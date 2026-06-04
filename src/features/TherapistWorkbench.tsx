@@ -43,17 +43,118 @@ type Overlay =
   | { kind: "discharge"; patient: Patient }
   | null;
 
-// AI 生成的康复方案（模拟）
-const aiRehabPlan = (patient: Patient) => ({
-  goal: `${patient.surgeryName ?? "术后"} · 7 日内屈膝 ≥90°，独立扶助行器行走 50m`,
-  items: [
-    "术后第 1 日：踝泵 30 次/h，SLR 直腿抬高 3 组×10 次",
-    "术后第 2 日：被动屈膝 0-60°，CPM 机辅助",
-    "术后第 3 日：床旁站立 5 min，扶助行器行走 5m",
-    "术后第 5 日：屈膝 ≥75°，扶助行器行走 30m",
-    "术后第 7 日：屈膝 ≥90°，独立行走 50m，可上下楼梯",
+// 康复方案数据结构（基于鼓楼医院《膝关节僵硬术后康复 3.0》模板）
+export type RehabExercise = {
+  id: string;
+  name: string; // 例：踝泵练习
+  description: string; // 动作描述
+  dosage: string; // 次数与组数
+  frequency: string; // 频率
+  intensity: string; // 强度
+  notes: string; // 注意事项
+};
+
+export type RehabPlan = {
+  templateName: string;
+  goal: string;
+  weightBearing: string; // 负重相关注意事项
+  exercises: RehabExercise[];
+  painSwellingTips: string[]; // 疼痛肿胀处理
+  iceTips: string[]; // 冰敷提醒
+  reminders: string[]; // 康复提醒
+};
+
+let _eid = 0;
+const eid = () => `ex_${++_eid}`;
+
+// AI 生成的康复方案（模拟，参考鼓楼医院《膝关节僵硬术后康复 3.0》）
+const aiRehabPlan = (patient: Patient): RehabPlan => ({
+  templateName: "膝关节僵硬术后康复 3.0（鼓楼医院·运动医学）",
+  goal: `${patient.surgeryName ?? "术后"} · 14 日内屈膝 ≥110°，独立行走 100m，可上下楼梯`,
+  weightBearing:
+    "术后即可拄拐下地行走，患肢可耐受下负重，无明显疼痛肿胀反复；必要时使用助行器/拐杖。步行时患侧支撑膝关节伸直，离地时弯腿——该伸直时伸直，该弯曲时弯曲。",
+  exercises: [
+    {
+      id: eid(),
+      name: "踝泵练习",
+      description: "足背用力向下压，脚趾同时下压，至最大角度保持 3 秒；再缓缓勾脚，至最大角度保持 3 秒。",
+      dosage: "20 个 × 10 组，每天 200 个",
+      frequency: "清醒即开始，每天多次（约 20~30 次/小时）",
+      intensity: "小腿前、后侧肌肉收缩用力感，无不适",
+      notes: "用力、缓慢，逐渐增加活动范围与力度",
+    },
+    {
+      id: eid(),
+      name: "髌骨滑动",
+      description: "膝关节放松，向髌骨上下左右四个方向推动髌骨（感受髌骨活动，而非皮肤移动），滑动范围逐渐与健侧一致。",
+      dosage: "5 分钟/次",
+      frequency: "2 次/天",
+      intensity: "无痛、可耐受",
+      notes: "避免重手法，注意区分皮肤位移与髌骨真实滑动",
+    },
+    {
+      id: eid(),
+      name: "膝关节伸直练习",
+      description: "仰卧，足跟下垫枕使膝关节后方悬空压直；如有伸直障碍可在膝盖上加适量沙袋加大强度。",
+      dosage: "每次 20-30 分钟",
+      frequency: "每天 3-5 次",
+      intensity: "轻度牵伸感，VAS ≤3",
+      notes: "训练中监测疼痛，出现刺痛及时停止",
+    },
+    {
+      id: eid(),
+      name: "股四头肌激活训练",
+      description: "仰卧或坐位，主动收缩股四头肌，髌骨向大腿根滑动、足跟欲抬起、锁住膝关节，保持 5-10 秒后放松 5-10 秒。膝下垫毛巾卷效果更佳。",
+      dosage: "20 次 × 3 组",
+      frequency: "每天 3 组",
+      intensity: "以无明显疼痛为度",
+      notes: "动作末端尽量伸直，避免代偿性抬髋",
+    },
+    {
+      id: eid(),
+      name: "弓步拉伸",
+      description: "站立位，患腿在后，弓步拉伸，脚后跟踩实，感受患侧膝后及小腿拉伸感。",
+      dosage: "30 秒 × (6-10) 个",
+      frequency: "上午、下午、晚上各一次",
+      intensity: "轻度牵伸感",
+      notes: "脚跟不离地，膝关节保持伸直",
+    },
+    {
+      id: eid(),
+      name: "站立位伸膝",
+      description: "站直，患侧腿用力伸直并维持。",
+      dosage: "维持 10 秒 × 20 个",
+      frequency: "上午、下午、晚上均需进行",
+      intensity: "股四头肌明显收缩",
+      notes: "保持躯干直立，避免锁膝代偿",
+    },
+    {
+      id: eid(),
+      name: "屈膝练习（配合勾脚）",
+      description: "早期可在辅助下或主动完成，屈至最大角度保持 1-2-5 分钟，重复 3-5 次，组间休息 2 分钟。2 周后无明显肿痛可下蹲压角度。",
+      dosage: "3-5 次/组",
+      frequency: "上午、下午、晚上各一次",
+      intensity: "末端轻中度牵伸感，VAS ≤3",
+      notes: "目标：逐渐增加至与健侧一致，不反弹后可暂停",
+    },
   ],
-  precautions: ["避免患肢负重 >50%", "如出现 38℃ 以上发热立即上报", "夜间睡眠保持患肢中立位"],
+  painSwellingTips: [
+    "日常及康复中疼痛 ≤ 3/10，以酸胀痛为主，避免刺痛/撕裂样痛",
+    "疼痛明显持续可适当使用止痛药，及时复诊",
+    "关节红肿热痛明显时，冰敷加压 15-20 分钟",
+    "平躺时患肢整体抬高，膝后垫高高于心脏 20cm，20-30 分钟",
+    "由踝关节向大腿根方向轻柔提拉皮肤，避免重手法",
+    "下地时可穿弹力袜，适当加压减少肿胀",
+  ],
+  iceTips: [
+    "术后 3-5 天：每天冰敷 3-5 次，每次 15-20 分钟，间隔 1-2 小时",
+    "冰袋与皮肤之间隔一层毛巾，避免冻伤",
+    "后期：运动或下地后出现发胀/疼/皮温升高即可冰敷 15-20 分钟",
+  ],
+  reminders: [
+    "所有运动（尤其下地类）务必循序渐进，早期注意疼痛肿胀管理",
+    "行走中或行走后膝关节轻微肿、轻微痛属正常现象",
+  ],
 });
 
 type PlanStatus = "ai-draft" | "confirmed" | "edited" | "empty";
