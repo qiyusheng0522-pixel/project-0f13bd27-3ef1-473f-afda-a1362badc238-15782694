@@ -540,17 +540,43 @@ function PlansTab({
             ) : (
               <>
                 <div className="border-b bg-info/5 px-3 py-2">
-                  <div className="text-[10px] font-bold text-info">康复目标</div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-[10px] font-bold text-info">康复目标</div>
+                    <span className="rounded-full bg-info/10 px-1.5 py-0.5 text-[9px] text-info">
+                      模板：{plan.templateName.split("（")[0]}
+                    </span>
+                  </div>
                   <div className="mt-0.5 text-[11px]">{plan.goal}</div>
                 </div>
-                <div className="space-y-1 p-3">
-                  {plan.items.slice(0, 3).map((i, idx) => (
-                    <div key={idx} className="flex items-start gap-1.5 text-[11px]">
-                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                      <span className="text-foreground">{i}</span>
+                {plan.weightBearing && (
+                  <div className="border-b px-3 py-2">
+                    <div className="text-[10px] font-bold text-warning">负重注意事项</div>
+                    <div className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground line-clamp-2">
+                      {plan.weightBearing}
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-1.5 p-3">
+                  <div className="text-[10px] font-bold text-foreground">训练动作 · {plan.exercises.length} 项</div>
+                  {plan.exercises.slice(0, 4).map((ex, idx) => (
+                    <div key={ex.id} className="flex items-start gap-1.5 text-[11px]">
+                      <span className="mt-[2px] inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary">
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-foreground">{ex.name}</div>
+                        <div className="truncate text-[10px] text-muted-foreground">
+                          {ex.dosage}
+                          {ex.frequency ? ` · ${ex.frequency}` : ""}
+                        </div>
+                      </div>
                     </div>
                   ))}
-                  <div className="text-[10px] text-muted-foreground">+ {plan.items.length - 3} 条更多...</div>
+                  {plan.exercises.length > 4 && (
+                    <div className="text-[10px] text-muted-foreground">
+                      + 还有 {plan.exercises.length - 4} 项动作...
+                    </div>
+                  )}
                 </div>
               </>
             )}
