@@ -119,6 +119,7 @@ function RolePage() {
           {role === "doctor-on-duty" && <DoctorOnDutyWorkbench />}
           {role === "surgical-team" && <SurgicalTeamWorkbench />}
           {role === "therapist" && <TherapistWorkbench />}
+          {role === "patient" && <PatientWorkbench />}
         </main>
 
         {/* 右侧：角色简介 */}
