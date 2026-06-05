@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Stethoscope, ClipboardCheck, Users, Activity, ChevronRight, Smartphone, Workflow } from "lucide-react";
+import { Stethoscope, ClipboardCheck, Users, Activity, ChevronRight, Smartphone, Workflow, HeartPulse } from "lucide-react";
 import { roleMeta } from "@/lib/mock-data";
 import type { Role } from "@/lib/types";
 
@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "骨安 BoneCare 小程序 — 角色入口" },
-      { name: "description", content: "骨安骨科诊疗小程序 · 4 个角色端 · 门诊与住院全周期管理" },
+      { name: "description", content: "骨安骨科诊疗小程序 · 5 个角色端 · 门诊与住院全周期管理" },
     ],
   }),
   component: HomePage,
@@ -18,9 +18,10 @@ const roleIcons = {
   "doctor-on-duty": ClipboardCheck,
   "surgical-team": Users,
   therapist: Activity,
+  patient: HeartPulse,
 } as const;
 
-const roles: Role[] = ["secretary", "doctor-on-duty", "surgical-team", "therapist"];
+const roles: Role[] = ["secretary", "doctor-on-duty", "surgical-team", "therapist", "patient"];
 
 const flow = [
   { n: "01", t: "门诊登记", who: "护士/秘书" },
