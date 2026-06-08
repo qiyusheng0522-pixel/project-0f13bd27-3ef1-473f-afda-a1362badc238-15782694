@@ -125,20 +125,29 @@ export function PatientArchiveSheet({
             <SectionTitle icon={Activity} text="术前检查项数据" tone="text-primary" />
             <div className="rounded-xl border bg-primary/5 p-3 text-[11px]">
               {patient.preOpFindings && patient.preOpFindings.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {patient.preOpFindings.map((f) => (
-                    <span
-                      key={f.label}
-                      className={`rounded-md px-1.5 py-0.5 text-[10px] ${
-                        f.abnormal
-                          ? "bg-destructive/10 font-bold text-destructive"
-                          : "bg-card text-muted-foreground"
-                      }`}
-                    >
-                      {f.label} {f.value}
-                    </span>
-                  ))}
-                </div>
+                <>
+                  {patient.preOpFindings.some((f) => f.abnormal) && (
+                    <div className="mb-2 flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-1 text-[10px] font-bold text-destructive">
+                      <AlertTriangle className="h-3 w-3" />
+                      存在 {patient.preOpFindings.filter((f) => f.abnormal).length} 项异常指标，请重点关注
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-1">
+                    {patient.preOpFindings.map((f) => (
+                      <span
+                        key={f.label}
+                        className={`rounded-md px-1.5 py-0.5 text-[10px] ${
+                          f.abnormal
+                            ? "animate-pulse bg-destructive font-bold text-destructive-foreground ring-2 ring-destructive/40"
+                            : "bg-card text-muted-foreground"
+                        }`}
+                      >
+                        {f.abnormal && "⚠ "}
+                        {f.label} {f.value}
+                      </span>
+                    ))}
+                  </div>
+                </>
               )}
               {patient.preOpSymptoms && (
                 <div className="mt-2 grid grid-cols-2 gap-1.5">
