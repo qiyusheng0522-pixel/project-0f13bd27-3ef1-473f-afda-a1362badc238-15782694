@@ -1372,15 +1372,24 @@ function DischargeSheet({
   onClose: () => void;
   onConfirm: (note: string) => void;
 }) {
+  const [understanding, setUnderstanding] = useState<"优" | "良" | "差">("良");
+  const [compliance, setCompliance] = useState<"高" | "中" | "低">("高");
+  const [transfer, setTransfer] = useState("");
   const [note, setNote] = useState("");
+  const [remark, setRemark] = useState("");
+  const canSave = note.trim().length > 0;
   return (
     <div className="absolute inset-0 z-[60] flex flex-col bg-background">
       <div className="flex items-center justify-between border-b bg-card px-3 py-2.5">
         <button onClick={onClose} className="text-[12px] text-muted-foreground">取消</button>
-        <div className="text-[13px] font-semibold">康复出院确认 · {patient.name}</div>
+        <div className="text-[13px] font-semibold">康复出院评估 · {patient.name}</div>
         <button
-          disabled={!note.trim()}
-          onClick={() => onConfirm(note.trim())}
+          disabled={!canSave}
+          onClick={() =>
+            onConfirm(
+              `[理解配合度:${understanding} / 医从性:${compliance}${transfer ? ` / 转院:${transfer}` : ""}${remark ? ` / 备注:${remark}` : ""}] ${note.trim()}`,
+            )
+          }
           className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
         >
           <Save className="h-3 w-3" />确认出院
@@ -1389,7 +1398,7 @@ function DischargeSheet({
       <div className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-3">
         <div className="rounded-2xl border bg-warning/5 p-2.5 text-[11px] text-warning-foreground">
           <AlertTriangle className="mr-1 inline h-3 w-3" />
-          确认出院前必须填写出院备注，所有角色（医生 / 护士 / 治疗师）均可查看。
+          出院评估完成后，该患者仍在「术后康复」中保留 <b>3 天</b>，便于后续追踪。
         </div>
         <div className="rounded-2xl border bg-card p-3 text-[11px]">
           <div className="font-semibold">
@@ -1399,19 +1408,59 @@ function DischargeSheet({
             术日 {patient.surgeryDate ?? "—"} · 患侧 {patient.side ?? "—"}
           </div>
         </div>
-        <div>
-          <div className="mb-1 text-[11px] font-semibold">出院备注说明 *</div>
+
+        <SectionBox label="理解配合度">
+          <div className="flex gap-1.5">
+            {(["优", "良", "差"] as const).map((k) => (
+              <Chip key={k} active={understanding === k} onClick={() => setUnderstanding(k)}>
+                {k}
+              </Chip>
+            ))}
+          </div>
+        </SectionBox>
+
+        <SectionBox label="医从性">
+          <div className="flex gap-1.5">
+            {(["高", "中", "低"] as const).map((k) => (
+              <Chip key={k} active={compliance === k} onClick={() => setCompliance(k)}>
+                {k}
+              </Chip>
+            ))}
+          </div>
+        </SectionBox>
+
+        <SectionBox label="转院记录（如有）">
+          <input
+            value={transfer}
+            onChange={(e) => setTransfer(e.target.value)}
+            placeholder="如：转往社区医院康复科 · 张医生"
+            className="h-9 w-full rounded-lg border bg-muted/20 px-2 text-[12px] outline-none focus:border-primary"
+          />
+        </SectionBox>
+
+        <SectionBox label="备注（团队可见）">
           <textarea
-            rows={6}
+            rows={2}
+            value={remark}
+            onChange={(e) => setRemark(e.target.value)}
+            placeholder="对家属交代、心理状态、特殊注意事项..."
+            className="w-full rounded-lg border bg-muted/20 p-2 text-[11px] outline-none focus:border-primary"
+          />
+        </SectionBox>
+
+        <SectionBox label="出院备注说明 *">
+          <textarea
+            rows={5}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="请填写康复达标情况、居家训练计划、复诊安排、注意事项..."
-            className="w-full rounded-xl border bg-card p-3 text-[12px] outline-none focus:border-primary"
+            className="w-full rounded-lg border bg-muted/20 p-2 text-[12px] outline-none focus:border-primary"
           />
-        </div>
+        </SectionBox>
       </div>
     </div>
   );
 }
+
 
 
