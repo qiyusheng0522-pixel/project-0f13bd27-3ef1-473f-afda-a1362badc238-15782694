@@ -102,7 +102,8 @@ export function SurgicalTeamWorkbench() {
       )}
       {tab === "intraop" && (
         <IntraOpTab
-          list={todaySurgery}
+          list={intraOpList}
+          filledIntraOp={filledIntraOp}
           onOpen={(p) => setIntraOpFor(p)}
         />
       )}
