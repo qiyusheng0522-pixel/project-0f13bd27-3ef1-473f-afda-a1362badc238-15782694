@@ -570,27 +570,54 @@ function PlansTab({
                     </div>
                   </div>
                 )}
-                <div className="space-y-1.5 p-3">
-                  <div className="text-[10px] font-bold text-foreground">训练动作 · {plan.exercises.length} 项</div>
-                  {plan.exercises.slice(0, 4).map((ex, idx) => (
-                    <div key={ex.id} className="flex items-start gap-1.5 text-[11px]">
-                      <span className="mt-[2px] inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary">
-                        {idx + 1}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-foreground">{ex.name}</div>
-                        <div className="truncate text-[10px] text-muted-foreground">
-                          {ex.dosage}
-                          {ex.frequency ? ` · ${ex.frequency}` : ""}
+                <div className="space-y-2 p-3">
+                  <div className="text-[10px] font-bold text-foreground">训练动作 · {plan.exercises.length} 项 · 可逐项自定义</div>
+                  {plan.exercises.map((ex, idx) => {
+                    const k = `${p.id}_${ex.id}`;
+                    const ed = edits[k] ?? {};
+                    const dosage = ed.dosage ?? ex.dosage;
+                    const notes = ed.notes ?? ex.notes;
+                    const customized = ed.dosage !== undefined || ed.notes !== undefined;
+                    return (
+                      <div key={ex.id} className="rounded-xl border bg-muted/10 p-2">
+                        <div className="flex items-start gap-1.5">
+                          <span className="mt-[2px] inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary">
+                            {idx + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-medium text-foreground">{ex.name}</span>
+                              {customized && (
+                                <span className="rounded bg-success/15 px-1 py-0.5 text-[9px] font-bold text-success">已自定义</span>
+                              )}
+                            </div>
+                            <div className="mt-0.5 text-[10px] text-muted-foreground line-clamp-2">{ex.description}</div>
+                          </div>
+                        </div>
+                        <div className="mt-1.5 grid grid-cols-1 gap-1.5">
+                          <label className="block">
+                            <div className="text-[9px] text-muted-foreground">动作及角度（剂量）</div>
+                            <input
+                              value={dosage}
+                              onChange={(e) => onEditExercise(p.id, ex.id, { dosage: e.target.value })}
+                              placeholder={`默认：${ex.dosage}`}
+                              className="mt-0.5 h-7 w-full rounded border bg-card px-1.5 text-[11px] outline-none focus:border-primary"
+                            />
+                          </label>
+                          <label className="block">
+                            <div className="text-[9px] text-muted-foreground">注意事项</div>
+                            <textarea
+                              rows={2}
+                              value={notes}
+                              onChange={(e) => onEditExercise(p.id, ex.id, { notes: e.target.value })}
+                              placeholder={`默认：${ex.notes}`}
+                              className="mt-0.5 w-full rounded border bg-card px-1.5 py-1 text-[11px] outline-none focus:border-primary"
+                            />
+                          </label>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                  {plan.exercises.length > 4 && (
-                    <div className="text-[10px] text-muted-foreground">
-                      + 还有 {plan.exercises.length - 4} 项动作...
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
               </>
             )}
