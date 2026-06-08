@@ -825,11 +825,13 @@ function RecordsTab({
 /* ---------- 术后康复列表（含状态/病症筛选 + 时间排序） ---------- */
 function PostOpList({
   list,
+  dischargedAt,
   onSelect,
   onAddRecord,
   onDischarge,
 }: {
   list: Patient[];
+  dischargedAt: Record<string, number>;
   onSelect: (p: Patient) => void;
   onAddRecord: (p: Patient) => void;
   onDischarge: (p: Patient) => void;
