@@ -37,12 +37,20 @@ export function SurgicalTeamWorkbench() {
   const [decisions, setDecisions] = useState<Record<string, Decision | undefined>>({});
   const [reasonFor, setReasonFor] = useState<{ patient: Patient; decision: "hold" | "return" } | null>(null);
   const [intraOpFor, setIntraOpFor] = useState<Patient | null>(null);
+  // 已填写术中量表：patientId → 完成时间戳；保留 3 天可见
+  const [filledIntraOp, setFilledIntraOp] = useState<Record<string, number>>({});
   const [chatPatient, setChatPatient] = useState<Patient | null>(null);
   const [showPatientList, setShowPatientList] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const tomorrowSurgery = patients.filter((p) => p.status === "admitted" && p.preOpFindings);
   const todaySurgery = patients.filter((p) => p.status === "in-surgery");
+  // 术中量表列表 = 今日手术 + 3 日内已填写
+  const intraOpList = patients.filter(
+    (p) =>
+      p.status === "in-surgery" ||
+      (filledIntraOp[p.id] && Date.now() - filledIntraOp[p.id] < 3 * 86400000),
+  );
   const myPatients = patients.filter((p) => p.director === "王主任");
   const tasks = todayTasks["surgical-team"];
 
