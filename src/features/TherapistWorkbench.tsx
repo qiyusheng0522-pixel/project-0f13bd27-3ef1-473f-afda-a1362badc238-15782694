@@ -922,6 +922,11 @@ function PostOpList({
               {p.status === "rehab" && p.department === "inpatient" && <Pill cls="bg-success/15 text-success">康复达标</Pill>}
               {p.status === "post-op" && <Pill cls="bg-info/15 text-info">术后观察</Pill>}
               {p.status === "in-surgery" && <Pill cls="bg-warning/20 text-warning-foreground">今日术后</Pill>}
+              {dischargedAt[p.id] && (
+                <Pill cls="bg-success text-success-foreground">
+                  已出院评估 · 剩 {Math.max(0, 3 - Math.floor((Date.now() - dischargedAt[p.id]) / 86400000))} 天
+                </Pill>
+              )}
             </div>
             <div className="mt-1 text-[10px] text-muted-foreground">
               {p.surgeryName ?? p.diagnosis}
