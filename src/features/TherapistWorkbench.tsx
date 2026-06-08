@@ -170,6 +170,10 @@ export function TherapistWorkbench() {
     p8: "confirmed",
     p9: "edited",
   });
+  // 出院评估完成的患者，保留 3 天用于后续追踪
+  const [dischargedAt, setDischargedAt] = useState<Record<string, number>>({});
+  // 康复方案内联编辑：key = `${patientId}_${exerciseId}` → 自定义动作描述/角度 + 注意事项
+  const [planEdits, setPlanEdits] = useState<Record<string, { dosage?: string; notes?: string }>>({});
   const [toast, setToast] = useState<string | null>(null);
 
   // 住院 + 门诊康复患者
