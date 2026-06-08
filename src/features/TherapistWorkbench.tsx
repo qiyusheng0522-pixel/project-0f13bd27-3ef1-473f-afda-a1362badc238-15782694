@@ -679,6 +679,7 @@ function PlansTab({
 function RecordsTab({
   inpatientList,
   tomorrowSurgery,
+  dischargedAt,
   onSelect,
   onAddRecord,
   onDischarge,
@@ -686,6 +687,7 @@ function RecordsTab({
 }: {
   inpatientList: Patient[];
   tomorrowSurgery: Patient[];
+  dischargedAt: Record<string, number>;
   onSelect: (p: Patient) => void;
   onAddRecord: (p: Patient) => void;
   onDischarge: (p: Patient) => void;
