@@ -150,7 +150,8 @@ export function SurgicalTeamWorkbench() {
           patient={intraOpFor}
           onClose={() => setIntraOpFor(null)}
           onSave={() => {
-            showToast(`术中量表已推送至治疗师 → ${intraOpFor.name}`);
+            setFilledIntraOp((s) => ({ ...s, [intraOpFor.id]: Date.now() }));
+            showToast(`术中量表已推送至治疗师 → ${intraOpFor.name} · 保留 3 天`);
             setIntraOpFor(null);
           }}
         />
