@@ -498,45 +498,76 @@ function ReasonSheet({
 }
 
 /* ---------- 术中量表列表 ---------- */
-function IntraOpTab({ list, onOpen }: { list: typeof patients; onOpen: (p: Patient) => void }) {
+function IntraOpTab({
+  list,
+  filledIntraOp,
+  onOpen,
+}: {
+  list: typeof patients;
+  filledIntraOp: Record<string, number>;
+  onOpen: (p: Patient) => void;
+}) {
   return (
     <div className="space-y-3 p-3">
       <div className="rounded-2xl border bg-primary/5 p-3 text-[11px] text-primary">
-        ✏️ 团队任一成员可填写，保存后自动同步治疗师。
+        ✏️ 团队任一成员可填写，保存后自动同步治疗师，并在列表中保留 3 天。
       </div>
 
-      {list.map((p) => (
-        <button
-          key={p.id}
-          onClick={() => onOpen(p)}
-          className="block w-full overflow-hidden rounded-2xl border bg-card text-left active:bg-muted/30"
-          style={{ boxShadow: "var(--shadow-card)" }}
-        >
-          <div className="flex items-center justify-between p-3">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
-                  {p.bedNo}床
-                </span>
-                <span className="text-sm font-bold">{p.name}</span>
-                <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[9px] font-medium text-warning-foreground">
-                  手术中
-                </span>
+      {list.length === 0 && (
+        <div className="rounded-2xl border bg-card p-6 text-center text-[12px] text-muted-foreground">
+          今日暂无术中患者
+        </div>
+      )}
+
+      {list.map((p) => {
+        const ts = filledIntraOp[p.id];
+        const filled = !!ts;
+        const remain = ts ? Math.max(0, 3 - Math.floor((Date.now() - ts) / 86400000)) : 0;
+        return (
+          <button
+            key={p.id}
+            onClick={() => onOpen(p)}
+            className="block w-full overflow-hidden rounded-2xl border bg-card text-left active:bg-muted/30"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="flex items-center justify-between p-3">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
+                    {p.bedNo}床
+                  </span>
+                  <span className="text-sm font-bold">{p.name}</span>
+                  {filled ? (
+                    <span className="rounded-full bg-success/15 px-1.5 py-0.5 text-[9px] font-medium text-success">
+                      已填写 · 剩 {remain} 天
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[9px] font-medium text-warning-foreground">
+                      待填写
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1 text-[10px] text-muted-foreground">
+                  {p.surgeryName} · 1号台 · 主刀 王主任
+                </div>
               </div>
-              <div className="mt-1 text-[10px] text-muted-foreground">
-                {p.surgeryName} · 1号台 · 主刀 王主任
-              </div>
+              <FileSignature className={cn("h-4 w-4", filled ? "text-success" : "text-primary")} />
             </div>
-            <FileSignature className="h-4 w-4 text-primary" />
-          </div>
-        </button>
-      ))}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
 /* ---------- 术中量表编辑 ---------- */
 function IntraOpEditor({ patient, onClose, onSave }: { patient: Patient; onClose: () => void; onSave: () => void }) {
+  const [photos, setPhotos] = useState<string[]>([]);
+  const addPhotos = (files: FileList | null) => {
+    if (!files) return;
+    const urls = Array.from(files).map((f) => URL.createObjectURL(f));
+    setPhotos((p) => [...p, ...urls]);
+  };
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-background">
       <div className="flex items-center justify-between border-b bg-card px-3 py-2.5">
@@ -558,6 +589,56 @@ function IntraOpEditor({ patient, onClose, onSave }: { patient: Patient; onClose
         <FormField label="假体型号" value="DePuy Sigma #4" />
         <FormField label="手术时长" value="92 min" />
         <FormField label="术中并发症" value="无" />
+
+        {/* 量表图片 - 支持相册/拍照 */}
+        <div className="rounded-2xl border bg-card p-2.5">
+          <div className="mb-1.5 flex items-center justify-between">
+            <div className="text-[10px] font-medium text-muted-foreground">量表照片 / 影像</div>
+            <div className="flex gap-1.5">
+              <label className="flex cursor-pointer items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] text-foreground active:bg-muted/70">
+                <Activity className="h-3 w-3" />
+                相册选择
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => addPhotos(e.target.files)}
+                />
+              </label>
+              <label className="flex cursor-pointer items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] text-primary active:opacity-80">
+                + 拍照
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => addPhotos(e.target.files)}
+                />
+              </label>
+            </div>
+          </div>
+          {photos.length === 0 ? (
+            <div className="rounded-lg border border-dashed bg-muted/20 p-4 text-center text-[10px] text-muted-foreground">
+              暂未上传 · 可从相册选择多张图片或拍照
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1.5">
+              {photos.map((u, i) => (
+                <div key={i} className="relative">
+                  <img src={u} alt={`量表${i + 1}`} className="aspect-square w-full rounded object-cover" />
+                  <button
+                    onClick={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
+                    className="absolute right-0 top-0 rounded-full bg-black/60 px-1.5 text-[10px] text-white"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div>
           <div className="mb-1 text-[10px] font-medium text-muted-foreground">医生建议（推送至治疗师）</div>
           <textarea
@@ -568,11 +649,12 @@ function IntraOpEditor({ patient, onClose, onSave }: { patient: Patient; onClose
         </div>
       </div>
       <div className="border-t bg-muted/20 px-3 py-2 text-[10px] text-muted-foreground">
-        保存后将推送至 <span className="font-medium text-primary">朱年鑫 治疗师</span>
+        保存后将推送至 <span className="font-medium text-primary">朱年鑫 治疗师</span> · 列表保留 3 天
       </div>
     </div>
   );
 }
+
 
 function FormField({ label, value }: { label: string; value: string }) {
   return (
