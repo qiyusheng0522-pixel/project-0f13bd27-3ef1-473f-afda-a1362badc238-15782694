@@ -296,8 +296,9 @@ export function TherapistWorkbench() {
         <DischargeSheet
           patient={overlay.patient}
           onClose={() => setOverlay(null)}
-          onConfirm={(note) => {
-            showToast(`已确认 ${overlay.patient.name} 出院 · 备注已同步`);
+          onConfirm={() => {
+            setDischargedAt((s) => ({ ...s, [overlay.patient.id]: Date.now() }));
+            showToast(`已确认 ${overlay.patient.name} 出院 · 评估保留 3 天`);
             setOverlay(null);
           }}
         />
