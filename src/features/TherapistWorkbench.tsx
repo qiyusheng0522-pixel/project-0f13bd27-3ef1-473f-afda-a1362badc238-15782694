@@ -225,6 +225,10 @@ export function TherapistWorkbench() {
         <PlansTab
           list={myPatients}
           statuses={planStatuses}
+          edits={planEdits}
+          onEditExercise={(pid, eid, patch) =>
+            setPlanEdits((s) => ({ ...s, [`${pid}_${eid}`]: { ...s[`${pid}_${eid}`], ...patch } }))
+          }
           onEdit={(p) => setPlanEditor(p)}
           onConfirm={(p) => {
             setPlanStatuses((s) => ({ ...s, [p.id]: "confirmed" }));
@@ -242,6 +246,7 @@ export function TherapistWorkbench() {
         <RecordsTab
           inpatientList={inpatientList}
           tomorrowSurgery={tomorrowSurgery}
+          dischargedAt={dischargedAt}
           onSelect={(p) => setActionPatient(p)}
           onAddRecord={(p) => setRecordFor(p)}
           onDischarge={(p) => setOverlay({ kind: "discharge", patient: p })}
