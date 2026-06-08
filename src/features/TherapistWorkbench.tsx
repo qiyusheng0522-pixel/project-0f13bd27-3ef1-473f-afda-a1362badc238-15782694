@@ -817,7 +817,7 @@ function RecordsTab({
         })}
 
       {/* 术后康复：增加筛选与排序 */}
-      {sub === "postop" && <PostOpList list={visible} onSelect={onSelect} onAddRecord={onAddRecord} onDischarge={onDischarge} />}
+      {sub === "postop" && <PostOpList list={visible} dischargedAt={dischargedAt} onSelect={onSelect} onAddRecord={onAddRecord} onDischarge={onDischarge} />}
     </div>
   );
 }
