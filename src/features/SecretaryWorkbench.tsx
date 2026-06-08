@@ -242,7 +242,7 @@ function HomeTab({
       </div>
 
       <div className="grid grid-cols-4 gap-2 rounded-2xl border bg-card p-3">
-        <QuickAction icon={Camera} label="OCR 录入" tone="bg-info/15 text-info" onClick={() => onQuick("ocr")} />
+        <QuickAction icon={Camera} label="住院录入" tone="bg-info/15 text-info" onClick={() => onQuick("ocr")} />
         <QuickAction icon={ClipboardList} label="护理交班" tone="bg-primary/15 text-primary" onClick={() => onQuick("handover")} />
         <QuickAction icon={Activity} label="指标录入" tone="bg-warning/20 text-warning-foreground" onClick={() => onQuick("vitals")} />
         <QuickAction icon={BellRing} label="宣教推送" tone="bg-success/15 text-success" onClick={() => onQuick("education")} />
