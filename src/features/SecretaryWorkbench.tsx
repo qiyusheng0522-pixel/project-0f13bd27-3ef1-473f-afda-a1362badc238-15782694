@@ -242,7 +242,7 @@ function HomeTab({
       </div>
 
       <div className="grid grid-cols-4 gap-2 rounded-2xl border bg-card p-3">
-        <QuickAction icon={Camera} label="OCR 录入" tone="bg-info/15 text-info" onClick={() => onQuick("ocr")} />
+        <QuickAction icon={Camera} label="住院录入" tone="bg-info/15 text-info" onClick={() => onQuick("ocr")} />
         <QuickAction icon={ClipboardList} label="护理交班" tone="bg-primary/15 text-primary" onClick={() => onQuick("handover")} />
         <QuickAction icon={Activity} label="指标录入" tone="bg-warning/20 text-warning-foreground" onClick={() => onQuick("vitals")} />
         <QuickAction icon={BellRing} label="宣教推送" tone="bg-success/15 text-success" onClick={() => onQuick("education")} />
@@ -328,68 +328,120 @@ function OutpatientTab({
   onEducation: (p: Patient) => void;
   onBatchEducation: () => void;
 }) {
+  const [keyword, setKeyword] = useState("");
+  const [dates, setDates] = useState<Record<string, string>>({});
+  const [editingDate, setEditingDate] = useState<string | null>(null);
+  const filtered = list.filter((p) => {
+    if (!keyword.trim()) return true;
+    const k = keyword.trim();
+    return p.name.includes(k) || (p.phone ?? "").includes(k);
+  });
   return (
     <div className="space-y-3 p-3">
-      <SearchBar placeholder="搜索姓名 / 门诊号" />
+      <div className="flex items-center gap-2 rounded-full bg-card px-3 py-2 shadow-sm">
+        <Search className="h-3.5 w-3.5 text-muted-foreground" />
+        <input
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          placeholder="搜索姓名 / 手机号"
+          className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
+        />
+        {keyword && (
+          <button onClick={() => setKeyword("")} className="text-[10px] text-muted-foreground">
+            清空
+          </button>
+        )}
+      </div>
 
       <div className="flex items-center justify-between px-1">
-        <div className="text-xs font-semibold">门诊待入院 · {list.length} 人</div>
+        <div className="text-xs font-semibold">门诊待入院 · {filtered.length} 人</div>
         <button onClick={onBatchEducation} className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary">
           <BellRing className="h-3 w-3" />批量宣教
         </button>
       </div>
 
       <div className="space-y-2">
-        {list.map((p) => (
-          <div key={p.id} className="rounded-2xl border bg-card p-3" style={{ boxShadow: "var(--shadow-card)" }}>
-            <div className="flex items-start justify-between gap-2">
-              <button onClick={() => onArchive(p)} className="min-w-0 flex-1 text-left">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold">{p.name}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                  {p.gender} · {p.age}岁
-                  </span>
-                </div>
-                <div className="mt-1 text-[11px] text-foreground">{p.diagnosis}</div>
-                <div className="text-[10px] text-muted-foreground">拟行: {p.surgeryName} · {p.director}</div>
-              </button>
-              <div className="text-right">
-                <div className="text-[9px] text-muted-foreground">拟入院</div>
-                <div className="rounded-md bg-warning/15 px-2 py-0.5 text-[10px] font-bold text-warning-foreground">
-                  {p.scheduledAdmission?.slice(5)}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-2.5 flex items-center justify-between border-t pt-2">
-              <button onClick={() => onArchive(p)} className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
-                <FileSearch className="h-3 w-3" />档案
-              </button>
-              <div className="flex gap-1.5">
-                <a
-                  href={`tel:${(p.phone ?? "").replace(/\D/g, "")}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-[10px] text-foreground active:bg-muted/70"
-                >
-                  <Phone className="h-3 w-3" />电话
-                </a>
-                <button
-                  onClick={() => onEducation(p)}
-                  className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-[10px] text-foreground active:bg-muted/70"
-                >
-                  <BellRing className="h-3 w-3" />宣教
-                </button>
-                <button
-                  onClick={() => onChat(p)}
-                  className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-primary-foreground active:opacity-80"
-                  style={{ background: "var(--gradient-primary)" }}
-                >
-                  <MessageCircle className="h-3 w-3" />沟通
-                </button>
-              </div>
-            </div>
+        {filtered.length === 0 && (
+          <div className="rounded-2xl border bg-card p-6 text-center text-[12px] text-muted-foreground">
+            未找到匹配的患者
           </div>
-        ))}
+        )}
+        {filtered.map((p) => {
+          const admission = dates[p.id] ?? p.scheduledAdmission ?? "";
+          return (
+            <div key={p.id} className="rounded-2xl border bg-card p-3" style={{ boxShadow: "var(--shadow-card)" }}>
+              <div className="flex items-start justify-between gap-2">
+                <button onClick={() => onArchive(p)} className="min-w-0 flex-1 text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold">{p.name}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {p.gender} · {p.age}岁
+                    </span>
+                  </div>
+                  <div className="mt-1 text-[11px] text-foreground">{p.diagnosis}</div>
+                  <div className="text-[10px] text-muted-foreground">拟行: {p.surgeryName} · {p.director}</div>
+                </button>
+                <div className="text-right">
+                  <div className="text-[9px] text-muted-foreground">拟入院</div>
+                  {editingDate === p.id ? (
+                    <input
+                      type="date"
+                      autoFocus
+                      defaultValue={admission}
+                      onBlur={(e) => {
+                        setDates((s) => ({ ...s, [p.id]: e.target.value }));
+                        setEditingDate(null);
+                      }}
+                      className="mt-0.5 w-[110px] rounded-md border bg-card px-1 py-0.5 text-[10px] outline-none focus:border-primary"
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setEditingDate(p.id)}
+                      className="mt-0.5 inline-flex items-center gap-0.5 rounded-md bg-warning/15 px-2 py-0.5 text-[10px] font-bold text-warning-foreground active:bg-warning/25"
+                    >
+                      {admission ? admission.slice(5) : "未设"}
+                      <Clock className="h-2.5 w-2.5" />
+                    </button>
+                  )}
+                  {dates[p.id] && (
+                    <div className="mt-0.5 text-[9px] text-success">已改</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-2.5 flex items-center justify-between border-t pt-2">
+                <button
+                  onClick={() => setEditingDate(p.id)}
+                  className="flex items-center gap-1 font-mono text-[10px] text-primary active:opacity-70"
+                >
+                  <Clock className="h-3 w-3" />修改入院时间
+                </button>
+                <div className="flex gap-1.5">
+                  <a
+                    href={`tel:${(p.phone ?? "").replace(/\D/g, "")}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-[10px] text-foreground active:bg-muted/70"
+                  >
+                    <Phone className="h-3 w-3" />电话
+                  </a>
+                  <button
+                    onClick={() => onEducation(p)}
+                    className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-[10px] text-foreground active:bg-muted/70"
+                  >
+                    <BellRing className="h-3 w-3" />宣教
+                  </button>
+                  <button
+                    onClick={() => onChat(p)}
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-primary-foreground active:opacity-80"
+                    style={{ background: "var(--gradient-primary)" }}
+                  >
+                    <MessageCircle className="h-3 w-3" />沟通
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -397,9 +449,13 @@ function OutpatientTab({
 
 function InpatientTab({ list, onSelect, onBatchEducation }: { list: typeof patients; onSelect: (p: Patient) => void; onBatchEducation: () => void }) {
   const [sub, setSub] = useState<"all" | "discharge">("all");
+  const [bedAssign, setBedAssign] = useState<Patient | null>(null);
+  const [assignedBeds, setAssignedBeds] = useState<Record<string, string>>({});
   // 今日出院 = 状态为 rehab 或已下出院评估的患者（mock）
   const dischargeToday = list.filter((p) => p.status === "rehab");
   const visible = sub === "all" ? list : dischargeToday;
+  // 待分配床位（住院当天入院但未分配床位的）
+  const unassigned = list.filter((p) => !p.bedNo && !assignedBeds[p.id] && p.status === "admitted");
   return (
     <div className="space-y-3 p-3">
       <div className="grid grid-cols-4 gap-2">
@@ -415,6 +471,35 @@ function InpatientTab({ list, onSelect, onBatchEducation }: { list: typeof patie
           </div>
         ))}
       </div>
+
+      {/* 待分配床位 */}
+      {unassigned.length > 0 && sub === "all" && (
+        <div className="rounded-2xl border border-warning/40 bg-warning/5 p-3" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="mb-1.5 flex items-center gap-1 text-[11px] font-semibold text-warning-foreground">
+            <AlertCircle className="h-3 w-3" />
+            待分配床位 · {unassigned.length} 人
+          </div>
+          <div className="space-y-1.5">
+            {unassigned.map((p) => (
+              <div key={p.id} className="flex items-center gap-2 rounded-xl border bg-card p-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-warning/15 text-warning-foreground">
+                  <BedDouble className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12px] font-bold">{p.name} <span className="text-[10px] font-normal text-muted-foreground">· {p.gender}·{p.age}</span></div>
+                  <div className="truncate text-[10px] text-muted-foreground">{p.diagnosis}</div>
+                </div>
+                <button
+                  onClick={() => setBedAssign(p)}
+                  className="flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-medium text-primary-foreground active:opacity-80"
+                >
+                  <Camera className="h-3 w-3" />分配床位
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 overflow-hidden rounded-full border bg-muted/30 p-0.5 text-[12px]">
         <button
@@ -450,35 +535,141 @@ function InpatientTab({ list, onSelect, onBatchEducation }: { list: typeof patie
             {sub === "discharge" ? "今日暂无出院患者" : "暂无在院患者"}
           </div>
         )}
-        {visible.map((p) => (
-          <button key={p.id} onClick={() => onSelect(p)} className="w-full rounded-2xl border bg-card p-3 text-left active:bg-muted/30">
-            <div className="flex items-start gap-2.5">
-              <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <span className="text-[8px]">床号</span>
-                <span className="font-mono text-sm font-bold leading-none">{p.bedNo}</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1">
-                  <span className="text-sm font-bold">{p.name}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {p.gender}·{p.age}
-                  </span>
-                  {p.side && (
-                    <span className="rounded bg-warning/20 px-1 py-0.5 text-[9px] font-bold text-warning-foreground">
-                      患侧 {p.side}
-                    </span>
-                  )}
-                  {p.isNew && <Tag color="info">新</Tag>}
-                  {p.infectious && <Tag color="destructive">传</Tag>}
-                  {p.communicationDifficult && <Tag color="warning">沟</Tag>}
+        {visible.filter((p) => p.bedNo || assignedBeds[p.id]).map((p) => {
+          const bedNo = assignedBeds[p.id] ?? p.bedNo!;
+          return (
+            <button key={p.id} onClick={() => onSelect({ ...p, bedNo })} className="w-full rounded-2xl border bg-card p-3 text-left active:bg-muted/30">
+              <div className="flex items-start gap-2.5">
+                <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <span className="text-[8px]">床号</span>
+                  <span className="font-mono text-sm font-bold leading-none">{bedNo}</span>
                 </div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">{p.diagnosis}</div>
-                <div className="text-[10px] text-muted-foreground">{p.surgeryName}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1">
+                    <span className="text-sm font-bold">{p.name}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {p.gender}·{p.age}
+                    </span>
+                    {p.side && (
+                      <span className="rounded bg-warning/20 px-1 py-0.5 text-[9px] font-bold text-warning-foreground">
+                        患侧 {p.side}
+                      </span>
+                    )}
+                    {p.isNew && <Tag color="info">新</Tag>}
+                    {p.infectious && <Tag color="destructive">传</Tag>}
+                    {p.communicationDifficult && <Tag color="warning">沟</Tag>}
+                    {assignedBeds[p.id] && <Tag color="success">新分配</Tag>}
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">{p.diagnosis}</div>
+                  <div className="text-[10px] text-muted-foreground">{p.surgeryName}</div>
+                </div>
+                <StatusPill status={p.status} />
               </div>
-              <StatusPill status={p.status} />
+            </button>
+          );
+        })}
+      </div>
+
+      {bedAssign && (
+        <BedAssignmentSheet
+          patient={bedAssign}
+          onClose={() => setBedAssign(null)}
+          onConfirm={(bedNo) => {
+            setAssignedBeds((s) => ({ ...s, [bedAssign.id]: bedNo }));
+            setBedAssign(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function BedAssignmentSheet({
+  patient,
+  onClose,
+  onConfirm,
+}: {
+  patient: Patient;
+  onClose: () => void;
+  onConfirm: (bedNo: string) => void;
+}) {
+  const [bedNo, setBedNo] = useState("");
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+  return (
+    <div className="absolute inset-0 z-[60] flex flex-col bg-background">
+      <div className="flex items-center justify-between border-b bg-card px-3 py-2.5">
+        <button onClick={onClose} className="text-[12px] text-muted-foreground">取消</button>
+        <div className="text-[13px] font-semibold">分配床位 · {patient.name}</div>
+        <button
+          disabled={!bedNo.trim()}
+          onClick={() => onConfirm(bedNo.trim().padStart(2, "0"))}
+          className="rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
+        >
+          确认分配
+        </button>
+      </div>
+      <div className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-3">
+        <div className="rounded-2xl border bg-info/5 p-2.5 text-[11px] text-info">
+          <BedDouble className="mr-1 inline h-3 w-3" />
+          为新入院患者分配床位，建议拍摄床位与配置信息（床卡、设备、防跌设施等）。
+        </div>
+
+        <div className="rounded-2xl border bg-card p-3 text-[11px]">
+          <div className="font-semibold">{patient.name} · {patient.gender}·{patient.age}</div>
+          <div className="mt-0.5 text-[10px] text-muted-foreground">{patient.diagnosis} · {patient.director}</div>
+        </div>
+
+        <div className="rounded-2xl border bg-card p-3">
+          <div className="mb-1 text-[10px] font-medium text-muted-foreground">分配床号</div>
+          <input
+            value={bedNo}
+            onChange={(e) => setBedNo(e.target.value)}
+            placeholder="如 06"
+            className="h-10 w-full rounded-lg border bg-muted/20 px-3 text-[14px] font-bold outline-none focus:border-primary"
+          />
+        </div>
+
+        <div className="rounded-2xl border bg-card p-3">
+          <div className="mb-1.5 text-[10px] font-medium text-muted-foreground">床位配置照片</div>
+          {photo ? (
+            <div className="relative">
+              <img src={photo} alt="床位" className="w-full rounded-lg" />
+              <button
+                onClick={() => setPhoto(null)}
+                className="absolute right-1.5 top-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white"
+              >
+                重拍
+              </button>
             </div>
-          </button>
-        ))}
+          ) : (
+            <label className="flex h-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 active:bg-muted/40">
+              <Camera className="h-6 w-6 text-muted-foreground" />
+              <span className="text-[11px] text-muted-foreground">拍摄 / 上传床位配置</span>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) setPhoto(URL.createObjectURL(f));
+                }}
+              />
+            </label>
+          )}
+        </div>
+
+        <div className="rounded-2xl border bg-card p-3">
+          <div className="mb-1 text-[10px] font-medium text-muted-foreground">配置备注（可选）</div>
+          <textarea
+            rows={3}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="如：床卡已贴 · 已配电动护栏 · 防跌设施已检查"
+            className="w-full rounded-lg border bg-muted/20 p-2 text-[11px] outline-none focus:border-primary"
+          />
+        </div>
       </div>
     </div>
   );

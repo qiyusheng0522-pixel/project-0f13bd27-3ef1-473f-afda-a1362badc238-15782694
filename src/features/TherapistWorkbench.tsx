@@ -170,6 +170,10 @@ export function TherapistWorkbench() {
     p8: "confirmed",
     p9: "edited",
   });
+  // 出院评估完成的患者，保留 3 天用于后续追踪
+  const [dischargedAt, setDischargedAt] = useState<Record<string, number>>({});
+  // 康复方案内联编辑：key = `${patientId}_${exerciseId}` → 自定义动作描述/角度 + 注意事项
+  const [planEdits, setPlanEdits] = useState<Record<string, { dosage?: string; notes?: string }>>({});
   const [toast, setToast] = useState<string | null>(null);
 
   // 住院 + 门诊康复患者
@@ -221,6 +225,10 @@ export function TherapistWorkbench() {
         <PlansTab
           list={myPatients}
           statuses={planStatuses}
+          edits={planEdits}
+          onEditExercise={(pid, eid, patch) =>
+            setPlanEdits((s) => ({ ...s, [`${pid}_${eid}`]: { ...s[`${pid}_${eid}`], ...patch } }))
+          }
           onEdit={(p) => setPlanEditor(p)}
           onConfirm={(p) => {
             setPlanStatuses((s) => ({ ...s, [p.id]: "confirmed" }));
@@ -238,6 +246,7 @@ export function TherapistWorkbench() {
         <RecordsTab
           inpatientList={inpatientList}
           tomorrowSurgery={tomorrowSurgery}
+          dischargedAt={dischargedAt}
           onSelect={(p) => setActionPatient(p)}
           onAddRecord={(p) => setRecordFor(p)}
           onDischarge={(p) => setOverlay({ kind: "discharge", patient: p })}
@@ -287,8 +296,9 @@ export function TherapistWorkbench() {
         <DischargeSheet
           patient={overlay.patient}
           onClose={() => setOverlay(null)}
-          onConfirm={(note) => {
-            showToast(`已确认 ${overlay.patient.name} 出院 · 备注已同步`);
+          onConfirm={() => {
+            setDischargedAt((s) => ({ ...s, [overlay.patient.id]: Date.now() }));
+            showToast(`已确认 ${overlay.patient.name} 出院 · 评估保留 3 天`);
             setOverlay(null);
           }}
         />
@@ -482,6 +492,8 @@ function StatEntry({
 function PlansTab({
   list,
   statuses,
+  edits,
+  onEditExercise,
   onEdit,
   onConfirm,
   onClear,
@@ -490,6 +502,8 @@ function PlansTab({
 }: {
   list: typeof patients;
   statuses: Record<string, PlanStatus>;
+  edits: Record<string, { dosage?: string; notes?: string }>;
+  onEditExercise: (pid: string, eid: string, patch: { dosage?: string; notes?: string }) => void;
   onEdit: (p: Patient) => void;
   onConfirm: (p: Patient) => void;
   onClear: (p: Patient) => void;
@@ -556,27 +570,54 @@ function PlansTab({
                     </div>
                   </div>
                 )}
-                <div className="space-y-1.5 p-3">
-                  <div className="text-[10px] font-bold text-foreground">训练动作 · {plan.exercises.length} 项</div>
-                  {plan.exercises.slice(0, 4).map((ex, idx) => (
-                    <div key={ex.id} className="flex items-start gap-1.5 text-[11px]">
-                      <span className="mt-[2px] inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary">
-                        {idx + 1}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-foreground">{ex.name}</div>
-                        <div className="truncate text-[10px] text-muted-foreground">
-                          {ex.dosage}
-                          {ex.frequency ? ` · ${ex.frequency}` : ""}
+                <div className="space-y-2 p-3">
+                  <div className="text-[10px] font-bold text-foreground">训练动作 · {plan.exercises.length} 项 · 可逐项自定义</div>
+                  {plan.exercises.map((ex, idx) => {
+                    const k = `${p.id}_${ex.id}`;
+                    const ed = edits[k] ?? {};
+                    const dosage = ed.dosage ?? ex.dosage;
+                    const notes = ed.notes ?? ex.notes;
+                    const customized = ed.dosage !== undefined || ed.notes !== undefined;
+                    return (
+                      <div key={ex.id} className="rounded-xl border bg-muted/10 p-2">
+                        <div className="flex items-start gap-1.5">
+                          <span className="mt-[2px] inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary">
+                            {idx + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-medium text-foreground">{ex.name}</span>
+                              {customized && (
+                                <span className="rounded bg-success/15 px-1 py-0.5 text-[9px] font-bold text-success">已自定义</span>
+                              )}
+                            </div>
+                            <div className="mt-0.5 text-[10px] text-muted-foreground line-clamp-2">{ex.description}</div>
+                          </div>
+                        </div>
+                        <div className="mt-1.5 grid grid-cols-1 gap-1.5">
+                          <label className="block">
+                            <div className="text-[9px] text-muted-foreground">动作及角度（剂量）</div>
+                            <input
+                              value={dosage}
+                              onChange={(e) => onEditExercise(p.id, ex.id, { dosage: e.target.value })}
+                              placeholder={`默认：${ex.dosage}`}
+                              className="mt-0.5 h-7 w-full rounded border bg-card px-1.5 text-[11px] outline-none focus:border-primary"
+                            />
+                          </label>
+                          <label className="block">
+                            <div className="text-[9px] text-muted-foreground">注意事项</div>
+                            <textarea
+                              rows={2}
+                              value={notes}
+                              onChange={(e) => onEditExercise(p.id, ex.id, { notes: e.target.value })}
+                              placeholder={`默认：${ex.notes}`}
+                              className="mt-0.5 w-full rounded border bg-card px-1.5 py-1 text-[11px] outline-none focus:border-primary"
+                            />
+                          </label>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                  {plan.exercises.length > 4 && (
-                    <div className="text-[10px] text-muted-foreground">
-                      + 还有 {plan.exercises.length - 4} 项动作...
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
               </>
             )}
@@ -638,6 +679,7 @@ function PlansTab({
 function RecordsTab({
   inpatientList,
   tomorrowSurgery,
+  dischargedAt,
   onSelect,
   onAddRecord,
   onDischarge,
@@ -645,6 +687,7 @@ function RecordsTab({
 }: {
   inpatientList: Patient[];
   tomorrowSurgery: Patient[];
+  dischargedAt: Record<string, number>;
   onSelect: (p: Patient) => void;
   onAddRecord: (p: Patient) => void;
   onDischarge: (p: Patient) => void;
@@ -774,7 +817,7 @@ function RecordsTab({
         })}
 
       {/* 术后康复：增加筛选与排序 */}
-      {sub === "postop" && <PostOpList list={visible} onSelect={onSelect} onAddRecord={onAddRecord} onDischarge={onDischarge} />}
+      {sub === "postop" && <PostOpList list={visible} dischargedAt={dischargedAt} onSelect={onSelect} onAddRecord={onAddRecord} onDischarge={onDischarge} />}
     </div>
   );
 }
@@ -782,11 +825,13 @@ function RecordsTab({
 /* ---------- 术后康复列表（含状态/病症筛选 + 时间排序） ---------- */
 function PostOpList({
   list,
+  dischargedAt,
   onSelect,
   onAddRecord,
   onDischarge,
 }: {
   list: Patient[];
+  dischargedAt: Record<string, number>;
   onSelect: (p: Patient) => void;
   onAddRecord: (p: Patient) => void;
   onDischarge: (p: Patient) => void;
@@ -877,6 +922,11 @@ function PostOpList({
               {p.status === "rehab" && p.department === "inpatient" && <Pill cls="bg-success/15 text-success">康复达标</Pill>}
               {p.status === "post-op" && <Pill cls="bg-info/15 text-info">术后观察</Pill>}
               {p.status === "in-surgery" && <Pill cls="bg-warning/20 text-warning-foreground">今日术后</Pill>}
+              {dischargedAt[p.id] && (
+                <Pill cls="bg-success text-success-foreground">
+                  已出院评估 · 剩 {Math.max(0, 3 - Math.floor((Date.now() - dischargedAt[p.id]) / 86400000))} 天
+                </Pill>
+              )}
             </div>
             <div className="mt-1 text-[10px] text-muted-foreground">
               {p.surgeryName ?? p.diagnosis}
@@ -1372,15 +1422,24 @@ function DischargeSheet({
   onClose: () => void;
   onConfirm: (note: string) => void;
 }) {
+  const [understanding, setUnderstanding] = useState<"优" | "良" | "差">("良");
+  const [compliance, setCompliance] = useState<"高" | "中" | "低">("高");
+  const [transfer, setTransfer] = useState("");
   const [note, setNote] = useState("");
+  const [remark, setRemark] = useState("");
+  const canSave = note.trim().length > 0;
   return (
     <div className="absolute inset-0 z-[60] flex flex-col bg-background">
       <div className="flex items-center justify-between border-b bg-card px-3 py-2.5">
         <button onClick={onClose} className="text-[12px] text-muted-foreground">取消</button>
-        <div className="text-[13px] font-semibold">康复出院确认 · {patient.name}</div>
+        <div className="text-[13px] font-semibold">康复出院评估 · {patient.name}</div>
         <button
-          disabled={!note.trim()}
-          onClick={() => onConfirm(note.trim())}
+          disabled={!canSave}
+          onClick={() =>
+            onConfirm(
+              `[理解配合度:${understanding} / 医从性:${compliance}${transfer ? ` / 转院:${transfer}` : ""}${remark ? ` / 备注:${remark}` : ""}] ${note.trim()}`,
+            )
+          }
           className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
         >
           <Save className="h-3 w-3" />确认出院
@@ -1389,7 +1448,7 @@ function DischargeSheet({
       <div className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-3">
         <div className="rounded-2xl border bg-warning/5 p-2.5 text-[11px] text-warning-foreground">
           <AlertTriangle className="mr-1 inline h-3 w-3" />
-          确认出院前必须填写出院备注，所有角色（医生 / 护士 / 治疗师）均可查看。
+          出院评估完成后，该患者仍在「术后康复」中保留 <b>3 天</b>，便于后续追踪。
         </div>
         <div className="rounded-2xl border bg-card p-3 text-[11px]">
           <div className="font-semibold">
@@ -1399,19 +1458,59 @@ function DischargeSheet({
             术日 {patient.surgeryDate ?? "—"} · 患侧 {patient.side ?? "—"}
           </div>
         </div>
-        <div>
-          <div className="mb-1 text-[11px] font-semibold">出院备注说明 *</div>
+
+        <SectionBox label="理解配合度">
+          <div className="flex gap-1.5">
+            {(["优", "良", "差"] as const).map((k) => (
+              <Chip key={k} active={understanding === k} onClick={() => setUnderstanding(k)}>
+                {k}
+              </Chip>
+            ))}
+          </div>
+        </SectionBox>
+
+        <SectionBox label="医从性">
+          <div className="flex gap-1.5">
+            {(["高", "中", "低"] as const).map((k) => (
+              <Chip key={k} active={compliance === k} onClick={() => setCompliance(k)}>
+                {k}
+              </Chip>
+            ))}
+          </div>
+        </SectionBox>
+
+        <SectionBox label="转院记录（如有）">
+          <input
+            value={transfer}
+            onChange={(e) => setTransfer(e.target.value)}
+            placeholder="如：转往社区医院康复科 · 张医生"
+            className="h-9 w-full rounded-lg border bg-muted/20 px-2 text-[12px] outline-none focus:border-primary"
+          />
+        </SectionBox>
+
+        <SectionBox label="备注（团队可见）">
           <textarea
-            rows={6}
+            rows={2}
+            value={remark}
+            onChange={(e) => setRemark(e.target.value)}
+            placeholder="对家属交代、心理状态、特殊注意事项..."
+            className="w-full rounded-lg border bg-muted/20 p-2 text-[11px] outline-none focus:border-primary"
+          />
+        </SectionBox>
+
+        <SectionBox label="出院备注说明 *">
+          <textarea
+            rows={5}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="请填写康复达标情况、居家训练计划、复诊安排、注意事项..."
-            className="w-full rounded-xl border bg-card p-3 text-[12px] outline-none focus:border-primary"
+            className="w-full rounded-lg border bg-muted/20 p-2 text-[12px] outline-none focus:border-primary"
           />
-        </div>
+        </SectionBox>
       </div>
     </div>
   );
 }
+
 
 

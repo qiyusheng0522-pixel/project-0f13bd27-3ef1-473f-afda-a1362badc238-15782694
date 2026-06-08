@@ -164,6 +164,25 @@ export const patients: Patient[] = [
       dailyFunction: "可缓慢平地行走，蹲起受限",
     },
   },
+  // 今日新入院 · 待分配床位
+  {
+    id: "p_new1",
+    outpatientId: "MZ-20240422-031",
+    name: "马建军",
+    age: 41,
+    gender: "男",
+    phone: "138****0021",
+    diagnosis: "右膝半月板撕裂（登山）",
+    surgeryName: "右膝半月板部分切除",
+    side: "右",
+    director: "王主任",
+    responsibleDoctor: "朱医生",
+    admissionDate: "2024-04-22",
+    surgeryDate: "2024-04-24",
+    status: "admitted",
+    department: "inpatient",
+    isNew: true,
+  },
   // 今日手术
   {
     id: "p7",
