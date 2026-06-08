@@ -492,6 +492,8 @@ function StatEntry({
 function PlansTab({
   list,
   statuses,
+  edits,
+  onEditExercise,
   onEdit,
   onConfirm,
   onClear,
@@ -500,6 +502,8 @@ function PlansTab({
 }: {
   list: typeof patients;
   statuses: Record<string, PlanStatus>;
+  edits: Record<string, { dosage?: string; notes?: string }>;
+  onEditExercise: (pid: string, eid: string, patch: { dosage?: string; notes?: string }) => void;
   onEdit: (p: Patient) => void;
   onConfirm: (p: Patient) => void;
   onClear: (p: Patient) => void;
