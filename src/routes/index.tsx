@@ -124,7 +124,17 @@ function HomePage() {
           })}
         </section>
 
-        <footer className="mt-10 text-center text-[11px] text-muted-foreground">
+        <div className="mt-10 flex justify-center">
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-xs font-medium text-foreground shadow-sm hover:border-primary/40 hover:text-primary"
+          >
+            <Workflow className="h-3.5 w-3.5" />
+            打开手术排程后台（Admin · 导入 Excel）
+          </Link>
+        </div>
+
+        <footer className="mt-6 text-center text-[11px] text-muted-foreground">
           数据为演示用模拟数据 · 已脱敏 · 设计参照微信小程序原型规范
         </footer>
       </main>
