@@ -599,15 +599,14 @@ function InpatientHomeTab({
 
         <button
           onClick={onOpenPath}
-          className="relative mt-3 flex w-full items-center justify-between gap-2 rounded-2xl bg-white/20 px-3 py-3 text-left backdrop-blur active:scale-[0.99]"
+          className="relative mt-3 flex w-full items-center gap-2 rounded-2xl bg-white/20 px-3 py-3 text-left backdrop-blur active:scale-[0.99]"
         >
-          <div className="flex min-w-0 items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             <MapPin className="h-5 w-5 shrink-0" />
-            <span className="whitespace-nowrap text-[17px]">当前阶段：</span>
-            <b className="truncate text-[19px]">{currentStage.label}</b>
+            <span className="shrink-0 text-[17px]">当前阶段：</span>
+            <b className="whitespace-nowrap text-[19px]">{currentStage.label}</b>
           </div>
           <span className="flex shrink-0 items-center whitespace-nowrap text-[16px] font-bold">
-            完整路径
             <ChevronRight className="h-5 w-5" />
           </span>
         </button>
