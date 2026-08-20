@@ -126,24 +126,43 @@ export function PatientAiChat({
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [msgs]);
 
+  const hour = new Date().getHours();
+  const greet = hour < 6 ? "凌晨好呀" : hour < 12 ? "上午好呀" : hour < 18 ? "下午好呀" : "晚上好呀";
+  const SUGGESTS = [
+    "膝关节术后多久可以下地走路？",
+    "今天的康复动作怎么做才标准？",
+    "钙片和止痛药能一起吃吗？",
+  ];
+
   return (
     <div className="flex h-full flex-col bg-background">
-      {/* 顶栏 */}
-      <header className="flex shrink-0 items-center gap-2.5 border-b bg-card px-3 py-3">
-        <button
-          onClick={onClose}
-          aria-label="返回"
-          className="grid size-9 place-items-center rounded-full active:scale-95"
-        >
-          <ChevronLeft className="size-6" />
-        </button>
-        <div className="size-10 overflow-hidden rounded-xl ring-1 ring-primary/20">
-          <img src={aiDoctor} alt="骨灵 AI 主治医生" className="h-full w-full object-cover" />
+      {/* 顶栏 + 问候 */}
+      <header
+        className="shrink-0 px-3 pb-4 pt-3"
+        style={{ background: "var(--gradient-hero)" }}
+      >
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onClose}
+            aria-label="返回"
+            className="grid size-9 place-items-center rounded-full text-primary-foreground active:scale-95"
+          >
+            <ChevronLeft className="size-6" />
+          </button>
+          <div className="text-[17px] font-bold text-primary-foreground">骨安 · 骨灵</div>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-[17px] font-bold leading-tight">骨安 · 骨灵</div>
-          <div className="mt-0.5 text-[12.5px] text-muted-foreground">
-            结合您的档案给出个性化建议
+        <div className="mt-2 flex items-end justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-[24px] font-bold leading-tight text-primary-foreground">
+              {greet}
+              <Sparkles className="size-5" />
+            </div>
+            <div className="mt-1 text-[19px] font-bold leading-tight text-primary-foreground/90">
+              陪您稳稳走好每一步
+            </div>
+          </div>
+          <div className="size-16 shrink-0 overflow-hidden rounded-2xl ring-2 ring-white/40">
+            <img src={aiDoctor} alt="骨灵 AI 主治医生" className="h-full w-full object-cover" />
           </div>
         </div>
       </header>
@@ -164,6 +183,25 @@ export function PatientAiChat({
             </div>
           </div>
         ))}
+
+        {msgs.length === 1 && (
+          <div className="space-y-2.5 pt-1">
+            {SUGGESTS.map((s) => (
+              <button
+                key={s}
+                onClick={() => send(s)}
+                className="flex w-full items-center gap-3 rounded-2xl bg-card px-3.5 py-3.5 text-left ring-1 ring-black/[0.05] active:scale-[0.99]"
+                style={{ boxShadow: "var(--shadow-card)" }}
+              >
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/12 text-[15px] font-bold text-primary">
+                  #
+                </span>
+                <span className="min-w-0 flex-1 text-[17px] font-semibold leading-snug">{s}</span>
+                <ChevronLeft className="size-5 rotate-180 shrink-0 text-muted-foreground" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 分类 + 输入 */}
@@ -180,6 +218,7 @@ export function PatientAiChat({
             </button>
           ))}
         </div>
+
         <div className="flex items-center gap-2 rounded-full bg-muted/60 py-1 pl-3 pr-1 ring-1 ring-black/[0.05]">
           <Sparkles className="size-4 shrink-0 text-primary" />
           <input
