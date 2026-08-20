@@ -1228,3 +1228,322 @@ function PathSheet({
     </div>
   );
 }
+
+// ---------- 新用户使用引导 ----------
+const GUIDE_STEPS = [
+  {
+    icon: Camera,
+    title: "第 1 步 · 档案上传",
+    desc: "拍照上传出院小结 / 病历，OCR 自动识别",
+    action: "去拍照",
+  },
+  {
+    icon: ClipboardList,
+    title: "第 2 步 · 风险评估",
+    desc: "填写专病量表，AI 结合档案生成风险报告",
+    action: "去填写",
+  },
+  {
+    icon: HeartPulse,
+    title: "第 3 步 · 查看健康方案",
+    desc: "在「安家在护」中查看专属健康方案",
+    action: "去查看",
+  },
+] as const;
+
+function GuideSheet({
+  step,
+  onSkip,
+  onAction,
+}: {
+  step: 1 | 2 | 3;
+  onSkip: () => void;
+  onAction: () => void;
+}) {
+  const cfg = GUIDE_STEPS[step - 1];
+  const Icon = cfg.icon;
+  return (
+    <div className="absolute inset-0 z-50 flex flex-col justify-end bg-foreground/40 p-3">
+      <div className="overflow-hidden rounded-2xl bg-card shadow-2xl">
+        <div
+          className="flex items-center justify-between px-4 py-3 text-white"
+          style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
+        >
+          <div className="flex items-center gap-2 text-[19px] font-bold">
+            <Sparkles className="h-5 w-5" />
+            使用引导
+            <span className="rounded-md bg-white/25 px-2 py-0.5 text-[15px] font-bold">
+              {step}/3
+            </span>
+          </div>
+          <button onClick={onSkip} aria-label="关闭引导">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <div className="p-4">
+          {/* 步骤条 */}
+          <div className="flex items-center">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className="flex flex-1 items-center last:flex-none">
+                <div
+                  className={cn(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[17px] font-bold",
+                    s === step
+                      ? "bg-primary text-white"
+                      : s < step
+                        ? "bg-primary/15 text-primary"
+                        : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {s}
+                </div>
+                {s < 3 && (
+                  <div
+                    className={cn(
+                      "mx-2 h-[3px] flex-1 rounded-full",
+                      s < step ? "bg-primary/40" : "bg-muted",
+                    )}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* 当前步骤卡片 */}
+          <div className="mt-4 flex items-start gap-3 rounded-2xl bg-muted/50 p-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Icon className="h-7 w-7" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[21px] font-bold leading-tight">{cfg.title}</div>
+              <div className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">
+                {cfg.desc}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between">
+            <button onClick={onSkip} className="text-[18px] font-medium text-muted-foreground">
+              跳过引导
+            </button>
+            <button
+              onClick={onAction}
+              className="flex items-center gap-1 rounded-full px-6 py-3 text-[19px] font-bold text-white shadow-lg active:scale-[0.98]"
+              style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
+            >
+              {cfg.action}
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- 第 1 步：完善健康档案（拍照上传） ----------
+function ArchiveUploadSheet({ onClose }: { onClose: () => void }) {
+  const [uploaded, setUploaded] = useState(0);
+  const progress = Math.min(62 + uploaded * 15, 100);
+  const cards = [
+    { label: "化验单", sub: "已识别 3", tone: "ok" },
+    { label: "用药", sub: "已识别 2", tone: "ok" },
+    { label: "既往病史", sub: "待上传", tone: "todo" },
+    { label: "身份证", sub: "待上传", tone: "todo" },
+  ];
+  return (
+    <div className="absolute inset-0 z-50 flex flex-col bg-background">
+      <div className="flex items-center justify-between border-b bg-card px-3 py-3">
+        <button onClick={onClose} className="text-muted-foreground" aria-label="返回">
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+        <div className="text-[20px] font-bold">完善健康档案</div>
+        <div className="w-6" />
+      </div>
+
+      <div className="flex-1 space-y-4 overflow-y-auto p-3">
+        <section className="rounded-2xl border bg-card p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-[17px] font-bold text-primary">AI 建档 · 拍一拍</div>
+              <div className="mt-1 text-[22px] font-bold leading-tight">
+                拍照上传化验单 / 用药盒 / 既往病历
+              </div>
+              <div className="mt-1.5 text-[16px] text-muted-foreground">
+                AI 自动识别并归档，主诊医生随访前即可查看
+              </div>
+            </div>
+            <button
+              onClick={() => setUploaded((n) => n + 1)}
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg active:scale-95"
+              aria-label="拍照上传"
+            >
+              <Camera className="h-7 w-7" />
+            </button>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between text-[17px]">
+            <span className="text-muted-foreground">健康档案完成度</span>
+            <span className="font-bold text-primary">{progress}%</span>
+          </div>
+          <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-muted">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2.5">
+            {cards.map((c) => (
+              <div
+                key={c.label}
+                className={cn(
+                  "relative rounded-xl border p-3 text-center",
+                  c.tone === "ok"
+                    ? "border-emerald-200 bg-emerald-50/70"
+                    : "border-amber-200 bg-amber-50/70",
+                )}
+              >
+                {c.tone === "todo" && (
+                  <span className="absolute -right-1 -top-2 rounded-md bg-destructive px-1.5 py-0.5 text-[13px] font-bold text-destructive-foreground">
+                    必填
+                  </span>
+                )}
+                <div className="text-[18px] font-bold">{c.label}</div>
+                <div
+                  className={cn(
+                    "mt-0.5 text-[16px]",
+                    c.tone === "ok" ? "text-emerald-700" : "text-amber-700",
+                  )}
+                >
+                  {c.sub}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <div className="rounded-2xl bg-primary/10 p-4 text-[17px] leading-relaxed">
+          <span className="font-bold text-primary">AI 归档摘要 </span>· 共 5 份材料已识别，请补充必填项
+          <b> 既往病史、身份证</b>，以便档案更完整。
+        </div>
+
+        <section>
+          <div className="flex items-end justify-between">
+            <div className="text-[22px] font-bold">历史上传</div>
+            <div className="text-[16px] text-muted-foreground">共 6 项</div>
+          </div>
+          <div className="mt-2 space-y-2.5">
+            {[
+              { tag: "化验单", name: "生化全套 · 2026-07-10", sub: "空腹血糖 6.8 · HbA1c 7.2%", ago: "3 天前" },
+              { tag: "用药", name: "钙尔奇 D · 2026-07-08", sub: "每日 1 片 · 餐后", ago: "5 天前" },
+            ].map((r) => (
+              <div key={r.name} className="flex items-start gap-3 rounded-2xl border bg-card p-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <FileText className="h-6 w-6" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-[15px]">{r.tag}</span>
+                    <span className="flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[15px] text-emerald-700">
+                      <CheckCircle2 className="h-4 w-4" />
+                      已识别
+                    </span>
+                  </div>
+                  <div className="mt-1 text-[19px] font-bold">{r.name}</div>
+                  <div className="text-[16px] text-muted-foreground">{r.sub}</div>
+                  <div className="mt-0.5 text-[15px] text-muted-foreground">⏱ {r.ago}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="border-t bg-card p-3">
+        <button
+          onClick={onClose}
+          className="w-full rounded-full py-3.5 text-[20px] font-bold text-white shadow-lg active:scale-[0.99]"
+          style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
+        >
+          上传完成，下一步
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------- 第 2 步：专病量表 ----------
+const SCALE_QUESTIONS = [
+  { q: "近一周患侧关节疼痛程度", options: ["无痛", "轻度", "中度", "重度"] },
+  { q: "关节活动时是否有明显僵硬", options: ["没有", "偶尔", "经常", "持续"] },
+  { q: "日常行走能力", options: ["正常行走", "需扶拐", "需搀扶", "无法行走"] },
+  { q: "上下楼梯是否困难", options: ["不困难", "轻度困难", "较困难", "无法完成"] },
+  { q: "夜间是否因疼痛醒来", options: ["从不", "偶尔", "经常", "每晚"] },
+];
+
+function ScaleSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: () => void }) {
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const doneCount = Object.keys(answers).length;
+  return (
+    <div className="absolute inset-0 z-50 flex flex-col bg-background">
+      <div className="flex items-center justify-between border-b bg-card px-3 py-3">
+        <button onClick={onClose} className="text-muted-foreground" aria-label="返回">
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+        <div className="text-[20px] font-bold">专病评估量表</div>
+        <div className="w-6" />
+      </div>
+
+      <div className="flex-1 space-y-4 overflow-y-auto p-3">
+        <div
+          className="rounded-2xl p-4 text-white"
+          style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
+        >
+          <div className="text-[20px] font-bold">膝 / 肩专病功能量表</div>
+          <div className="mt-1 text-[16px] opacity-95">
+            共 {SCALE_QUESTIONS.length} 题 · 已填 {doneCount} 题，AI 将结合档案生成风险报告
+          </div>
+        </div>
+
+        {SCALE_QUESTIONS.map((item, i) => (
+          <section key={item.q} className="rounded-2xl border bg-card p-4">
+            <div className="text-[19px] font-bold">
+              {i + 1}. {item.q}
+            </div>
+            <div className="mt-3 space-y-2">
+              {item.options.map((o, oi) => {
+                const picked = answers[i] === oi;
+                return (
+                  <button
+                    key={o}
+                    onClick={() => setAnswers((a) => ({ ...a, [i]: oi }))}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-xl border p-3.5 text-left text-[18px] active:scale-[0.99]",
+                      picked ? "border-primary bg-primary/5 font-bold text-primary" : "bg-background",
+                    )}
+                  >
+                    {o}
+                    {picked ? (
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                    ) : (
+                      <Circle className="h-6 w-6 text-muted-foreground/40" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <div className="border-t bg-card p-3">
+        <button
+          onClick={onSubmit}
+          className="w-full rounded-full py-3.5 text-[20px] font-bold text-white shadow-lg active:scale-[0.99]"
+          style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
+        >
+          提交量表
+        </button>
+      </div>
+    </div>
+  );
+}
