@@ -311,7 +311,7 @@ export function PatientWorkbench() {
       subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
       hideHeader={aiOpen}
       overlay={
-        archiveOpen || scaleOpen || aiOpen ? null : guideStep ? (
+        aiOpen ? null : guideStep && !archiveOpen && !scaleOpen ? (
           <GuideSheet
             step={guideStep}
             onSkip={() => setGuideStep(null)}
@@ -1436,83 +1436,38 @@ function GuideSheet({
   const Icon = cfg.icon;
   return (
     <div className="z-50">
-      <div className="overflow-hidden rounded-2xl bg-card shadow-2xl">
-        <div
-          className="flex items-center justify-between px-4 py-3 text-white"
-          style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
-        >
-          <div className="flex items-center gap-2 text-[19px] font-bold">
-            <Sparkles className="h-5 w-5" />
-            使用引导
-            <span className="rounded-md bg-white/25 px-2 py-0.5 text-[17px] font-bold">
+      <div
+        className="flex items-center gap-2.5 rounded-2xl bg-card px-3 py-2.5 shadow-2xl ring-1 ring-primary/25"
+        style={{ boxShadow: "var(--shadow-elevated)" }}
+      >
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+          <Icon className="h-6 w-6" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="shrink-0 whitespace-nowrap rounded-full bg-primary px-2 py-0.5 text-[15px] font-bold text-primary-foreground">
               {step}/3
             </span>
+            <span className="truncate text-[18px] font-bold">{cfg.title.replace(/^第 \d 步 · /, "")}</span>
           </div>
-          <button onClick={onSkip} aria-label="关闭引导">
-            <X className="h-6 w-6" />
-          </button>
+          <div className="truncate text-[16px] text-muted-foreground">{cfg.desc}</div>
         </div>
-
-        <div className="p-4">
-          {/* 步骤条 */}
-          <div className="flex items-center">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className="flex flex-1 items-center last:flex-none">
-                <div
-                  className={cn(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[17px] font-bold",
-                    s === step
-                      ? "bg-primary text-white"
-                      : s < step
-                        ? "bg-primary/15 text-primary"
-                        : "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {s}
-                </div>
-                {s < 3 && (
-                  <div
-                    className={cn(
-                      "mx-2 h-[3px] flex-1 rounded-full",
-                      s < step ? "bg-primary/40" : "bg-muted",
-                    )}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* 当前步骤卡片 */}
-          <div className="mt-4 flex items-start gap-3 rounded-2xl bg-muted/50 p-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Icon className="h-7 w-7" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[21px] font-bold leading-tight">{cfg.title}</div>
-              <div className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">
-                {cfg.desc}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <button onClick={onSkip} className="text-[18px] font-medium text-muted-foreground">
-              跳过引导
-            </button>
-            <button
-              onClick={onAction}
-              className="flex items-center gap-1 rounded-full px-6 py-3 text-[19px] font-bold text-white shadow-lg active:scale-[0.98]"
-              style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
-            >
-              {cfg.action}
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={onAction}
+          className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-3.5 py-2 text-[17px] font-bold text-white active:scale-[0.98]"
+          style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
+        >
+          {cfg.action}
+          <ChevronRight className="h-4 w-4" />
+        </button>
+        <button onClick={onSkip} aria-label="关闭引导" className="shrink-0 text-muted-foreground">
+          <X className="h-5 w-5" />
+        </button>
       </div>
     </div>
   );
 }
+
 
 // ---------- 第 1 步：完善健康档案（拍照上传） ----------
 function ArchiveUploadSheet({ onClose }: { onClose: () => void }) {
