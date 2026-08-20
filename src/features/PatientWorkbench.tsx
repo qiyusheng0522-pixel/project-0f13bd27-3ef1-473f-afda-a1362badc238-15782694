@@ -407,21 +407,8 @@ export function PatientWorkbench() {
           />
         )}
 
-        {/* 新用户使用引导 */}
-        {guideStep && !archiveOpen && !scaleOpen && (
-          <GuideSheet
-            step={guideStep}
-            onSkip={() => setGuideStep(null)}
-            onAction={() => {
-              if (guideStep === 1) setArchiveOpen(true);
-              else if (guideStep === 2) setScaleOpen(true);
-              else {
-                setGuideStep(null);
-                setTab("plan");
-              }
-            }}
-          />
-        )}
+
+
 
 
         {/* Toast */}
