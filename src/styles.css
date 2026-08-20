@@ -143,7 +143,17 @@
     color: var(--color-foreground);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+
+  /* 标签/胶囊内文字禁止换行，空间不足时压缩左右内边距 */
+  span.rounded-full,
+  button.rounded-full,
+  a.rounded-full,
+  div.rounded-full {
+    white-space: nowrap;
+  }
 }
+
+
 
 @utility scrollbar-hide {
   scrollbar-width: none;
