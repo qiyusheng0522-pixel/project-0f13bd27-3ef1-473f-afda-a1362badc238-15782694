@@ -35,7 +35,7 @@ import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { cn } from "@/lib/utils";
 
 type Mode = "inpatient" | "home";
-type TabKey = "home" | "plan" | "tasks" | "me";
+type TabKey = "home" | "plan" | "me";
 
 // ---------- 路径图阶段 ----------
 const INPATIENT_STAGES = [
@@ -275,7 +275,7 @@ export function PatientWorkbench() {
       bottom={
         <TabBar
           items={tabItems}
-          activeKey={tab === "tasks" ? "home" : tab}
+          activeKey={tab}
           onChange={(k) => {
             if (k === "ai") {
               setAiOpen(true);
@@ -313,7 +313,7 @@ export function PatientWorkbench() {
           </div>
         </div>
 
-        {(tab === "home" || tab === "tasks") && (
+        {tab === "home" && (
           <HomeTab
             mode={mode}
             patient={PATIENT}
@@ -692,15 +692,15 @@ function TodoRow({ todo, onToggle }: { todo: TodoItem; onToggle: (id: string) =>
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "text-[15px] font-bold",
+              "text-[18px] font-bold",
               todo.done ? "text-muted-foreground line-through" : "text-foreground",
             )}
           >
             {todo.title}
           </span>
         </div>
-        <div className="mt-0.5 text-[13px] text-muted-foreground">{todo.detail}</div>
-        {todo.time && <div className="mt-0.5 text-[12px] text-primary">⏰ {todo.time}</div>}
+        <div className="mt-0.5 text-[16px] text-muted-foreground">{todo.detail}</div>
+        {todo.time && <div className="mt-0.5 text-[15px] text-primary">⏰ {todo.time}</div>}
       </div>
       {todo.done ? (
         <CheckCircle2 className="h-7 w-7 shrink-0 text-success" />
@@ -734,7 +734,7 @@ function PlanTab({
         style={{ background: "linear-gradient(135deg, #10b981, #0ea5e9)" }}
       >
         <div className="text-[18px] font-bold">{rehab.title}</div>
-        <div className="mt-1 text-[14px] opacity-95">🎯 {rehab.goal}</div>
+        <div className="mt-1 text-[17px] opacity-95">🎯 {rehab.goal}</div>
       </div>
 
       {/* 院外才显示营养方案切换 */}
@@ -743,7 +743,7 @@ function PlanTab({
           <button
             onClick={() => setSection("rehab")}
             className={cn(
-              "flex-1 rounded-xl py-2.5 text-[15px] font-bold",
+              "flex-1 rounded-xl py-2.5 text-[18px] font-bold",
               section === "rehab" ? "bg-card text-foreground shadow" : "text-muted-foreground",
             )}
           >
@@ -752,7 +752,7 @@ function PlanTab({
           <button
             onClick={() => setSection("nutrition")}
             className={cn(
-              "flex-1 rounded-xl py-2.5 text-[15px] font-bold",
+              "flex-1 rounded-xl py-2.5 text-[18px] font-bold",
               section === "nutrition" ? "bg-card text-foreground shadow" : "text-muted-foreground",
             )}
           >
@@ -767,8 +767,8 @@ function PlanTab({
           <Section icon={Dumbbell} title="康复运动" tint="bg-sky-50 text-sky-700">
             {rehab.exercises.map((e, i) => (
               <div key={i} className="rounded-xl border bg-background p-3">
-                <div className="text-[15px] font-bold">{i + 1}. {e.name}</div>
-                <div className="mt-1 text-[13px] text-muted-foreground">{e.dose}</div>
+                <div className="text-[18px] font-bold">{i + 1}. {e.name}</div>
+                <div className="mt-1 text-[16px] text-muted-foreground">{e.dose}</div>
               </div>
             ))}
           </Section>
@@ -776,7 +776,7 @@ function PlanTab({
           {/* 注意事项 */}
           <Section icon={AlertTriangle} title="注意事项" tint="bg-orange-50 text-orange-700">
             {rehab.cautions.map((c, i) => (
-              <div key={i} className="flex items-start gap-2 text-[14px]">
+              <div key={i} className="flex items-start gap-2 text-[17px]">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-orange-500" />
                 <span>{c}</span>
               </div>
@@ -786,7 +786,7 @@ function PlanTab({
           {/* 饮食 */}
           <Section icon={Apple} title="饮食建议" tint="bg-emerald-50 text-emerald-700">
             {rehab.diet.map((c, i) => (
-              <div key={i} className="flex items-start gap-2 text-[14px]">
+              <div key={i} className="flex items-start gap-2 text-[17px]">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
                 <span>{c}</span>
               </div>
@@ -798,25 +798,25 @@ function PlanTab({
       {mode === "home" && section === "nutrition" && (
         <>
           <Section icon={Leaf} title="营养方案 · 药食同源" tint="bg-emerald-50 text-emerald-700">
-            <div className="text-[13px] text-muted-foreground">
+            <div className="text-[16px] text-muted-foreground">
               依据您的康复阶段定制 · 不喜欢的菜可一键更换
             </div>
             {dishes.map((d) => (
               <div key={d.id} className="rounded-xl border bg-background p-3">
                 <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[12px] font-bold text-primary">
+                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[15px] font-bold text-primary">
                     {d.meal}
                   </span>
                   <button
                     onClick={() => onSwap(d)}
-                    className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[12px] font-medium text-foreground"
+                    className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[15px] font-medium text-foreground"
                   >
                     <RefreshCw className="h-3.5 w-3.5" />
                     换一道
                   </button>
                 </div>
-                <div className="mt-2 text-[16px] font-bold">{d.name}</div>
-                <div className="mt-1 text-[13px] text-muted-foreground">💚 {d.benefit}</div>
+                <div className="mt-2 text-[19px] font-bold">{d.name}</div>
+                <div className="mt-1 text-[16px] text-muted-foreground">💚 {d.benefit}</div>
               </div>
             ))}
           </Section>
@@ -825,7 +825,7 @@ function PlanTab({
 
       <button
         onClick={onSyncToTodo}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-[16px] font-bold text-primary-foreground shadow-lg active:scale-[0.98]"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-[19px] font-bold text-primary-foreground shadow-lg active:scale-[0.98]"
       >
         <CheckCircle2 className="h-5 w-5" />
         一键同步为今日打卡待办
@@ -851,38 +851,10 @@ function Section({
         <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", tint)}>
           <Icon className="h-5 w-5" />
         </div>
-        <div className="text-[16px] font-bold">{title}</div>
+        <div className="text-[19px] font-bold">{title}</div>
       </div>
       <div className="space-y-2">{children}</div>
     </section>
-  );
-}
-
-// ---------- 打卡 Tab ----------
-function TasksTab({ todos, onToggle }: { todos: TodoItem[]; onToggle: (id: string) => void }) {
-  const done = todos.filter((t) => t.done).length;
-  const pct = Math.round((done / todos.length) * 100);
-  return (
-    <div className="space-y-4 p-3">
-      <div className="rounded-2xl border bg-card p-4">
-        <div className="text-[15px] font-bold">今日打卡进度</div>
-        <div className="mt-2 flex items-end gap-2">
-          <div className="text-[36px] font-bold text-primary">{done}</div>
-          <div className="pb-2 text-[14px] text-muted-foreground">/ {todos.length} 项 ({pct}%)</div>
-        </div>
-        <div className="mt-2 h-3 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${pct}%`, background: "linear-gradient(90deg, hsl(var(--primary)), #10b981)" }}
-          />
-        </div>
-      </div>
-      <div className="space-y-2">
-        {todos.map((t) => (
-          <TodoRow key={t.id} todo={t} onToggle={onToggle} />
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -896,7 +868,7 @@ function MeTab({ mode, doneCount, total }: { mode: Mode; doneCount: number; tota
         </div>
         <div>
           <div className="text-[18px] font-bold">张建国</div>
-          <div className="text-[13px] text-muted-foreground">
+          <div className="text-[16px] text-muted-foreground">
             68 岁 · 右膝关节置换术后 · 主管医生:王主任
           </div>
         </div>
@@ -922,12 +894,12 @@ function MeTab({ mode, doneCount, total }: { mode: Mode; doneCount: number; tota
             )}
           >
             <it.icon className="h-6 w-6 text-primary" />
-            <span className="flex-1 text-[15px] font-medium">{it.label}</span>
-            <span className="text-[13px] text-muted-foreground">›</span>
+            <span className="flex-1 text-[18px] font-medium">{it.label}</span>
+            <span className="text-[16px] text-muted-foreground">›</span>
           </button>
         ))}
       </div>
-      <div className="px-2 text-center text-[12px] text-muted-foreground">
+      <div className="px-2 text-center text-[15px] text-muted-foreground">
         当前模式:{mode === "inpatient" ? "院内陪护" : "居家康复"} · 数据已加密
       </div>
     </div>
@@ -937,7 +909,7 @@ function MeTab({ mode, doneCount, total }: { mode: Mode; doneCount: number; tota
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border bg-card p-4">
-      <div className="text-[13px] text-muted-foreground">{label}</div>
+      <div className="text-[16px] text-muted-foreground">{label}</div>
       <div className="mt-1 text-[22px] font-bold text-primary">{value}</div>
     </div>
   );
@@ -959,14 +931,14 @@ function SwapDishSheet({
         <button onClick={onClose} className="text-muted-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <div className="text-[16px] font-bold">更换菜品</div>
+        <div className="text-[19px] font-bold">更换菜品</div>
         <div className="w-5" />
       </div>
       <div className="flex-1 overflow-y-auto p-4">
-        <div className="rounded-2xl bg-muted p-3 text-[14px]">
+        <div className="rounded-2xl bg-muted p-3 text-[17px]">
           当前:<b>{dish.name}</b>
         </div>
-        <div className="mt-3 text-[14px] font-bold text-muted-foreground">为您推荐</div>
+        <div className="mt-3 text-[17px] font-bold text-muted-foreground">为您推荐</div>
         <div className="mt-2 space-y-2">
           {dish.alternates.map((a) => (
             <button
@@ -975,10 +947,10 @@ function SwapDishSheet({
               className="flex w-full items-center justify-between rounded-2xl border bg-card p-4 text-left active:bg-muted/50"
             >
               <div>
-                <div className="text-[16px] font-bold">{a}</div>
-                <div className="mt-0.5 text-[12px] text-muted-foreground">药食同源 · 营养均衡</div>
+                <div className="text-[19px] font-bold">{a}</div>
+                <div className="mt-0.5 text-[15px] text-muted-foreground">药食同源 · 营养均衡</div>
               </div>
-              <span className="rounded-full bg-primary px-3 py-1 text-[13px] font-bold text-primary-foreground">
+              <span className="rounded-full bg-primary px-3 py-1 text-[16px] font-bold text-primary-foreground">
                 选它
               </span>
             </button>
@@ -1022,7 +994,7 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
         <button onClick={onClose}>
           <X className="h-5 w-5" />
         </button>
-        <div className="flex items-center gap-2 text-[16px] font-bold">
+        <div className="flex items-center gap-2 text-[19px] font-bold">
           <Sparkles className="h-5 w-5" />
           骨灵大模型
         </div>
@@ -1036,7 +1008,7 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
           >
             <div
               className={cn(
-                "max-w-[80%] rounded-2xl px-3 py-2.5 text-[15px] leading-relaxed",
+                "max-w-[80%] rounded-2xl px-3 py-2.5 text-[18px] leading-relaxed",
                 m.role === "user"
                   ? "bg-primary text-primary-foreground"
                   : "bg-card border text-foreground",
@@ -1053,7 +1025,7 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
             <button
               key={q}
               onClick={() => send(q)}
-              className="rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[12px] text-primary"
+              className="rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[15px] text-primary"
             >
               {q}
             </button>
@@ -1065,7 +1037,7 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(input)}
             placeholder="请输入您的问题…"
-            className="flex-1 rounded-full border bg-background px-4 py-2.5 text-[15px] outline-none focus:border-primary"
+            className="flex-1 rounded-full border bg-background px-4 py-2.5 text-[18px] outline-none focus:border-primary"
           />
           <button
             onClick={() => send(input)}
