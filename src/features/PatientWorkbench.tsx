@@ -437,18 +437,17 @@ export function PatientWorkbench() {
 
         {/* 骨灵会话 */}
         {aiOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="h-[792px] w-[355px] overflow-hidden rounded-[32px] bg-background shadow-2xl">
-              <PatientAiChat
-                initialQuestion={aiQuestion}
-                onClose={() => {
-                  setAiOpen(false);
-                  setAiQuestion(undefined);
-                }}
-              />
-            </div>
+          <div className="absolute inset-0 z-50 bg-background">
+            <PatientAiChat
+              initialQuestion={aiQuestion}
+              onClose={() => {
+                setAiOpen(false);
+                setAiQuestion(undefined);
+              }}
+            />
           </div>
         )}
+
 
 
 
