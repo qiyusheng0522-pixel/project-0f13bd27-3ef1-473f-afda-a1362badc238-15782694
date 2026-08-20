@@ -93,19 +93,20 @@ function answerFor(query: string): string {
 }
 
 export function PatientAiChat({
-  onClose,
   initialQuestion,
 }: {
-  onClose: () => void;
+  onClose?: () => void;
   initialQuestion?: string;
 }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
 
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const handledRef = useRef<string | undefined>(undefined);
 
-  const send = (text: string) => {
+  const send = (text: string, key?: string) => {
+    if (key) setActiveKey(key);
     const t = text.trim();
     if (!t) return;
     setMsgs((m) => [...m, { role: "user", text: t }]);
@@ -134,19 +135,19 @@ export function PatientAiChat({
   const SUGGESTS = [
     {
       q: "膝关节术后多久可以下地走路？",
-      sub: "根据患者情况给出康复建议",
+      sub: "结合您的情况给建议",
       icon: <PersonStanding className="size-6 text-primary" />,
       tint: "bg-primary/10",
     },
     {
       q: "今天的康复动作怎么做才标准？",
-      sub: "获取动作要点与注意事项",
+      sub: "动作要点与注意事项",
       icon: <Target className="size-6 text-emerald-600" />,
       tint: "bg-emerald-500/10",
     },
     {
       q: "钙片和止痛药能一起吃吗？",
-      sub: "用药搭配与禁忌快速查询",
+      sub: "用药搭配与禁忌",
       icon: <Pill className="size-6 text-amber-600" />,
       tint: "bg-amber-500/10",
     },
@@ -161,18 +162,6 @@ export function PatientAiChat({
 
   return (
     <div className="flex h-full flex-col bg-muted/30">
-      {/* 顶栏（单行，不与外层标题重复） */}
-      <header className="flex shrink-0 items-center gap-2 border-b bg-card px-2 py-2">
-        <button
-          onClick={onClose}
-          aria-label="返回"
-          className="grid size-9 shrink-0 place-items-center rounded-full active:scale-95"
-        >
-          <ChevronLeft className="size-6" />
-        </button>
-        <div className="min-w-0 flex-1 text-[17px] font-bold leading-tight">骨灵</div>
-      </header>
-
       {/* 消息区 */}
       <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3">
         {msgs.length === 0 && (
@@ -189,7 +178,7 @@ export function PatientAiChat({
                 <div className="text-[19px] font-bold text-primary-foreground">AI 主治医生 · 骨灵</div>
                 <div className="mt-0.5 flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-emerald-300" />
-                  <span className="text-[14px] text-primary-foreground/90">在线为您服务</span>
+                  <span className="text-[15px] text-primary-foreground/90">在线为您服务</span>
                 </div>
               </div>
             </div>
@@ -200,9 +189,9 @@ export function PatientAiChat({
                 <HeartPulse className="size-6 text-primary" />
               </div>
               <div className="min-w-0">
-                <div className="text-[21px] font-bold leading-tight">{greet}</div>
-                <div className="mt-0.5 text-[14.5px] text-muted-foreground">
-                  我可以帮您解答康复动作、用药、饮食与报告解读
+                <div className="text-[20px] font-bold leading-tight">{greet}</div>
+                <div className="mt-0.5 text-[15px] text-muted-foreground">
+                  康复动作、用药、饮食都可以问我
                 </div>
               </div>
             </div>
@@ -212,39 +201,23 @@ export function PatientAiChat({
               {SUGGESTS.map((s, i) => (
                 <button
                   key={s.q}
-                  onClick={() => send(s.q)}
+                  onClick={() => send(s.q, s.q)}
                   className={cn(
                     "flex w-full items-center gap-3 px-3.5 py-3.5 text-left active:bg-muted/50",
                     i > 0 && "border-t",
+                    activeKey === s.q && "bg-primary/10",
                   )}
                 >
                   <span className={cn("grid size-12 shrink-0 place-items-center rounded-2xl", s.tint)}>
                     {s.icon}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[16.5px] font-bold leading-snug">{s.q}</span>
-                    <span className="mt-0.5 block text-[13.5px] text-muted-foreground">{s.sub}</span>
+                    <span className="block text-[17px] font-bold leading-snug">{s.q}</span>
+                    <span className="mt-0.5 block text-[15px] text-muted-foreground">{s.sub}</span>
                   </span>
                   <ChevronLeft className="size-5 shrink-0 rotate-180 text-primary" />
                 </button>
               ))}
-            </div>
-
-            {/* 报告解读服务 */}
-            <div className="flex items-center gap-3 rounded-3xl bg-primary/10 px-3.5 py-3.5">
-              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-card">
-                <FileSearch className="size-6 text-primary" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="text-[16.5px] font-bold">报告解读服务</div>
-                <div className="mt-0.5 text-[13.5px] text-muted-foreground">上传检查报告，AI 帮您快速解读</div>
-              </div>
-              <button
-                onClick={() => send("请帮我解读最近的膝关节 X 光报告")}
-                className="shrink-0 rounded-full bg-primary px-4 py-2.5 text-[15px] font-bold text-primary-foreground active:scale-95"
-              >
-                去上传
-              </button>
             </div>
 
             {/* 快捷服务 */}
@@ -252,15 +225,18 @@ export function PatientAiChat({
               {QUICK.map((q) => (
                 <button
                   key={q.label}
-                  onClick={() => send(q.prompt)}
-                  className="rounded-2xl bg-card px-1 py-3 ring-1 ring-black/[0.05] active:scale-95"
+                  onClick={() => send(q.prompt, q.label)}
+                  className={cn(
+                    "rounded-2xl bg-card px-1 py-3 ring-1 active:scale-95",
+                    activeKey === q.label ? "ring-2 ring-primary bg-primary/10" : "ring-black/[0.05]",
+                  )}
                   style={{ boxShadow: "var(--shadow-card)" }}
                 >
                   <span className={cn("mx-auto grid size-11 place-items-center rounded-full", q.tint)}>
                     {q.icon}
                   </span>
-                  <span className="mt-1.5 block text-[13.5px] font-bold">{q.label}</span>
-                  <span className="block text-[12px] text-muted-foreground">{q.sub}</span>
+                  <span className="mt-1.5 block text-[15px] font-bold">{q.label}</span>
+                  <span className="block text-[13px] text-muted-foreground">{q.sub}</span>
                 </button>
               ))}
             </div>
@@ -271,7 +247,7 @@ export function PatientAiChat({
           <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
             <div
               className={cn(
-                "max-w-[84%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-[16px] leading-relaxed",
+                "max-w-[84%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-[17px] leading-relaxed",
                 m.role === "user"
                   ? "rounded-br-md bg-primary text-primary-foreground"
                   : "rounded-bl-md bg-card ring-1 ring-black/[0.06]",
@@ -285,20 +261,23 @@ export function PatientAiChat({
 
       {/* 输入区 */}
       <div className="shrink-0 border-t bg-card/95 px-3 pb-3 pt-2 backdrop-blur">
-        {msgs.length > 0 && (
-          <div className="scrollbar-hide mb-2 flex gap-1.5 overflow-x-auto">
-            {CATS.map((c) => (
-              <button
-                key={c.key}
-                onClick={() => send(c.prompt)}
-                className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-primary/10 px-3 text-[14px] font-semibold text-primary ring-1 ring-primary/15 active:scale-95"
-              >
-                {c.icon}
-                {c.label}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="scrollbar-hide mb-2 flex gap-1.5 overflow-x-auto">
+          {CATS.map((c) => (
+            <button
+              key={c.key}
+              onClick={() => send(c.prompt, c.key)}
+              className={cn(
+                "inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-3 text-[15px] font-semibold ring-1 active:scale-95",
+                activeKey === c.key
+                  ? "bg-primary text-primary-foreground ring-primary"
+                  : "bg-primary/10 text-primary ring-primary/15",
+              )}
+            >
+              {c.icon}
+              {c.label}
+            </button>
+          ))}
+        </div>
 
         <div className="flex items-center gap-2 rounded-full bg-muted/60 py-1 pl-3 pr-1 ring-1 ring-black/[0.05]">
           <Sparkles className="size-4 shrink-0 text-primary" />
@@ -306,8 +285,8 @@ export function PatientAiChat({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(input)}
-            placeholder="向骨灵提问，例如：术后腿肿怎么办？"
-            className="min-w-0 flex-1 bg-transparent py-2 text-[15px] outline-none placeholder:text-muted-foreground/70"
+            placeholder="向骨灵提问，例如：术后腿肿怎么办"
+            className="min-w-0 flex-1 bg-transparent py-2 text-[16px] outline-none placeholder:text-muted-foreground/70"
           />
           <button
             aria-label="语音输入"
