@@ -879,7 +879,14 @@ function TodoRow({ todo, onToggle }: { todo: TodoItem; onToggle: (id: string) =>
   );
 }
 
-// ---------- 健康方案 ----------
+// ---------- 健康方案（住院 / 居家 展示同一套内容） ----------
+const PLAN_DAYS = ["06/11", "06/12", "06/13", "06/14"];
+const PLAN_MACROS = [
+  { label: "碳水化合物", value: "177.3 g", dot: "bg-amber-400" },
+  { label: "脂肪", value: "43.4 g", dot: "bg-blue-600" },
+  { label: "蛋白质", value: "78.6 g", dot: "bg-sky-400" },
+];
+
 function PlanTab({
   mode,
   rehab,
@@ -893,103 +900,390 @@ function PlanTab({
   onSwap: (d: Dish) => void;
   onSyncToTodo: () => void;
 }) {
-  const [section, setSection] = useState<"rehab" | "nutrition">("rehab");
+  const [unlocked, setUnlocked] = useState(false);
+  const [dietTab, setDietTab] = useState<"营养方案" | "药食同源">("营养方案");
+  const [day, setDay] = useState(0);
+  const [riskOpen, setRiskOpen] = useState(true);
+  const [doneEx, setDoneEx] = useState<number[]>([0]);
+
+  const meals: Dish["meal"][] = ["早餐", "午餐", "晚餐", "加餐"];
+  const exDone = doneEx.length;
 
   return (
     <div className="space-y-4 p-3">
-      <div
-        className="rounded-2xl p-4 text-white"
-        style={{ background: "linear-gradient(135deg, #10b981, #0ea5e9)" }}
-      >
-        <div className="text-[18px] font-bold">{rehab.title}</div>
-        <div className="mt-1 text-[17px] opacity-95">🎯 {rehab.goal}</div>
+      {/* 开通状态预览切换 */}
+      <div className="flex gap-2 rounded-full bg-muted p-1">
+        {[false, true].map((v) => (
+          <button
+            key={String(v)}
+            onClick={() => setUnlocked(v)}
+            className={cn(
+              "flex-1 rounded-full py-2.5 text-[17px] font-bold",
+              unlocked === v ? "bg-foreground text-background" : "text-muted-foreground",
+            )}
+          >
+            {v ? "已开通预览" : "未开通预览"}
+          </button>
+        ))}
       </div>
 
-      {/* 院外才显示营养方案切换 */}
-      {mode === "home" && (
-        <div className="flex gap-2 rounded-2xl bg-muted p-1">
-          <button
-            onClick={() => setSection("rehab")}
-            className={cn(
-              "flex-1 rounded-xl py-2.5 text-[18px] font-bold",
-              section === "rehab" ? "bg-card text-foreground shadow" : "text-muted-foreground",
-            )}
-          >
-            🏃 康复运动
+      {/* 个人健康画像 */}
+      <button className="flex w-full items-center gap-3 rounded-2xl border bg-card p-4 text-left active:bg-muted/40">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <User className="h-6 w-6" />
+        </div>
+        <div className="text-[18px] text-muted-foreground">个人健康画像</div>
+        <span className="ml-auto flex items-center text-[18px] font-bold text-primary">
+          我的健康档案
+          <ChevronRight className="h-5 w-5" />
+        </span>
+      </button>
+
+      {/* 报告 / 方案 双卡 */}
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { icon: FileText, title: "专病体检报告", desc: "风险结论 · 最需关注问题 · 就医建议", link: "查看报告" },
+          { icon: ClipboardList, title: "健康管理方案", desc: "用药 · 营养 · 运动 · 监测随访", link: "查看方案" },
+        ].map((c) => (
+          <button key={c.title} className="rounded-2xl border bg-card p-4 text-left active:bg-muted/40">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <c.icon className="h-6 w-6" />
+            </div>
+            <div className="mt-2.5 text-[19px] font-bold leading-snug">{c.title}</div>
+            <div className="mt-1 text-[15px] leading-snug text-muted-foreground">{c.desc}</div>
+            <span className="mt-2 flex items-center text-[16px] font-bold text-primary">
+              {c.link}
+              <ChevronRight className="h-4 w-4" />
+            </span>
           </button>
+        ))}
+      </div>
+
+      {/* 专病服务包 · 风险识别 */}
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div
+          className="flex items-start justify-between p-4 text-white"
+          style={{ background: "linear-gradient(90deg, #dc2626, #ea580c)" }}
+        >
+          <div>
+            <div className="text-[20px] font-bold">骨关节管理服务包</div>
+            <div className="mt-1 flex items-center gap-1.5 text-[16px] opacity-95">
+              <AlertTriangle className="h-4 w-4" />
+              系统识别：术后并发症风险偏高
+            </div>
+          </div>
           <button
-            onClick={() => setSection("nutrition")}
-            className={cn(
-              "flex-1 rounded-xl py-2.5 text-[18px] font-bold",
-              section === "nutrition" ? "bg-card text-foreground shadow" : "text-muted-foreground",
-            )}
+            onClick={() => setRiskOpen((v) => !v)}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/20"
           >
-            🍲 营养药膳
+            <X className="h-5 w-5" />
           </button>
         </div>
-      )}
 
-      {(mode === "inpatient" || section === "rehab") && (
-        <>
-          {/* 运动 */}
-          <Section icon={Dumbbell} title="康复运动" tint="bg-sky-50 text-sky-700">
-            {rehab.exercises.map((e, i) => (
-              <div key={i} className="rounded-xl border bg-background p-3">
-                <div className="text-[18px] font-bold">{i + 1}. {e.name}</div>
-                <div className="mt-1 text-[16px] text-muted-foreground">{e.dose}</div>
+        {riskOpen && (
+          <div className="space-y-3 p-3">
+            <div className="rounded-2xl bg-destructive/5 p-3">
+              <div className="flex items-end justify-between">
+                <span className="text-[19px] font-bold text-destructive">关节僵硬 / 跌倒风险</span>
+                <span className="text-[28px] font-bold leading-none text-destructive">72%</span>
               </div>
-            ))}
-          </Section>
+              <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-destructive/15">
+                <div className="h-full w-[72%] rounded-full bg-destructive" />
+              </div>
+              <div className="mt-2 text-[16px] leading-relaxed text-muted-foreground">
+                依据：术后屈膝 60° · 股四头肌力 3 级 · 久坐 · 抽烟。若不规范康复，未来关节活动受限风险将增加{" "}
+                <b className="text-destructive underline">3.6 倍</b>，年均额外医疗支出或超{" "}
+                <b className="text-destructive">¥9,800</b>。
+              </div>
+            </div>
 
-          {/* 注意事项 */}
+            <div className="rounded-2xl border p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-[18px] font-bold">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  升级您的健康方案
+                </div>
+                <span className="text-[15px] text-muted-foreground">逐项对比</span>
+              </div>
+              <div className="mt-2.5 grid grid-cols-2 gap-2 text-[16px]">
+                <div className="rounded-xl bg-muted/50 p-3">
+                  <div className="font-bold">通用方案 · 免费</div>
+                  <div className="mt-1.5 space-y-1 text-muted-foreground">
+                    <div>通用康复动作</div>
+                    <div>通用饮食建议</div>
+                    <div>自助打卡</div>
+                  </div>
+                </div>
+                <div className="rounded-xl bg-primary/5 p-3">
+                  <div className="font-bold text-primary">专属跟踪</div>
+                  <div className="mt-1.5 space-y-1 text-foreground">
+                    <div>治疗师 1v1 调整</div>
+                    <div>药食同源定制餐</div>
+                    <div>异常自动预警</div>
+                  </div>
+                </div>
+              </div>
+              {!unlocked && (
+                <button className="mt-3 w-full rounded-xl bg-primary py-3 text-[18px] font-bold text-primary-foreground">
+                  立即开通专属方案
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* 饮食方案 */}
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div className="bg-emerald-50 p-4">
+          <div className="flex items-center gap-2">
+            <div className="text-[21px] font-bold">
+              {unlocked ? "专属饮食方案" : "通用饮食方案"}
+            </div>
+            <span className="rounded-full bg-white px-2.5 py-1 text-[14px] font-bold text-muted-foreground">
+              {unlocked ? "专属方案 · 已开通" : "通用方案 · 免费"}
+            </span>
+            <Soup className="ml-auto h-7 w-7 text-emerald-600" />
+          </div>
+          <div className="mt-1 text-[16px] text-muted-foreground">
+            基于骨科术后营养指南与药食同源建议
+          </div>
+        </div>
+
+        {/* 营养方案 / 药食同源 */}
+        <div className="flex border-b">
+          {(["营养方案", "药食同源"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setDietTab(t)}
+              className={cn(
+                "flex-1 py-3 text-[18px] font-bold",
+                dietTab === t
+                  ? "border-b-[3px] border-primary text-primary"
+                  : "text-muted-foreground",
+              )}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-3 p-3">
+          <div className="text-center text-[17px]">
+            当前您执行的是 <b className="text-warning">{dietTab}</b>
+          </div>
+          <div className="flex items-center justify-between text-[17px]">
+            <span>
+              用餐时间：<b>07:30 - 18:00</b>
+            </span>
+            <span className="rounded-full bg-primary/10 px-3 py-1.5 text-[15px] font-bold text-primary">
+              已选择该方案
+            </span>
+          </div>
+
+          {/* 热量环 + 三大营养素 */}
+          <div className="flex items-center gap-4">
+            <div
+              className="relative flex h-[110px] w-[110px] shrink-0 items-center justify-center rounded-full"
+              style={{
+                background:
+                  "conic-gradient(#fb923c 0turn 0.55turn, #1d4ed8 0.55turn 0.72turn, #38bdf8 0.72turn 1turn)",
+              }}
+            >
+              <div className="flex h-[82px] w-[82px] flex-col items-center justify-center rounded-full bg-card">
+                <span className="text-[20px] font-bold leading-none">1434</span>
+                <span className="text-[14px] text-muted-foreground">Kcal</span>
+              </div>
+            </div>
+            <div className="flex-1 space-y-2">
+              {PLAN_MACROS.map((m) => (
+                <div key={m.label} className="flex items-center gap-2 text-[17px]">
+                  <span className={cn("h-2.5 w-2.5 rounded-full", m.dot)} />
+                  <span className="font-medium">{m.label}</span>
+                  <span className="ml-auto text-muted-foreground">{m.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 日期 */}
+          <div className="flex gap-2 overflow-x-auto">
+            {PLAN_DAYS.map((d, i) => (
+              <button
+                key={d}
+                onClick={() => setDay(i)}
+                className={cn(
+                  "shrink-0 px-3 pb-1.5 text-[19px] font-bold",
+                  i === day
+                    ? "border-b-[3px] border-primary text-primary"
+                    : "text-muted-foreground",
+                )}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => dishes[0] && onSwap(dishes[0])}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/10 py-3.5 text-[19px] font-bold text-primary active:bg-primary/15"
+          >
+            <RefreshCw className="h-5 w-5" />
+            不想吃全部换
+          </button>
+
+          <div className="flex items-start gap-1.5 text-[15px] leading-snug text-muted-foreground">
+            <Leaf className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            <span>带标记的食谱包含卫健委公布的药食同源药材，点击查看功效</span>
+          </div>
+
+          {/* 各餐 */}
+          {meals.map((m) => {
+            const list = dishes.filter((d) => d.meal === m);
+            if (!list.length) return null;
+            return (
+              <div key={m} className="rounded-2xl bg-muted/40 p-3">
+                <div className="flex items-center gap-2 text-[19px] font-bold">
+                  {m}
+                  <span className="text-[15px] font-normal text-muted-foreground">
+                    约 {m === "加餐" ? 180 : 430} 千卡 · 推荐结构
+                  </span>
+                </div>
+                <div className="mt-2 space-y-2">
+                  {list.map((d) => (
+                    <div key={d.id} className="rounded-xl border bg-card p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="text-[19px] font-bold leading-snug">{d.name}</div>
+                          <div className="mt-1 text-[16px] text-muted-foreground">💚 {d.benefit}</div>
+                        </div>
+                        <button
+                          onClick={() => onSwap(d)}
+                          className="flex shrink-0 items-center gap-1 rounded-full bg-muted px-3 py-2 text-[15px] font-bold"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          更换
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 今日运动 */}
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div className="bg-sky-50 p-4">
+          <div className="flex items-center gap-2">
+            <div className="text-[21px] font-bold">今日运动</div>
+            <span className="rounded-full bg-white px-2.5 py-1 text-[14px] font-bold text-muted-foreground">
+              {unlocked ? "专属方案" : "通用方案 · 免费"}
+            </span>
+            <HeartPulse className="ml-auto h-7 w-7 text-sky-600" />
+          </div>
+          <div className="mt-1 text-[16px] text-muted-foreground">{rehab.title} · {rehab.goal}</div>
+        </div>
+
+        <div className="space-y-3 p-3">
+          <div className="rounded-2xl border p-3">
+            <div className="flex items-center justify-between text-[17px]">
+              <span className="text-muted-foreground">今日打卡进度</span>
+              <span className="text-muted-foreground">完成度</span>
+            </div>
+            <div className="mt-1 flex items-end justify-between">
+              <span className="text-[24px] font-bold">
+                {exDone}
+                <span className="text-[17px] text-muted-foreground"> / {rehab.exercises.length} 项</span>
+              </span>
+              <span className="text-[22px] font-bold text-primary">
+                {Math.round((exDone / rehab.exercises.length) * 100)}%
+              </span>
+            </div>
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${(exDone / rehab.exercises.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-destructive/5 p-3 text-[17px]">
+            <span className="font-bold text-destructive">⚠ 运动风险提示：</span>
+            <span className="text-muted-foreground">
+              出现剧烈疼痛、关节肿胀或头晕请立即停止并联系医护
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-xl border p-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+              <Activity className="h-6 w-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[18px] font-bold">授权微信步数</div>
+              <div className="text-[15px] text-muted-foreground">同步每日步数，自动计入运动量</div>
+            </div>
+            <button className="shrink-0 rounded-full bg-emerald-600 px-4 py-2.5 text-[16px] font-bold text-white">
+              立即授权
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-primary" />
+            <span className="text-[19px] font-bold">今日运动清单</span>
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[15px] font-bold text-primary">
+              {rehab.exercises.length} 项
+            </span>
+            <span className="ml-auto flex items-center text-[16px] font-medium text-primary">
+              打卡记录
+              <ChevronRight className="h-4 w-4" />
+            </span>
+          </div>
+
+          {rehab.exercises.map((e, i) => {
+            const done = doneEx.includes(i);
+            return (
+              <button
+                key={i}
+                onClick={() =>
+                  setDoneEx((arr) => (arr.includes(i) ? arr.filter((x) => x !== i) : [...arr, i]))
+                }
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-2xl border p-3 text-left",
+                  done ? "border-success/40 bg-success/5" : "bg-background",
+                )}
+              >
+                <div className="flex h-[70px] w-[92px] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white">
+                  <PlayCircle className="h-8 w-8" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[19px] font-bold leading-snug">{e.name}</div>
+                  <div className="mt-1 text-[16px] text-muted-foreground">{e.dose}</div>
+                  <div className="mt-1 text-[15px] text-primary">
+                    {done ? "已完成打卡" : "点击完成打卡"}
+                  </div>
+                </div>
+                {done ? (
+                  <CheckCircle2 className="h-7 w-7 shrink-0 text-success" />
+                ) : (
+                  <Circle className="h-7 w-7 shrink-0 text-muted-foreground/40" />
+                )}
+              </button>
+            );
+          })}
+
           <Section icon={AlertTriangle} title="注意事项" tint="bg-orange-50 text-orange-700">
             {rehab.cautions.map((c, i) => (
               <div key={i} className="flex items-start gap-2 text-[17px]">
-                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-orange-500" />
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-orange-500" />
                 <span>{c}</span>
               </div>
             ))}
           </Section>
-
-          {/* 饮食 */}
-          <Section icon={Apple} title="饮食建议" tint="bg-emerald-50 text-emerald-700">
-            {rehab.diet.map((c, i) => (
-              <div key={i} className="flex items-start gap-2 text-[17px]">
-                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
-                <span>{c}</span>
-              </div>
-            ))}
-          </Section>
-        </>
-      )}
-
-      {mode === "home" && section === "nutrition" && (
-        <>
-          <Section icon={Leaf} title="营养方案 · 药食同源" tint="bg-emerald-50 text-emerald-700">
-            <div className="text-[16px] text-muted-foreground">
-              依据您的康复阶段定制 · 不喜欢的菜可一键更换
-            </div>
-            {dishes.map((d) => (
-              <div key={d.id} className="rounded-xl border bg-background p-3">
-                <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[15px] font-bold text-primary">
-                    {d.meal}
-                  </span>
-                  <button
-                    onClick={() => onSwap(d)}
-                    className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[15px] font-medium text-foreground"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    换一道
-                  </button>
-                </div>
-                <div className="mt-2 text-[19px] font-bold">{d.name}</div>
-                <div className="mt-1 text-[16px] text-muted-foreground">💚 {d.benefit}</div>
-              </div>
-            ))}
-          </Section>
-        </>
-      )}
+        </div>
+      </section>
 
       <button
         onClick={onSyncToTodo}
@@ -998,6 +1292,10 @@ function PlanTab({
         <CheckCircle2 className="h-5 w-5" />
         一键同步为今日打卡待办
       </button>
+
+      <div className="pb-2 text-center text-[14px] text-muted-foreground">
+        {mode === "inpatient" ? "住院版" : "居家版"} · 方案内容一致，按当前阶段自动更新
+      </div>
     </div>
   );
 }
