@@ -420,11 +420,7 @@ export function PatientCareScreen({
         <WorkoutPlan purchased={purchased} rehab={rehab} />
       </section>
 
-      <div className="mt-4 px-4">
-        <p className="pb-2 text-center text-[16px] text-muted-foreground">
-          {mode === "inpatient" ? "住院版" : "居家版"} · 方案内容一致，按当前阶段自动更新
-        </p>
-      </div>
+
 
 
       {/* 弹层 */}
