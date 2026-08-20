@@ -350,6 +350,7 @@ export function PatientWorkbench() {
             todos={currentTodos}
             onToggle={toggleTodo}
             onAskAI={() => setAiOpen(true)}
+            onOpenScale={() => setScaleOpen(true)}
           />
         )}
 
