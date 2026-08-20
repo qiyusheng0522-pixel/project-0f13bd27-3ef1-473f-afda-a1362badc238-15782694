@@ -344,31 +344,25 @@ export function PatientWorkbench() {
 
       <div className={cn("relative pb-24 text-[17px] leading-relaxed", aiOpen && "hidden")}>
 
-        {/* 自动识别版本提示（不再让老人手动切换） */}
-        <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
-              style={{ background: "var(--gradient-primary)" }}
-            >
-              {mode === "inpatient" ? <Stethoscope className="h-6 w-6" /> : <Home className="h-6 w-6" />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[19px] font-bold">
-                {mode === "inpatient" ? "住院版" : "门诊 / 居家版"}
-              </div>
-              <div className="text-[14px] text-muted-foreground">
-                已根据您的就诊状态自动为您切换
-              </div>
-            </div>
-            <button
-              onClick={() => setStatus(mode === "inpatient" ? "outpatient" : "post-op")}
-              className="shrink-0 rounded-full border px-3 py-2 text-[13px] text-muted-foreground active:bg-muted"
-            >
-              演示切换
-            </button>
-          </div>
+        {/* 就诊状态标识（自动识别，不占大面积） */}
+        <div className="flex items-center justify-between px-4 pt-3">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[15px] font-bold",
+              mode === "inpatient" ? "bg-primary/10 text-primary" : "bg-success/10 text-success",
+            )}
+          >
+            {mode === "inpatient" ? <Stethoscope className="h-4 w-4" /> : <Home className="h-4 w-4" />}
+            {mode === "inpatient" ? "住院中" : "非住院"}
+          </span>
+          <button
+            onClick={() => setStatus(mode === "inpatient" ? "outpatient" : "post-op")}
+            className="rounded-full border px-3 py-1.5 text-[13px] text-muted-foreground active:bg-muted"
+          >
+            演示切换
+          </button>
         </div>
+
 
         {tab === "home" && mode === "inpatient" && (
           <InpatientHomeTab
