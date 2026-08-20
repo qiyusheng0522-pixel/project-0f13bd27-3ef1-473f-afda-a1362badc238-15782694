@@ -34,13 +34,16 @@ interface SurgeryRow {
   gender: string;
   diagnosis: string;
   surgery: string;
+  leader: string;
 }
 
+const LEADERS = ["王渭君", "秦江辉", "宋凯"];
+
 const sampleRows: SurgeryRow[] = [
-  { admissionId: "5633364", bedNo: "11", name: "彭兴喜", age: "49", gender: "男", diagnosis: "髋关节假体植入感染", surgery: "THA 翻修 + 感染清创" },
-  { admissionId: "5633378", bedNo: "15", name: "唐怀玲", age: "69", gender: "女", diagnosis: "原发性单侧膝关节病", surgery: "TKA" },
-  { admissionId: "5633934", bedNo: "16", name: "吴昊", age: "43", gender: "男", diagnosis: "膝关节前十字韧带损伤", surgery: "ACLR" },
-  { admissionId: "5202953", bedNo: "26", name: "陈礼翠", age: "80", gender: "女", diagnosis: "股骨假体周围骨折", surgery: "THA 翻修 + 骨折内固定" },
+  { admissionId: "5633364", bedNo: "11", name: "彭兴喜", age: "49", gender: "男", diagnosis: "髋关节假体植入感染", surgery: "THA 翻修 + 感染清创", leader: "王渭君" },
+  { admissionId: "5633378", bedNo: "15", name: "唐怀玲", age: "69", gender: "女", diagnosis: "原发性单侧膝关节病", surgery: "TKA", leader: "秦江辉" },
+  { admissionId: "5633934", bedNo: "16", name: "吴昊", age: "43", gender: "男", diagnosis: "膝关节前十字韧带损伤", surgery: "ACLR", leader: "宋凯" },
+  { admissionId: "5202953", bedNo: "26", name: "陈礼翠", age: "80", gender: "女", diagnosis: "股骨假体周围骨折", surgery: "THA 翻修 + 骨折内固定", leader: "王渭君" },
 ];
 
 const COLUMN_ALIASES: Record<keyof SurgeryRow, string[]> = {
@@ -51,6 +54,7 @@ const COLUMN_ALIASES: Record<keyof SurgeryRow, string[]> = {
   gender: ["性别"],
   diagnosis: ["入院诊断", "诊断", "病症"],
   surgery: ["手术名称", "手术", "拟行手术"],
+  leader: ["医疗组组长", "组长", "医疗组", "主刀"],
 };
 
 function normalize(v: unknown) {
@@ -85,6 +89,7 @@ function parseSheet(rows: unknown[][]): SurgeryRow[] {
       gender: normalize(r[colIndex.gender ?? -1]),
       diagnosis: normalize(r[colIndex.diagnosis ?? -1]),
       surgery,
+      leader: normalize(r[colIndex.leader ?? -1]) || LEADERS[out.length % LEADERS.length],
     });
   }
   return out;
@@ -263,6 +268,11 @@ function AdminPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
+              <datalist id="leader-options">
+                {LEADERS.map((l) => (
+                  <option key={l} value={l} />
+                ))}
+              </datalist>
               <table className="w-full text-xs">
                 <thead className="bg-slate-50 text-muted-foreground">
                   <tr className="text-left">
@@ -273,6 +283,7 @@ function AdminPage() {
                     <th className="px-4 py-2 font-medium">性别</th>
                     <th className="px-4 py-2 font-medium">入院诊断</th>
                     <th className="px-4 py-2 font-medium">手术名称</th>
+                    <th className="px-4 py-2 font-medium">医疗组组长</th>
                     <th className="px-4 py-2 font-medium">匹配量表</th>
                   </tr>
                 </thead>
@@ -288,6 +299,19 @@ function AdminPage() {
                         <td className="px-4 py-2">{r.gender}</td>
                         <td className="px-4 py-2 text-muted-foreground">{r.diagnosis}</td>
                         <td className="px-4 py-2">{r.surgery}</td>
+                        <td className="px-4 py-2">
+                          <input
+                            list="leader-options"
+                            value={r.leader}
+                            onChange={(e) =>
+                              setRows((arr) =>
+                                arr.map((row, idx) => (idx === i ? { ...row, leader: e.target.value } : row)),
+                              )
+                            }
+                            placeholder="选择或输入组长"
+                            className="w-28 rounded-md border bg-white px-2 py-1 text-[11px] outline-none focus:border-primary"
+                          />
+                        </td>
                         <td className="px-4 py-2">
                           {rule ? (
                             <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
