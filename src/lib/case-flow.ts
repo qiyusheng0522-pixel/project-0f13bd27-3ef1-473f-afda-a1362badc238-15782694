@@ -104,6 +104,28 @@ export interface CaseTodo {
   done: boolean;
 }
 
+/** 推送给患者的宣教（护士 / 治疗师推送，患者端【消息】提醒） */
+export interface EduPush {
+  id: string;
+  title: string;
+  desc: string;
+  tag: string;
+  by: string;
+  at: string;
+  read: boolean;
+}
+
+/** 患者端消息中心 */
+export interface CaseMessage {
+  id: string;
+  at: string;
+  kind: "edu" | "info";
+  title: string;
+  body: string;
+  eduId?: string;
+  read: boolean;
+}
+
 export interface CaseFlowState {
   stage: CaseStage;
   created: boolean;
@@ -120,9 +142,13 @@ export interface CaseFlowState {
   nurseRecords: NurseRecord[];
   handovers: HandoverRecord[];
   abnormal: AbnormalIndicator[];
+  eduPushes: EduPush[];
+  messages: CaseMessage[];
+  readmitCount: number;
   dischargeNote: string;
   events: FlowEvent[];
 }
+
 
 const initial = (): CaseFlowState => ({
   stage: "none",
@@ -140,7 +166,11 @@ const initial = (): CaseFlowState => ({
   nurseRecords: [],
   handovers: [],
   abnormal: [],
+  eduPushes: [],
+  messages: [],
+  readmitCount: 0,
   dischargeNote: "",
+
   events: [],
 });
 
@@ -354,7 +384,90 @@ export function dischargePatient(note: string) {
   notify();
 }
 
+/** 历史出院患者重新入院：沿用原床位，重新进入院内康复，治疗师/护士可继续每日录入 */
+export function readmitPatient() {
+  const p = getDemoPatient();
+  state.readmitCount += 1;
+  state.stage = state.planApproved ? "rehab" : "post-op";
+  state.dischargeNote = "";
+  patchPatient({
+    status: state.planApproved ? "rehab" : "post-op",
+    dischargeDate: undefined,
+    admissionDate: todayStr(),
+    isNew: true,
+  });
+  pushMessage({
+    kind: "info",
+    title: "您已重新入院",
+    body: `床位沿用 ${p?.bedNo ?? "--"} 床，治疗师与护士将继续每日康复记录与住院指标录入。`,
+  });
+  log("治疗师", `${p?.name ?? DEMO_PATIENT_NAME} 重新入院（第 ${state.readmitCount} 次），沿用 ${p?.bedNo ?? "--"} 床，继续院内康复`);
+  notify();
+}
+
+/* ---------------- 宣教推送 + 患者端消息 ---------------- */
+function pushMessage(m: Omit<CaseMessage, "id" | "at" | "read">) {
+  state.messages = [{ ...m, id: uid("msg"), at: nowStr(), read: false }, ...state.messages];
+}
+
+export function pushEducation(items: { title: string; desc: string; tag: string }[], by: string) {
+  const pushes: EduPush[] = items.map((i) => ({ ...i, id: uid("edu"), by, at: nowStr(), read: false }));
+  state.eduPushes = [...pushes, ...state.eduPushes];
+  pushes.forEach((p) =>
+    pushMessage({
+      kind: "edu",
+      title: `【必读宣教】${p.title}`,
+      body: `${by} 为您推送了宣教内容：${p.desc}，请点击查看。`,
+      eduId: p.id,
+    }),
+  );
+  log(by, `推送宣教 ${items.length} 条至患者端（已生成消息提醒）`);
+  notify();
+}
+
+export function markEduRead(eduId: string) {
+  state.eduPushes = state.eduPushes.map((e) => (e.id === eduId ? { ...e, read: true } : e));
+  state.messages = state.messages.map((m) => (m.eduId === eduId ? { ...m, read: true } : m));
+  notify();
+}
+
+export function markMessageRead(id: string) {
+  state.messages = state.messages.map((m) => (m.id === id ? { ...m, read: true } : m));
+  notify();
+}
+
+/** 各住院阶段的必读宣教（患者端住院版按当前阶段展示） */
+export const STAGE_EDU: Record<string, { title: string; desc: string; tag: string }[]> = {
+  admitted: [
+    { title: "入院须知与陪护安排", desc: "病区作息 / 携带物品 / 陪护登记", tag: "入院" },
+    { title: "术前准备与禁食水", desc: "术前 8 小时禁食、皮肤准备要点", tag: "术前" },
+  ],
+  "pushed-team": [
+    { title: "术前一日宣教", desc: "皮肤准备 / 禁食水 / 心理准备", tag: "术前" },
+    { title: "麻醉方式与术中配合", desc: "麻醉前评估、术中体位配合", tag: "术前" },
+  ],
+  "surgery-confirmed": [
+    { title: "术前一日宣教", desc: "皮肤准备 / 禁食水 / 心理准备", tag: "术前" },
+  ],
+  "in-surgery": [
+    { title: "术后返病房注意事项", desc: "体位摆放 / 引流管保护 / 疼痛告知", tag: "术后" },
+  ],
+  "post-op": [
+    { title: "术后第一天：踝泵与直腿抬高", desc: "预防血栓的关键动作示范", tag: "术后" },
+    { title: "DVT（下肢血栓）预防宣教", desc: "下肢活动 / 弹力袜 / 抗凝用药注意", tag: "术后" },
+  ],
+  rehab: [
+    { title: "院内康复：屈膝角度进阶训练", desc: "0-90° 循序渐进，疼痛 VAS ≤4", tag: "康复" },
+    { title: "助行器使用与防跌倒", desc: "起身三步法、上下床安全要点", tag: "安全" },
+  ],
+  discharged: [
+    { title: "出院随访注意事项", desc: "复查时间 / 用药 / 饮食", tag: "出院" },
+    { title: "居家康复计划与红旗症状", desc: "红肿热痛、发热需立即就诊", tag: "居家" },
+  ],
+};
+
 /* ---------------- 4. 护士：每日备注 / 指标 / 交班 ---------------- */
+
 export function addNurseRecord(input: {
   note: string;
   nurse: string;

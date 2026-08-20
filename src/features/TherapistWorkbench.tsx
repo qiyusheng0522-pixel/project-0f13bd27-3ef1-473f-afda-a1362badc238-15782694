@@ -36,6 +36,7 @@ import {
   addDailyRehab,
   approvePlan,
   dischargePatient,
+  readmitPatient,
   useCaseFlow,
 } from "@/lib/case-flow";
 import { patients, todayTasks } from "@/lib/mock-data";
@@ -330,6 +331,19 @@ export function TherapistWorkbench() {
           onClose={() => setOverlay(null)}
           onArchive={(p) => setOverlay({ kind: "archive", patient: p })}
           onChat={(p) => setOverlay({ kind: "chat", patient: p })}
+          onReadmit={(p) => {
+            if (p.id === DEMO_PATIENT_ID) {
+              readmitPatient();
+              setDischargedAt((s) => {
+                const next = { ...s };
+                delete next[p.id];
+                return next;
+              });
+              showToast(`${p.name} 已重新入院 · 沿用 ${p.bedNo ?? "原"} 床，可继续每日康复记录`);
+            } else {
+              showToast(`${p.name} 已重新入院 · 沿用原床位`);
+            }
+          }}
         />
       )}
       {overlay?.kind === "chat-list" && (

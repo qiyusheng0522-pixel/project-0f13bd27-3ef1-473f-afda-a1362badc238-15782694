@@ -35,6 +35,7 @@ export function PatientArchiveSheet({
   const intraOp = patient.id === DEMO_PATIENT_ID ? flow.intraOp : null;
   const intraOpFields = intraOp ? intraOpFindings(intraOp) : [];
   const intraOpAbnormal = intraOpFields.filter((f) => f.abnormal);
+  const nurseAbnormal = patient.id === DEMO_PATIENT_ID ? flow.abnormal.filter((a) => a.source === "护士") : [];
   return (
     <Sheet onClose={onClose} title="患者档案">
       <div className="space-y-3 p-3">
@@ -264,6 +265,42 @@ export function PatientArchiveSheet({
             </div>
           </>
         )}
+
+        {/* 护士录入的住院指标异常（含 DVT / 血栓）—— 多端同步高亮 */}
+        {nurseAbnormal.length > 0 && (
+          <>
+            <SectionTitle icon={ShieldAlert} text="住院指标异常 · 护士录入（含血栓）" tone="text-destructive" />
+            <div className="rounded-xl border bg-destructive/5 p-3 text-[11px]">
+              <div className="mb-2 flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-1 text-[10px] font-bold text-destructive">
+                <AlertTriangle className="h-3 w-3" />
+                护理录入存在 {nurseAbnormal.length} 项异常指标，已同步医生 / 治疗师 / 患者端
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {nurseAbnormal.map((a) => (
+                  <span
+                    key={a.id}
+                    className="animate-pulse rounded-md bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground ring-2 ring-destructive/40"
+                  >
+                    ⚠ {a.label} {a.value}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-2 space-y-1">
+                {nurseAbnormal.map((a) => (
+                  <div
+                    key={`n-${a.id}`}
+                    className="rounded-lg border border-destructive/30 bg-destructive/5 p-2 text-[10px] text-destructive"
+                  >
+                    ⚠ {a.label} {a.value} · {a.note ?? "需重点关注"}
+                    <span className="ml-1 text-muted-foreground">（{a.source} · {a.at}）</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+
 
         {/* 手术评估（医生建议） */}
         {arc.surgery && (

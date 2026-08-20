@@ -22,11 +22,14 @@ export function VitalsSheet({
     vas: "3",
     drainage: "30",
     urine: "850",
-    dvt: "Wells 1 分（低危）",
-    caprini: "3 分（中危）",
+    wells: "1",
+    caprini: "3",
+    dDimer: "0.4",
+    calfSwelling: "无",
     skin: "完整",
     note: "",
   });
+
 
   const update = (k: keyof typeof vitals, v: string) => setVitals((s) => ({ ...s, [k]: v }));
 
@@ -68,12 +71,15 @@ export function VitalsSheet({
         </Section>
 
         <Section title="DVT / 血栓评估">
-          <Row label="Wells 评分" value={vitals.dvt} onChange={(v) => update("dvt", v)} />
-          <Row label="Caprini 评分" value={vitals.caprini} onChange={(v) => update("caprini", v)} />
+          <Row label="Wells 评分" value={vitals.wells} onChange={(v) => update("wells", v)} suffix="分" />
+          <Row label="Caprini 评分" value={vitals.caprini} onChange={(v) => update("caprini", v)} suffix="分" />
+          <Row label="D-二聚体" value={vitals.dDimer} onChange={(v) => update("dDimer", v)} suffix="mg/L" />
+          <Row label="小腿肿胀/压痛" value={vitals.calfSwelling} onChange={(v) => update("calfSwelling", v)} />
           <div className="rounded-lg border border-warning/40 bg-warning/10 p-2 text-[10px] text-warning-foreground">
-            ⚠ Caprini ≥ 5 分需启动抗凝预防方案，并通知值班医生。
+            ⚠ Caprini ≥ 5 分 / Wells ≥ 2 分 / D-二聚体 &gt; 0.5 mg/L 需启动抗凝预防方案，异常将高亮同步至患者详情与医生、治疗师端。
           </div>
         </Section>
+
 
         <Section title="备注">
           <textarea

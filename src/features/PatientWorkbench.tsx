@@ -35,7 +35,14 @@ import {
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { PatientHomeScreen } from "@/features/patient/PatientHomeScreen";
 import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
-import { useCaseFlow, toggleTodo as toggleFlowTodo } from "@/lib/case-flow";
+import {
+  useCaseFlow,
+  toggleTodo as toggleFlowTodo,
+  markEduRead,
+  markMessageRead,
+  STAGE_EDU,
+  STAGE_STEPS,
+} from "@/lib/case-flow";
 import { PatientCareScreen } from "@/features/patient/PatientCareScreen";
 import { PatientAiChat } from "@/features/patient/PatientAiChat";
 import { cn } from "@/lib/utils";
@@ -243,6 +250,8 @@ export function PatientWorkbench() {
   const [guideStep, setGuideStep] = useState<1 | 2 | 3 | null>(1);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [scaleOpen, setScaleOpen] = useState(false);
+  const [msgOpen, setMsgOpen] = useState(false);
+  const [eduDetail, setEduDetail] = useState<{ id?: string; title: string; desc: string; tag: string } | null>(null);
 
 
   // 演示病例：治疗师审核康复方案后，患者端待办由方案自动生成
@@ -405,6 +414,8 @@ export function PatientWorkbench() {
               setAiOpen(true);
             }}
             onOpenPath={() => setPathOpen(true)}
+            onOpenMessages={() => setMsgOpen(true)}
+            onOpenEdu={(e) => setEduDetail(e)}
           />
         )}
 
@@ -469,6 +480,18 @@ export function PatientWorkbench() {
             onClose={() => setPathOpen(false)}
           />
         )}
+
+        {msgOpen && (
+          <MessagesSheet
+            onClose={() => setMsgOpen(false)}
+            onOpenEdu={(e) => {
+              setEduDetail(e);
+              setMsgOpen(false);
+            }}
+          />
+        )}
+
+        {eduDetail && <EduDetailSheet edu={eduDetail} onClose={() => setEduDetail(null)} />}
 
 
 
@@ -579,6 +602,8 @@ function InpatientHomeTab({
   onToggle,
   onAskAI,
   onOpenPath,
+  onOpenMessages,
+  onOpenEdu,
 }: {
   patient: PatientProfile;
   stages: { key: string; label: string }[];
@@ -588,6 +613,8 @@ function InpatientHomeTab({
   onToggle: (id: string) => void;
   onAskAI: () => void;
   onOpenPath: () => void;
+  onOpenMessages?: () => void;
+  onOpenEdu?: (e: { id?: string; title: string; desc: string; tag: string }) => void;
 }) {
   const currentStage = stages[currentStageIdx];
   const doing = todos.filter((t) => !t.done);
@@ -666,8 +693,15 @@ function InpatientHomeTab({
         </div>
       </section>
 
+      {/* 消息提醒（护士推送的宣教在此提醒查看） */}
+      <MessageEntry onOpen={onOpenMessages} />
+
+      {/* 本阶段必读宣教 */}
+      <StageEduSection onOpenEdu={onOpenEdu} />
+
       {/* 宣教：健康百科 */}
       <EduSection />
+
 
       {/* 健康服务包 */}
       <section className="overflow-hidden rounded-2xl border bg-card p-3">
@@ -793,7 +827,219 @@ function EduSection() {
 
 
 
+/** 消息入口：护士 / 治疗师推送的宣教会在此提醒 */
+function MessageEntry({ onOpen }: { onOpen?: () => void }) {
+  const flow = useCaseFlow();
+  const unread = flow.messages.filter((m) => !m.read).length;
+  if (flow.messages.length === 0) return null;
+  const latest = flow.messages[0];
+  return (
+    <button
+      onClick={onOpen}
+      className="flex w-full items-center gap-3 rounded-2xl border bg-card p-4 text-left active:bg-muted/40"
+      style={{ boxShadow: "var(--shadow-card)" }}
+    >
+      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <Bell className="h-7 w-7" />
+        {unread > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-destructive px-1 text-[15px] font-bold text-white">
+            {unread}
+          </span>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-[20px] font-bold">消息{unread > 0 ? ` · ${unread} 条未读` : ""}</div>
+        <div className="truncate text-[17px] text-muted-foreground">{latest.title}</div>
+      </div>
+      <ChevronRight className="h-6 w-6 shrink-0 text-muted-foreground" />
+    </button>
+  );
+}
+
+/** 按当前住院阶段展示的必读宣教 */
+function StageEduSection({
+  onOpenEdu,
+}: {
+  onOpenEdu?: (e: { id?: string; title: string; desc: string; tag: string }) => void;
+}) {
+  const flow = useCaseFlow();
+  const stageKey = flow.created ? flow.stage : "post-op";
+  const stageLabel = STAGE_STEPS.find((s) => s.key === stageKey)?.label ?? "术后观察";
+  const required = STAGE_EDU[stageKey] ?? STAGE_EDU["post-op"];
+  const pushed = flow.eduPushes;
+  return (
+    <section className="overflow-hidden rounded-2xl border bg-card">
+      <div className="flex items-center justify-between gap-2 bg-violet-600 px-4 py-3 text-white">
+        <div className="flex items-center gap-2 text-[20px] font-bold">
+          <PlayCircle className="h-6 w-6" />
+          本阶段必读宣教
+        </div>
+        <span className="shrink-0 rounded-full bg-white/20 px-3 py-1 text-[16px] font-bold">{stageLabel}</span>
+      </div>
+      <div className="space-y-2.5 p-3">
+        {pushed.map((e) => (
+          <button
+            key={e.id}
+            onClick={() => onOpenEdu?.({ id: e.id, title: e.title, desc: e.desc, tag: e.tag })}
+            className="flex w-full items-start gap-3 rounded-2xl border-2 border-primary/40 bg-primary/5 p-3 text-left active:bg-primary/10"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
+              <Bell className="h-6 w-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[18px] font-bold leading-snug">{e.title}</div>
+              <div className="mt-1 text-[17px] text-muted-foreground">{e.desc}</div>
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className="rounded-full bg-primary px-2.5 py-0.5 text-[16px] font-bold text-white">
+                  {e.read ? "已阅读" : "护士推送 · 待查看"}
+                </span>
+                <span className="text-[16px] text-muted-foreground">{e.at}</span>
+              </div>
+            </div>
+            <ChevronRight className="mt-2 h-6 w-6 shrink-0 text-muted-foreground" />
+          </button>
+        ))}
+        {required.map((e) => (
+          <button
+            key={e.title}
+            onClick={() => onOpenEdu?.(e)}
+            className="flex w-full items-start gap-3 rounded-2xl bg-muted/40 p-3 text-left active:bg-muted"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+              <PlayCircle className="h-6 w-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[18px] font-bold leading-snug">{e.title}</div>
+              <div className="mt-1 text-[17px] text-muted-foreground">{e.desc}</div>
+              <span className="mt-1.5 inline-block rounded-full bg-violet-100 px-2.5 py-0.5 text-[16px] font-bold text-violet-700">
+                必读 · {e.tag}
+              </span>
+            </div>
+            <ChevronRight className="mt-2 h-6 w-6 shrink-0 text-muted-foreground" />
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** 消息中心 */
+function MessagesSheet({
+  onClose,
+  onOpenEdu,
+}: {
+  onClose: () => void;
+  onOpenEdu: (e: { id?: string; title: string; desc: string; tag: string }) => void;
+}) {
+  const flow = useCaseFlow();
+  return (
+    <div className="absolute inset-0 z-[70] flex flex-col bg-background">
+      <div className="flex items-center gap-2 border-b bg-card px-4 py-3">
+        <button onClick={onClose} className="flex items-center gap-1 text-[18px] text-muted-foreground">
+          <ArrowLeft className="h-6 w-6" />返回
+        </button>
+        <div className="flex-1 text-center text-[20px] font-bold">消息</div>
+        <div className="w-14" />
+      </div>
+      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+        {flow.messages.length === 0 && (
+          <div className="rounded-2xl border bg-card p-8 text-center text-[18px] text-muted-foreground">
+            暂无消息
+          </div>
+        )}
+        {flow.messages.map((m) => (
+          <button
+            key={m.id}
+            onClick={() => {
+              if (m.kind === "edu" && m.eduId) {
+                const e = flow.eduPushes.find((x) => x.id === m.eduId);
+                if (e) {
+                  onOpenEdu({ id: e.id, title: e.title, desc: e.desc, tag: e.tag });
+                  return;
+                }
+              }
+              markMessageRead(m.id);
+            }}
+            className={cn(
+              "block w-full rounded-2xl border-2 p-4 text-left active:bg-muted/40",
+              m.read ? "border-border bg-card" : "border-primary/40 bg-primary/5",
+            )}
+          >
+            <div className="flex items-center gap-2">
+              {!m.read && <span className="h-3 w-3 shrink-0 rounded-full bg-destructive" />}
+              <div className="text-[19px] font-bold leading-snug">{m.title}</div>
+            </div>
+            <div className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">{m.body}</div>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-[16px] text-muted-foreground">{m.at}</span>
+              {m.kind === "edu" && (
+                <span className="flex items-center text-[17px] font-bold text-primary">
+                  查看宣教
+                  <ChevronRight className="h-5 w-5" />
+                </span>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** 宣教详情（大字适老） */
+function EduDetailSheet({
+  edu,
+  onClose,
+}: {
+  edu: { id?: string; title: string; desc: string; tag: string };
+  onClose: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-[80] flex flex-col bg-background">
+      <div className="flex items-center gap-2 border-b bg-card px-4 py-3">
+        <button onClick={onClose} className="flex items-center gap-1 text-[18px] text-muted-foreground">
+          <ArrowLeft className="h-6 w-6" />返回
+        </button>
+        <div className="flex-1 truncate text-center text-[20px] font-bold">宣教详情</div>
+        <div className="w-14" />
+      </div>
+      <div className="flex-1 space-y-4 overflow-y-auto p-4 text-[18px] leading-relaxed">
+        <div
+          className="rounded-2xl p-4 text-white"
+          style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}
+        >
+          <span className="rounded-full bg-white/20 px-3 py-1 text-[16px] font-bold">必读 · {edu.tag}</span>
+          <div className="mt-2 text-[24px] font-bold leading-snug">{edu.title}</div>
+          <div className="mt-1.5 text-[17px] opacity-95">{edu.desc}</div>
+        </div>
+        <div className="flex h-44 items-center justify-center rounded-2xl bg-muted/50 text-muted-foreground">
+          <PlayCircle className="h-16 w-16" />
+        </div>
+        <div className="space-y-2.5 rounded-2xl border bg-card p-4">
+          <div className="text-[20px] font-bold">要点提示</div>
+          <div>1. 请在护士或家属陪同下练习，避免独自下床。</div>
+          <div>2. 每个动作缓慢完成，疼痛评分超过 4 分请暂停并告知护士。</div>
+          <div>3. 观看后请点击下方按钮确认已读，医护可看到您的完成情况。</div>
+        </div>
+      </div>
+      <div className="border-t bg-card p-4">
+        <button
+          onClick={() => {
+            if (edu.id) markEduRead(edu.id);
+            onClose();
+          }}
+          className="w-full rounded-full py-4 text-[20px] font-bold text-white"
+          style={{ background: "var(--gradient-primary)" }}
+        >
+          我已阅读
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ColorSection({
+
   title,
   icon: Icon,
   bar,

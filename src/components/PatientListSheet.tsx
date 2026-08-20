@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Search, FileSearch, MessageCircle, Edit3, Save, Stethoscope, ChevronRight } from "lucide-react";
+import { ArrowLeft, Search, FileSearch, MessageCircle, Edit3, Save, Stethoscope, ChevronRight, RotateCcw } from "lucide-react";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ export function PatientListSheet({
   onClose,
   onArchive,
   onChat,
+  onReadmit,
 }: {
   inpatientList: Patient[];
   outpatientList: Patient[];
@@ -22,6 +23,7 @@ export function PatientListSheet({
   onClose: () => void;
   onArchive: (p: Patient) => void;
   onChat: (p: Patient) => void;
+  onReadmit?: (p: Patient) => void;
 }) {
   const [category, setCategory] = useState<"active" | "history">("active");
   const [sub, setSub] = useState<"inpatient" | "outpatient">("inpatient");
@@ -29,6 +31,7 @@ export function PatientListSheet({
   const [keyword, setKeyword] = useState("");
   const [noteFor, setNoteFor] = useState<Patient | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+
 
   const baseList =
     category === "history" ? dischargedList : sub === "inpatient" ? inpatientList : outpatientList;
@@ -197,6 +200,15 @@ export function PatientListSheet({
                 <Edit3 className="h-3 w-3" />{notes[p.id] ? "改备注" : "加备注"}
               </button>
             </div>
+            {category === "history" && onReadmit && (
+              <button
+                onClick={() => onReadmit(p)}
+                className="flex w-full items-center justify-center gap-1 border-t py-2.5 text-[11px] font-medium text-primary-foreground"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                <RotateCcw className="h-3 w-3" />重新入院{p.bedNo ? `（沿用 ${p.bedNo} 床）` : ""}
+              </button>
+            )}
           </div>
         ))}
       </div>
