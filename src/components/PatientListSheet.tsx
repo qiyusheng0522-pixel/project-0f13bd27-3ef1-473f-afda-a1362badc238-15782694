@@ -11,25 +11,29 @@ import { cn } from "@/lib/utils";
 export function PatientListSheet({
   inpatientList,
   outpatientList,
+  dischargedList = [],
   onClose,
   onArchive,
   onChat,
 }: {
   inpatientList: Patient[];
   outpatientList: Patient[];
+  dischargedList?: Patient[];
   onClose: () => void;
   onArchive: (p: Patient) => void;
   onChat: (p: Patient) => void;
 }) {
+  const [category, setCategory] = useState<"active" | "history">("active");
   const [sub, setSub] = useState<"inpatient" | "outpatient">("inpatient");
   const [outpatientSub, setOutpatientSub] = useState<"all" | "first" | "revisit">("all");
   const [keyword, setKeyword] = useState("");
   const [noteFor, setNoteFor] = useState<Patient | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
 
-  const baseList = sub === "inpatient" ? inpatientList : outpatientList;
+  const baseList =
+    category === "history" ? dischargedList : sub === "inpatient" ? inpatientList : outpatientList;
   const filteredByVisitType =
-    sub === "outpatient" && outpatientSub !== "all"
+    category === "active" && sub === "outpatient" && outpatientSub !== "all"
       ? baseList.filter((p) => p.visitType === outpatientSub)
       : baseList;
   const list = filteredByVisitType.filter(
@@ -38,6 +42,8 @@ export function PatientListSheet({
 
   const firstCount = outpatientList.filter((p) => p.visitType === "first").length;
   const revisitCount = outpatientList.filter((p) => p.visitType === "revisit").length;
+  const activeCount = inpatientList.length + outpatientList.length;
+
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-background">
@@ -59,27 +65,49 @@ export function PatientListSheet({
             className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
           />
         </div>
-        <div className="grid grid-cols-2 overflow-hidden rounded-full border bg-muted/30 p-0.5 text-[12px]">
+        <div className="mb-2 grid grid-cols-2 overflow-hidden rounded-full border bg-muted/30 p-0.5 text-[12px]">
           <button
-            onClick={() => setSub("inpatient")}
+            onClick={() => setCategory("active")}
             className={cn(
               "rounded-full py-1.5 font-medium transition-colors",
-              sub === "inpatient" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+              category === "active" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground",
             )}
           >
-            住院 · {inpatientList.length}
+            在院 · {activeCount}
           </button>
           <button
-            onClick={() => setSub("outpatient")}
+            onClick={() => setCategory("history")}
             className={cn(
               "rounded-full py-1.5 font-medium transition-colors",
-              sub === "outpatient" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+              category === "history" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground",
             )}
           >
-            门诊 · {outpatientList.length}
+            历史出院 · {dischargedList.length}
           </button>
         </div>
-        {sub === "outpatient" && (
+        {category === "active" && (
+          <div className="grid grid-cols-2 overflow-hidden rounded-full border bg-muted/30 p-0.5 text-[12px]">
+            <button
+              onClick={() => setSub("inpatient")}
+              className={cn(
+                "rounded-full py-1.5 font-medium transition-colors",
+                sub === "inpatient" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+              )}
+            >
+              住院 · {inpatientList.length}
+            </button>
+            <button
+              onClick={() => setSub("outpatient")}
+              className={cn(
+                "rounded-full py-1.5 font-medium transition-colors",
+                sub === "outpatient" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+              )}
+            >
+              门诊 · {outpatientList.length}
+            </button>
+          </div>
+        )}
+        {category === "active" && sub === "outpatient" && (
           <div className="mt-2 flex gap-1.5">
             {(
               [
@@ -108,9 +136,10 @@ export function PatientListSheet({
       <div className="flex-1 space-y-2 overflow-y-auto p-3">
         {list.length === 0 && (
           <div className="rounded-2xl border bg-card p-6 text-center text-[12px] text-muted-foreground">
-            暂无{sub === "inpatient" ? "住院" : "门诊"}患者
+            暂无{category === "history" ? "历史出院" : sub === "inpatient" ? "住院" : "门诊"}患者
           </div>
         )}
+
         {list.map((p) => (
           <div key={p.id} className="overflow-hidden rounded-2xl border bg-card" style={{ boxShadow: "var(--shadow-card)" }}>
             <button onClick={() => onArchive(p)} className="block w-full border-b p-3 text-left active:bg-muted/30">
@@ -129,6 +158,11 @@ export function PatientListSheet({
                 )}
                 {p.visitType === "revisit" && (
                   <span className="rounded bg-info/15 px-1 py-0.5 text-[9px] font-bold text-info">复诊</span>
+                )}
+                {p.dischargeDate && (
+                  <span className="rounded bg-muted px-1 py-0.5 text-[9px] font-bold text-muted-foreground">
+                    出院 {p.dischargeDate}
+                  </span>
                 )}
                 <ChevronRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
               </div>
