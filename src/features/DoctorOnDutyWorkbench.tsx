@@ -257,15 +257,17 @@ function HomeTab({
   surgeryCount,
   abnormalCount,
   pendingPush,
+  flowHint,
   onOpenScales,
-  onOcr,
+  onAdmit,
 }: {
   tasks: typeof todayTasks["doctor-on-duty"];
   surgeryCount: number;
   abnormalCount: number;
   pendingPush: number;
+  flowHint: string;
   onOpenScales: () => void;
-  onOcr: () => void;
+  onAdmit: () => void;
 }) {
   return (
     <div className="space-y-3 p-3">
@@ -281,14 +283,20 @@ function HomeTab({
         </div>
       </div>
 
+      <CaseFlowBanner hint={flowHint} actionLabel="去术前量表" onAction={onOpenScales} />
+
       <button
-        onClick={onOcr}
+        onClick={onAdmit}
         className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-medium text-primary-foreground active:opacity-90"
         style={{ background: "var(--gradient-primary)" }}
       >
         <Camera className="h-5 w-5" />
-        OCR 录入新量表
+        住院录入（拍照 OCR / 手工）
       </button>
+
+      <AbnormalPanel compact />
+
+
 
 
       <Card title="今日待办" rightLabel={`${tasks.length} 项`}>
