@@ -469,10 +469,12 @@ function HomeTab({
             <div className="text-[15px] opacity-90">出生日期：{patient.birthday}</div>
           </div>
         </div>
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 text-[16px] backdrop-blur">
-          <MapPin className="h-5 w-5 shrink-0" />
-          当前阶段：<b className="text-[18px]">{currentStage.label}</b>
-        </div>
+        {mode === "inpatient" && (
+          <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 text-[16px] backdrop-blur">
+            <MapPin className="h-5 w-5 shrink-0" />
+            当前阶段：<b className="text-[18px]">{currentStage.label}</b>
+          </div>
+        )}
         <div className="mt-2 text-[14px] opacity-90">{patient.hospital} · 关节外科</div>
       </div>
 
