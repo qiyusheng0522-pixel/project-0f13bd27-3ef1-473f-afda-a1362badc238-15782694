@@ -296,6 +296,7 @@ export function TherapistWorkbench() {
         <PatientListSheet
           inpatientList={inpatientList}
           outpatientList={outpatientList}
+          dischargedList={dischargedList}
           onClose={() => setOverlay(null)}
           onArchive={(p) => setOverlay({ kind: "archive", patient: p })}
           onChat={(p) => setOverlay({ kind: "chat", patient: p })}
