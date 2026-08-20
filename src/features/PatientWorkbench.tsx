@@ -311,7 +311,7 @@ export function PatientWorkbench() {
       subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
       hideHeader={aiOpen}
       overlay={
-        archiveOpen || scaleOpen || aiOpen ? null : guideStep ? (
+        aiOpen ? null : guideStep && !archiveOpen && !scaleOpen ? (
           <GuideSheet
             step={guideStep}
             onSkip={() => setGuideStep(null)}
