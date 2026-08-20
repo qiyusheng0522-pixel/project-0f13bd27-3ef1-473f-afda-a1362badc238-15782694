@@ -448,74 +448,43 @@ function HomeTab({
           </button>
 
           <section className="rounded-2xl border bg-card p-3">
-            <div className="mb-3 flex items-center gap-2 text-[18px] font-bold">
-              <MapPin className="h-5 w-5 text-primary" />
-              我的住院路径
-            </div>
-
-            {/* 紧凑 S 弯：两行蛇形排列 */}
-            <div className="relative">
-              <svg
-                className="absolute left-0 top-0 h-full w-full"
-                viewBox="0 0 320 110"
-                fill="none"
-                aria-hidden="true"
-                style={{ overflow: "visible" }}
-              >
-                <path
-                  d="M40 22 H280 M280 22 V55 M280 55 H40 M40 55 V88 M40 88 H280"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeDasharray="6 4"
-                  className="text-muted-foreground/30"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-              </svg>
-
-              <div className="relative grid grid-cols-3 gap-x-2 gap-y-10">
-                {stages.map((s, idx) => {
-                  const done = idx < currentStageIdx;
-                  const active = idx === currentStageIdx;
-                  const row = idx < 3 ? 0 : 1;
-                  const col = row === 0 ? idx : 5 - idx; // 第二行从右往左
-                  const order = row * 3 + (row === 0 ? col : 2 - col);
-                  return (
-                    <div
-                      key={s.key}
-                      className={cn(
-                        "flex flex-col items-center gap-1.5",
-                        row === 1 && "flex-col-reverse",
-                      )}
-                      style={{ gridColumn: col + 1, gridRow: row + 1 }}
-                    >
-                      <div
-                        className={cn(
-                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[15px] font-bold shadow-sm",
-                          done && "bg-success text-white",
-                          active && "bg-primary text-white ring-[3px] ring-primary/25",
-                          !done && !active && "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {done ? <CheckCircle2 className="h-5 w-5" /> : order + 1}
-                      </div>
-                      <div
-                        className={cn(
-                          "text-center text-[14px] leading-tight",
-                          active ? "font-bold text-foreground" : "text-muted-foreground",
-                        )}
-                      >
-                        {s.label}
-                      </div>
-                      {active && (
-                        <div className="text-[11px] font-bold text-primary">当前</div>
-                      )}
-                    </div>
-                  );
-                })}
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-[18px] font-bold">
+                <MapPin className="h-5 w-5 text-primary" />
+                我的住院进度
               </div>
+              <span className="text-[15px] text-muted-foreground">
+                第 {currentStageIdx + 1} / {stages.length} 阶段
+              </span>
             </div>
+
+            <button
+              onClick={() => setPathOpen(true)}
+              className="flex w-full items-center justify-between rounded-xl bg-primary/5 p-3 text-left active:bg-primary/10"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-[20px] font-bold text-white shadow-sm">
+                  {currentStageIdx + 1}
+                </div>
+                <div>
+                  <div className="text-[15px] text-muted-foreground">当前所处阶段</div>
+                  <div className="text-[22px] font-bold text-foreground">{currentStage.label}</div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center text-primary">
+                <span className="text-[13px] font-medium">查看完整路径</span>
+                <ChevronRight className="h-6 w-6" />
+              </div>
+            </button>
           </section>
+
+          {pathOpen && (
+            <PathSheet
+              stages={stages}
+              currentStageIdx={currentStageIdx}
+              onClose={() => setPathOpen(false)}
+            />
+          )}
         </>
       )}
 
