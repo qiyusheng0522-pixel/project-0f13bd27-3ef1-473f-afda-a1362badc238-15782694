@@ -231,6 +231,11 @@ export function PatientWorkbench() {
   const [aiOpen, setAiOpen] = useState(false);
   const [swapDish, setSwapDish] = useState<Dish | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // 新用户使用引导（1/3 ~ 3/3）
+  const [guideStep, setGuideStep] = useState<1 | 2 | 3 | null>(1);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [scaleOpen, setScaleOpen] = useState(false);
+
 
   const currentTodos = mode === "inpatient" ? todos : homeTodos;
   const setCurrentTodos = mode === "inpatient" ? setTodos : setHomeTodos;
