@@ -698,6 +698,150 @@ function HomeTab({
   );
 }
 
+// ---------- 居家版首页顶部：AI 主治医生 + 今日打卡轮播 ----------
+function HomeHeroCard({
+  patient,
+  todos,
+  onToggle,
+  onAskAI,
+  onScan,
+}: {
+  patient: PatientProfile;
+  todos: TodoItem[];
+  onToggle: (id: string) => void;
+  onAskAI: () => void;
+  onScan: () => void;
+}) {
+  const pending = todos.filter((t) => !t.done);
+  const [idx, setIdx] = useState(0);
+  const list = pending.length ? pending : todos;
+  const cur = list[Math.min(idx, list.length - 1)];
+  const { icon: CatIcon, color } = categoryStyle(cur.category);
+
+  return (
+    <div
+      className="rounded-[24px] p-4 text-white"
+      style={{ background: "linear-gradient(160deg, #1677d2, #0b5fbd)" }}
+    >
+      {/* 顶部按钮 */}
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={onAskAI}
+          className="flex items-center gap-1.5 rounded-full bg-white/20 px-4 py-2.5 text-[17px] font-bold backdrop-blur"
+        >
+          <Sparkles className="h-5 w-5" />
+          引导
+        </button>
+        <button
+          onClick={onScan}
+          className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-[17px] font-bold text-primary"
+        >
+          <ScanLine className="h-5 w-5" />
+          入群
+        </button>
+      </div>
+
+      {/* 标题 + 头像 */}
+      <div className="mt-1 flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 text-[17px] opacity-95">
+            <Sparkles className="h-5 w-5" />
+            骨安 · AI 主治医生
+          </div>
+          <div className="mt-1.5 text-[27px] font-bold leading-tight">
+            {patient.name.slice(0, 1)}
+            {patient.gender === "女" ? "女士" : "先生"}，今日 {pending.length} 项待打卡
+          </div>
+        </div>
+        <button
+          onClick={onAskAI}
+          className="relative flex h-[86px] w-[86px] shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur"
+        >
+          <Stethoscope className="h-10 w-10" />
+          <span className="absolute -bottom-3 -left-6 whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-[15px] font-bold text-primary shadow">
+            👆 点我试试
+          </span>
+        </button>
+      </div>
+
+      {/* 今日任务轮播 */}
+      <div className="mt-5 rounded-2xl bg-white p-3 text-foreground">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Bell className="h-5 w-5" />
+          </div>
+          <span className="text-[20px] font-bold">今日任务</span>
+          <span className="ml-auto rounded-full bg-primary/10 px-3 py-1 text-[16px] font-bold text-primary">
+            {Math.min(idx + 1, list.length)}/{list.length}
+          </span>
+          <button
+            onClick={() => setIdx((i) => (i - 1 + list.length) % list.length)}
+            className="flex h-9 w-9 items-center justify-center rounded-full border"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => setIdx((i) => (i + 1) % list.length)}
+            className="flex h-9 w-9 items-center justify-center rounded-full border"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="mt-2.5 rounded-2xl bg-muted/50 p-3">
+          <div className="flex items-center gap-2">
+            <div className={cn("flex h-11 w-11 items-center justify-center rounded-xl", color)}>
+              <CatIcon className="h-6 w-6" />
+            </div>
+            <span className="text-[22px] font-bold">{cur.title}</span>
+            <span
+              className={cn(
+                "ml-auto rounded-md px-2.5 py-1 text-[15px] font-bold",
+                cur.done ? "bg-success/10 text-success" : "bg-warning/15 text-warning",
+              )}
+            >
+              {cur.done ? "已完成" : "待完成"}
+            </span>
+          </div>
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+            {cur.time && (
+              <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-[17px] font-bold text-primary">
+                ⏰ {cur.time}
+              </span>
+            )}
+            <span className="rounded-lg bg-background px-2.5 py-1.5 text-[17px]">{cur.detail}</span>
+          </div>
+          <div className="mt-2.5 flex items-end justify-between gap-2">
+            <span className="text-[17px] leading-snug text-muted-foreground">
+              按方案完成后点击确认，医护可实时看到
+            </span>
+            <button
+              onClick={() => onToggle(cur.id)}
+              className="shrink-0 rounded-full bg-primary px-5 py-3 text-[18px] font-bold text-primary-foreground"
+            >
+              确认
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 快捷提问 */}
+      <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        {["这个动作有什么作用", "膝盖肿了怎么办", "今天吃什么"].map((q) => (
+          <button
+            key={q}
+            onClick={onAskAI}
+            className="shrink-0 rounded-full bg-white/20 px-4 py-2.5 text-[17px] font-medium backdrop-blur"
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
 function QuickCard({
   icon: Icon,
   title,
