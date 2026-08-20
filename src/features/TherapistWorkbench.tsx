@@ -521,11 +521,22 @@ function PlansTab({
   onArchive: (p: Patient) => void;
 }) {
   const [sub, setSub] = useState<"pending" | "all">("pending");
+  const flow = useCaseFlow();
   const pending = list.filter((p) => (statuses[p.id] ?? "ai-draft") === "ai-draft");
   const visible = sub === "pending" ? pending : list;
 
   return (
     <div className="space-y-3 p-3">
+      <CaseFlowBanner
+        hint={
+          !flow.pushedToTherapist
+            ? "等待手术团队推送术后患者"
+            : flow.planApproved
+              ? `方案已生成待办 ${flow.todos.length} 项，患者端可打卡执行`
+              : "术后患者已到达：请审核 AI 康复方案并保存生效"
+        }
+      />
+      <AbnormalPanel compact />
       <div className="rounded-2xl border bg-info/5 p-3 text-[11px] text-info">
         <Sparkles className="mr-1 inline h-3 w-3" />
         AI 已按病症自动生成康复方案，请按患者逐一审核；点击患者卡片查看详情。
@@ -623,6 +634,7 @@ function RecordsTab({
   onArchive: (p: Patient) => void;
 }) {
   const [sub, setSub] = useState<"tomorrow" | "postop">("postop");
+  const flow = useCaseFlow();
   // 术后康复 = 已手术 / 术后观察 / 康复中
   const postOpList = inpatientList;
   const visible = sub === "tomorrow" ? tomorrowSurgery : postOpList;
