@@ -155,7 +155,7 @@ export function PatientHomeScreen({
               </div>
               <button
                 onClick={() => onAskAI()}
-                aria-label="进入骨灵大模型会话"
+                aria-label="进入骨灵会话"
                 className="group relative shrink-0 transition-transform active:scale-95"
               >
                 <div className="size-[80px] overflow-hidden rounded-2xl shadow-xl ring-[3px] ring-white/50 transition-all group-hover:ring-white">

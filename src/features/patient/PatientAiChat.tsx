@@ -141,7 +141,7 @@ export function PatientAiChat({
           <img src={aiDoctor} alt="骨灵 AI 主治医生" className="h-full w-full object-cover" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[17px] font-bold leading-tight">骨安 · 骨灵大模型</div>
+          <div className="text-[17px] font-bold leading-tight">骨安 · 骨灵</div>
           <div className="mt-0.5 text-[12.5px] text-muted-foreground">
             结合您的档案给出个性化建议
           </div>
@@ -186,7 +186,7 @@ export function PatientAiChat({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(input)}
-            placeholder="向骨灵大模型提问…"
+            placeholder="向骨灵提问…"
             className="min-w-0 flex-1 bg-transparent py-2 text-[16px] outline-none placeholder:text-muted-foreground/70"
           />
           <button

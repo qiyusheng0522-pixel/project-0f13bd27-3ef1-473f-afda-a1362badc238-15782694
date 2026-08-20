@@ -274,7 +274,7 @@ export function PatientWorkbench() {
 
   const tabItems = [
     { key: "home", label: "首页", icon: Home },
-    { key: "ai", label: "骨灵大模型", icon: Sparkles },
+    { key: "ai", label: "骨灵", icon: Sparkles },
     { key: "plan", label: "方案", icon: ClipboardList },
     { key: "me", label: "我的", icon: User },
   ];
@@ -435,7 +435,7 @@ export function PatientWorkbench() {
           />
         )}
 
-        {/* 骨灵大模型会话 */}
+        {/* 骨灵会话 */}
         {aiOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="h-[792px] w-[355px] overflow-hidden rounded-[32px] bg-background shadow-2xl">
@@ -712,7 +712,7 @@ function InpatientHomeTab({
         </button>
       </section>
 
-      {/* 骨灵大模型快捷入口 */}
+      {/* 骨灵快捷入口 */}
       <button
         onClick={onAskAI}
         className="flex w-full items-center gap-3 rounded-2xl p-4 text-left text-white active:scale-[0.99]"
@@ -720,7 +720,7 @@ function InpatientHomeTab({
       >
         <Sparkles className="h-8 w-8 shrink-0" />
         <div>
-          <div className="text-[20px] font-bold">问问骨灵大模型</div>
+          <div className="text-[20px] font-bold">问问骨灵</div>
           <div className="text-[15px] opacity-95">可以说话提问，随时解答康复疑问</div>
         </div>
       </button>
@@ -1062,7 +1062,7 @@ function SwapDishSheet({
   );
 }
 
-// ---------- 骨灵大模型 ----------
+// ---------- 骨灵 ----------
 function PathSheet({
   stages,
   currentStageIdx,
