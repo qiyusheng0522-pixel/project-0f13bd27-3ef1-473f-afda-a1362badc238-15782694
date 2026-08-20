@@ -127,7 +127,7 @@ export function PatientAiChat({
   }, [msgs]);
 
   return (
-    <div className="absolute inset-0 z-50 flex h-full flex-col bg-background">
+    <div className="absolute inset-x-0 top-0 bottom-[68px] z-40 flex flex-col bg-background">
       {/* 顶栏 */}
       <header className="flex shrink-0 items-center gap-2.5 border-b bg-card px-3 py-3">
         <button
