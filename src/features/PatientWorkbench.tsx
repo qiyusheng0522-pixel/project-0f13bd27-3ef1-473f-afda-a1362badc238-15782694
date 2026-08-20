@@ -549,8 +549,6 @@ function InpatientHomeTab({
   patient,
   stages,
   currentStageIdx,
-  admissionUploaded,
-  onUpload,
   todos,
   onToggle,
   onAskAI,
@@ -559,8 +557,7 @@ function InpatientHomeTab({
   patient: PatientProfile;
   stages: { key: string; label: string }[];
   currentStageIdx: number;
-  admissionUploaded: boolean;
-  onUpload: () => void;
+
   todos: TodoItem[];
   onToggle: (id: string) => void;
   onAskAI: () => void;
