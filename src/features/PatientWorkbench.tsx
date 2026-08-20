@@ -344,16 +344,17 @@ export function PatientWorkbench() {
 
       <div className={cn("relative pb-24 text-[17px] leading-relaxed", aiOpen && "hidden")}>
 
-        {/* 就诊状态标识（自动识别，不占大面积） */}
+        {/* 就诊状态胶囊（自动识别，住院/非住院） */}
         <div className="flex items-center justify-between px-4 pt-3">
           <span
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[15px] font-bold",
-              mode === "inpatient" ? "bg-primary/10 text-primary" : "bg-success/10 text-success",
+              "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[17px] font-bold text-white shadow-md",
+              mode === "inpatient" ? "bg-gradient-to-r from-primary to-primary/80" : "bg-gradient-to-r from-success to-success/80",
             )}
+            style={{ boxShadow: "var(--shadow-elevated)" }}
           >
-            {mode === "inpatient" ? <Stethoscope className="h-4 w-4" /> : <Home className="h-4 w-4" />}
-            {mode === "inpatient" ? "住院中" : "非住院"}
+            <Activity className="h-5 w-5" />
+            {mode === "inpatient" ? "骨安 · 住院中" : "骨安 · 非住院"}
           </span>
           <button
             onClick={() => setStatus(mode === "inpatient" ? "outpatient" : "post-op")}
