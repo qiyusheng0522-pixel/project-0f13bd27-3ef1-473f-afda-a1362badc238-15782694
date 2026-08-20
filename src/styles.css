@@ -151,12 +151,8 @@
   div.rounded-full {
     white-space: nowrap;
   }
-
-  span.rounded-full,
-  a.rounded-full {
-    padding-inline: min(0.5rem, 2.5cqw);
-  }
 }
+
 
 
 @utility scrollbar-hide {
