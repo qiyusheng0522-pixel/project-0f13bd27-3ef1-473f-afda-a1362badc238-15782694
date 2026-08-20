@@ -33,6 +33,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
+import { PatientHomeScreen } from "@/features/patient/PatientHomeScreen";
+import { PatientCareScreen } from "@/features/patient/PatientCareScreen";
+import { PatientAiChat } from "@/features/patient/PatientAiChat";
 import { cn } from "@/lib/utils";
 
 type Mode = "inpatient" | "home";
@@ -229,6 +232,8 @@ export function PatientWorkbench() {
   const [homeTodos, setHomeTodos] = useState<TodoItem[]>(HOME_TODOS);
   const [dishes, setDishes] = useState<Dish[]>(INITIAL_DISHES);
   const [aiOpen, setAiOpen] = useState(false);
+  const [aiQuestion, setAiQuestion] = useState<string | undefined>(undefined);
+  const [pathOpen, setPathOpen] = useState(false);
   const [swapDish, setSwapDish] = useState<Dish | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   // 新用户使用引导（1/3 ~ 3/3）
