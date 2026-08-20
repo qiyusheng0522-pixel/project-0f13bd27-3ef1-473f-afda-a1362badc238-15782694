@@ -8,7 +8,12 @@ import {
   Pill,
   FileSearch,
   HeartPulse,
+  PersonStanding,
+  Target,
+  ClipboardList,
+  UtensilsCrossed,
 } from "lucide-react";
+
 import aiDoctor from "@/assets/ai-doctor.jpg";
 import { cn } from "@/lib/utils";
 
