@@ -338,7 +338,7 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
           <div
             className="grid size-28 shrink-0 place-items-center rounded-full"
             style={{
-              background: `conic-gradient(hsl(var(--primary)) ${rate * 3.6}deg, hsl(var(--muted)) 0deg)`,
+              background: `conic-gradient(var(--primary) ${rate * 3.6}deg, var(--muted) 0deg)`,
             }}
           >
             <div className="grid size-20 place-items-center rounded-full bg-card">
