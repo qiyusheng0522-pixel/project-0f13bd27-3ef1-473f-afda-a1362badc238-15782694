@@ -572,9 +572,26 @@ function InpatientHomeTab({
 
   return (
     <div className="space-y-4 p-3">
-      {/* 患者信息卡 */}
-      <div className="rounded-2xl p-4 text-white" style={{ background: "var(--gradient-primary)" }}>
-        <div className="flex items-center gap-3">
+      {/* 患者信息 + 住院状态 + 当前阶段（融合卡） */}
+      <div
+        className="relative overflow-hidden rounded-[26px] p-4 text-white"
+        style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-14 -top-16 size-48 rounded-full opacity-30 blur-3xl"
+          style={{ background: "oklch(0.85 0.12 220)" }}
+        />
+        <div className="relative flex items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-[16px] font-bold ring-1 ring-white/25">
+            <Activity className="h-4 w-4" /> 骨安 · 住院中
+          </span>
+          <span className="rounded-full bg-white px-3 py-1.5 text-[16px] font-bold text-primary">
+            第 {currentStageIdx + 1}/{stages.length} 阶段
+          </span>
+        </div>
+
+        <div className="relative mt-3 flex items-center gap-3">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-[24px] font-bold backdrop-blur">
             {patient.name.slice(0, 1)}
           </div>
@@ -586,72 +603,25 @@ function InpatientHomeTab({
             <div className="text-[17px] opacity-90">出生日期：{patient.birthday}</div>
           </div>
         </div>
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 text-[17px] backdrop-blur">
-          <MapPin className="h-5 w-5 shrink-0" />
-          当前阶段：<b className="text-[18px]">{currentStage.label}</b>
-        </div>
-        <div className="mt-2 text-[17px] opacity-90">{patient.hospital} · 关节外科</div>
-      </div>
 
-      {/* 入院单上传 */}
-      <button
-        onClick={admissionUploaded ? undefined : onUpload}
-        className={cn(
-          "flex w-full items-center justify-between rounded-2xl border-2 border-dashed p-4 text-left",
-          admissionUploaded ? "border-success bg-success/5" : "border-primary/50 bg-primary/5",
-        )}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              "flex h-14 w-14 items-center justify-center rounded-xl",
-              admissionUploaded ? "bg-success text-white" : "bg-primary text-white",
-            )}
-          >
-            {admissionUploaded ? <CheckCircle2 className="h-7 w-7" /> : <Upload className="h-7 w-7" />}
-          </div>
-          <div>
-            <div className="text-[19px] font-bold">
-              {admissionUploaded ? "入院单已上传" : "上传入院单"}
-            </div>
-            <div className="text-[17px] text-muted-foreground">
-              {admissionUploaded ? "护士已收到，正在为您办理" : "拍照上传，护士为您预办入院"}
-            </div>
-          </div>
-        </div>
-        {!admissionUploaded && <Camera className="h-7 w-7 text-primary" />}
-      </button>
-
-      {/* 住院进度 */}
-      <section className="rounded-2xl border bg-card p-3">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[18px] font-bold">
-            <MapPin className="h-5 w-5 text-primary" />
-            我的住院进度
-          </div>
-          <span className="text-[17px] text-muted-foreground">
-            第 {currentStageIdx + 1} / {stages.length} 阶段
-          </span>
-        </div>
         <button
           onClick={onOpenPath}
-          className="flex w-full items-center justify-between rounded-xl bg-primary/5 p-3 text-left active:bg-primary/10"
+          className="relative mt-3 flex w-full items-center justify-between gap-2 rounded-2xl bg-white/20 px-3 py-3 text-left backdrop-blur active:scale-[0.99]"
         >
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-[20px] font-bold text-white shadow-sm">
-              {currentStageIdx + 1}
-            </div>
-            <div>
-              <div className="text-[17px] text-muted-foreground">当前所处阶段</div>
-              <div className="text-[22px] font-bold text-foreground">{currentStage.label}</div>
-            </div>
+          <div className="flex min-w-0 items-center gap-2">
+            <MapPin className="h-5 w-5 shrink-0" />
+            <span className="whitespace-nowrap text-[17px]">当前阶段：</span>
+            <b className="truncate text-[19px]">{currentStage.label}</b>
           </div>
-          <div className="flex flex-col items-center text-primary">
-            <span className="text-[16px] font-medium">查看完整路径</span>
-            <ChevronRight className="h-6 w-6" />
-          </div>
+          <span className="flex shrink-0 items-center whitespace-nowrap text-[16px] font-bold">
+            完整路径
+            <ChevronRight className="h-5 w-5" />
+          </span>
         </button>
-      </section>
+
+        <div className="relative mt-2 text-[17px] opacity-90">{patient.hospital} · 关节外科</div>
+      </div>
+
 
       {/* 我的任务 */}
       <section className="overflow-hidden rounded-2xl border bg-card">
