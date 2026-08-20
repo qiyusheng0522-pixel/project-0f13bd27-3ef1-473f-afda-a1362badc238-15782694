@@ -367,12 +367,8 @@ export function PatientWorkbench() {
             patient={PATIENT}
             stages={stages as unknown as { key: string; label: string }[]}
             currentStageIdx={currentStageIdx}
-            admissionUploaded={admissionUploaded}
-            onUpload={() => {
-              setAdmissionUploaded(true);
-              showToast("入院单上传成功");
-            }}
             todos={currentTodos}
+
             onToggle={toggleTodo}
             onAskAI={() => {
               setAiQuestion(undefined);
