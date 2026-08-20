@@ -347,10 +347,7 @@ export function PatientWorkbench() {
         {/* 就诊状态胶囊（自动识别，住院/非住院） */}
         <div className="flex items-center justify-between px-4 pt-3">
           <span
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[17px] font-bold text-white shadow-md",
-              mode === "inpatient" ? "bg-gradient-to-r from-primary to-primary/80" : "bg-gradient-to-r from-success to-success/80",
-            )}
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-glow px-4 py-2.5 text-[17px] font-bold text-white shadow-md"
             style={{ boxShadow: "var(--shadow-elevated)" }}
           >
             <Activity className="h-5 w-5" />
