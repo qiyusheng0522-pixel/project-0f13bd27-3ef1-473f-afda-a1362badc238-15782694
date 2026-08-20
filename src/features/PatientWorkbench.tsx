@@ -386,6 +386,7 @@ function HomeTab({
   onAskAI: () => void;
 }) {
   const currentStage = stages[currentStageIdx];
+  const [pathOpen, setPathOpen] = useState(false);
   const doing = todos.filter((t) => !t.done);
   const finished = todos.filter((t) => t.done);
 
