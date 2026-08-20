@@ -30,6 +30,14 @@ import { PatientArchiveSheet } from "@/components/PatientArchiveSheet";
 import { PatientListSheet } from "@/components/PatientListSheet";
 import { RehabRecordSheet } from "@/components/RehabRecordSheet";
 import { ActionSheet, ToastBanner } from "@/components/ActionSheet";
+import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
+import {
+  DEMO_PATIENT_ID,
+  addDailyRehab,
+  approvePlan,
+  dischargePatient,
+  useCaseFlow,
+} from "@/lib/case-flow";
 import { patients, todayTasks } from "@/lib/mock-data";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -173,6 +181,12 @@ export function TherapistWorkbench() {
   // 出院评估完成的患者，保留 3 天用于后续追踪
   const [dischargedAt, setDischargedAt] = useState<Record<string, number>>({});
   const [toast, setToast] = useState<string | null>(null);
+  const flow = useCaseFlow();
+
+  // 演示病例：手术团队推送后即出现待审核方案
+  const statuses: Record<string, PlanStatus> = flow.created
+    ? { ...planStatuses, [DEMO_PATIENT_ID]: flow.planApproved ? "confirmed" : "ai-draft" }
+    : planStatuses;
 
   // 住院 + 门诊康复患者
   const inpatientList = patients.filter(
@@ -202,7 +216,7 @@ export function TherapistWorkbench() {
           onChange={(k) => setTab(k as TabKey)}
           items={[
             { key: "home", label: "首页", icon: Home, badge: tasks.length },
-            { key: "plans", label: "康复方案", icon: HeartPulse, badge: myPatients.filter((p) => planStatuses[p.id] === "ai-draft").length },
+            { key: "plans", label: "康复方案", icon: HeartPulse, badge: myPatients.filter((p) => statuses[p.id] === "ai-draft").length },
             { key: "records", label: "院内评估", icon: FileText, badge: inpatientList.length },
             { key: "me", label: "我的", icon: User },
           ]}
@@ -214,7 +228,7 @@ export function TherapistWorkbench() {
           tasks={tasks}
           inpatientCount={inpatientList.length}
           outpatientCount={outpatientList.length}
-          planPendingCount={myPatients.filter((p) => planStatuses[p.id] === "ai-draft").length}
+          planPendingCount={myPatients.filter((p) => statuses[p.id] === "ai-draft").length}
           chatPendingCount={3}
           onOpenPatients={() => setOverlay({ kind: "patient-list" })}
           onOpenChat={() => setOverlay({ kind: "chat-list" })}
@@ -225,7 +239,7 @@ export function TherapistWorkbench() {
       {tab === "plans" && (
         <PlansTab
           list={myPatients}
-          statuses={planStatuses}
+          statuses={statuses}
           onEdit={(p) => setPlanEditor(p)}
           onArchive={(p) => setOverlay({ kind: "archive", patient: p })}
         />
@@ -248,9 +262,14 @@ export function TherapistWorkbench() {
         <PlanEditorSheet
           patient={planEditor}
           onClose={() => setPlanEditor(null)}
-          onSave={() => {
-            setPlanStatuses((s) => ({ ...s, [planEditor.id]: "edited" }));
-            showToast(`已保存修改：${planEditor.name}`);
+          onSave={(planName) => {
+            setPlanStatuses((s) => ({ ...s, [planEditor.id]: "confirmed" }));
+            if (planEditor.id === DEMO_PATIENT_ID) {
+              approvePlan(planName);
+              showToast(`方案已审核通过，已生成患者端打卡待办：${planEditor.name}`);
+            } else {
+              showToast(`已保存修改：${planEditor.name}`);
+            }
             setPlanEditor(null);
           }}
         />
@@ -259,8 +278,18 @@ export function TherapistWorkbench() {
         <RehabRecordSheet
           patient={recordFor}
           onClose={() => setRecordFor(null)}
-          onSave={() => {
-            showToast(`已保存院内康复记录：${recordFor.name}`);
+          onSave={(r) => {
+            if (recordFor.id === DEMO_PATIENT_ID) {
+              addDailyRehab({
+                date: r.date,
+                painLevel: r.painLevel,
+                extension: r.extension,
+                flexion: r.flexion,
+                content: [r.standing, r.walking, r.other].filter(Boolean).join(" / "),
+                therapist: "朱年鑫",
+              });
+            }
+            showToast(`已保存每日康复评估：${recordFor.name}`);
             setRecordFor(null);
           }}
         />
@@ -285,8 +314,9 @@ export function TherapistWorkbench() {
         <DischargeSheet
           patient={overlay.patient}
           onClose={() => setOverlay(null)}
-          onConfirm={() => {
+          onConfirm={(note) => {
             setDischargedAt((s) => ({ ...s, [overlay.patient.id]: Date.now() }));
+            if (overlay.patient.id === DEMO_PATIENT_ID) dischargePatient(note);
             showToast(`已确认 ${overlay.patient.name} 出院 · 评估保留 3 天`);
             setOverlay(null);
           }}
