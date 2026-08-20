@@ -550,56 +550,98 @@ function HomeTab({
         </>
       )}
 
-      {/* ===== 门诊 / 居家版专属：AI 扫描 + 常用服务 ===== */}
+      {/* ===== 居家版专属：AI 主治医生 + 今日打卡轮播 + 咨询 + 评估中心 ===== */}
       {mode === "home" && (
         <>
-          <button
-            onClick={onUpload}
-            className="w-full rounded-2xl border-2 border-dashed border-primary/50 bg-card p-5 text-center active:bg-primary/5"
-          >
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <ScanLine className="h-9 w-9" />
-            </div>
-            <div className="mt-3 text-[20px] font-bold">AI 扫描，智能识别就诊信息</div>
-            <div className="mt-2 text-[16px] font-bold text-warning">
-              * 我们将为您定制更全面的营养方案
-            </div>
-          </button>
+          <HomeHeroCard
+            patient={patient}
+            todos={todos}
+            onToggle={onToggle}
+            onAskAI={onAskAI}
+            onScan={onUpload}
+          />
 
-          <div className="grid grid-cols-2 gap-3">
-            <QuickCard
-              icon={Stethoscope}
-              title="专科服务"
-              desc="骨科门诊 · 康复评估"
-              tint="bg-emerald-50 text-emerald-700"
-            />
-            <QuickCard icon={Watch} title="智能设备" desc="护具 · 手环 · 监测" tint="bg-sky-50 text-sky-700" />
-            <QuickCard icon={Pill} title="用药提醒" desc="添加提醒" tint="bg-violet-50 text-violet-700" />
-            <QuickCard icon={HeartPulse} title="健康评估" desc="立即评估" tint="bg-rose-50 text-rose-700" />
+          <div className="flex gap-3">
+            <button className="flex flex-1 items-center gap-3 rounded-2xl border bg-card p-4 text-left active:bg-muted/40">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Stethoscope className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[19px] font-bold leading-snug">咨询关节外科医生？</div>
+                <div className="mt-0.5 text-[16px] leading-snug text-muted-foreground">
+                  选择主任 / 主治医生 1v1 · 住院期间锁定主管医护
+                </div>
+              </div>
+            </button>
+            <button className="relative flex w-[92px] shrink-0 flex-col items-center justify-center rounded-2xl border bg-card p-3 active:bg-muted/40">
+              <Bell className="h-7 w-7 text-primary" />
+              <span className="mt-1 text-[17px] font-bold">消息</span>
+              <span className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-[13px] font-bold text-white">
+                3
+              </span>
+            </button>
           </div>
+
+          {/* 评估中心 */}
+          <section className="rounded-2xl border bg-card p-3">
+            <div className="flex items-center">
+              <div className="text-[21px] font-bold">评估中心</div>
+              <button
+                onClick={onOpenScale}
+                className="ml-auto flex items-center text-[17px] font-medium text-primary"
+              >
+                全部 12 项
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mt-2.5 rounded-2xl border p-3">
+              <div className="flex items-center gap-2">
+                <span className="rounded-md bg-destructive/10 px-2 py-1 text-[15px] font-bold text-destructive">
+                  待完成 7
+                </span>
+                <span className="text-[16px] text-muted-foreground">已填 5/12 项</span>
+              </div>
+              <div className="mt-2 flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[20px] font-bold">骨灵智慧大脑</div>
+                  <div className="mt-1 text-[16px] leading-snug text-muted-foreground">
+                    7 题 · 约 3 分钟，完成后同步主诊医生
+                  </div>
+                </div>
+                <button
+                  onClick={onOpenScale}
+                  className="shrink-0 rounded-full bg-primary px-5 py-3 text-[18px] font-bold text-primary-foreground"
+                >
+                  去填写
+                </button>
+              </div>
+            </div>
+          </section>
         </>
       )}
 
-      {/* ===== 两版共用：我的任务（进行中 / 已完成） ===== */}
-      <section className="overflow-hidden rounded-2xl border bg-card">
-        <div className="flex items-center justify-between bg-teal-500 px-4 py-3 text-white">
-          <div className="flex items-center gap-2 text-[20px] font-bold">
-            <Bell className="h-6 w-6" />
-            我的任务
+      {/* ===== 住院版：我的任务 ===== */}
+      {mode === "inpatient" && (
+        <section className="overflow-hidden rounded-2xl border bg-card">
+          <div className="flex items-center justify-between bg-teal-500 px-4 py-3 text-white">
+            <div className="flex items-center gap-2 text-[20px] font-bold">
+              <Bell className="h-6 w-6" />
+              我的任务
+            </div>
+            <div className="text-[16px]">
+              {finished.length}/{todos.length}
+            </div>
           </div>
-          <div className="text-[16px]">
-            {finished.length}/{todos.length}
+          <div className="space-y-2.5 p-3">
+            {doing.length === 0 && (
+              <div className="py-4 text-center text-[16px] text-muted-foreground">今日任务已全部完成 🎉</div>
+            )}
+            {doing.map((t) => (
+              <TodoRow key={t.id} todo={t} onToggle={onToggle} />
+            ))}
           </div>
-        </div>
-        <div className="space-y-2.5 p-3">
-          {doing.length === 0 && (
-            <div className="py-4 text-center text-[16px] text-muted-foreground">今日任务已全部完成 🎉</div>
-          )}
-          {doing.map((t) => (
-            <TodoRow key={t.id} todo={t} onToggle={onToggle} />
-          ))}
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ===== 宣教：健康百科 ===== */}
       <EduSection />
