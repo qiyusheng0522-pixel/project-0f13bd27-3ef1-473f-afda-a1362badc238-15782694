@@ -225,23 +225,11 @@ export function TherapistWorkbench() {
         <PlansTab
           list={myPatients}
           statuses={planStatuses}
-          edits={planEdits}
-          onEditExercise={(pid, eid, patch) =>
-            setPlanEdits((s) => ({ ...s, [`${pid}_${eid}`]: { ...s[`${pid}_${eid}`], ...patch } }))
-          }
           onEdit={(p) => setPlanEditor(p)}
-          onConfirm={(p) => {
-            setPlanStatuses((s) => ({ ...s, [p.id]: "confirmed" }));
-            showToast(`已确认 AI 方案：${p.name}`);
-          }}
-          onClear={(p) => {
-            setPlanStatuses((s) => ({ ...s, [p.id]: "empty" }));
-            showToast(`已清空方案：${p.name}`);
-          }}
-          onChat={(p) => setOverlay({ kind: "chat", patient: p })}
           onArchive={(p) => setOverlay({ kind: "archive", patient: p })}
         />
       )}
+
       {tab === "records" && (
         <RecordsTab
           inpatientList={inpatientList}
