@@ -179,6 +179,9 @@ export function TherapistWorkbench() {
     (p) => p.department === "inpatient" && ["in-surgery", "post-op", "rehab"].includes(p.status),
   );
   const outpatientList = patients.filter((p) => p.department === "outpatient" && p.status === "rehab");
+  // 历史出院患者（已出院 / 随访中）
+  const dischargedList = patients.filter((p) => ["discharged", "follow-up"].includes(p.status));
+
   const myPatients = [...inpatientList, ...outpatientList];
   const tasks = todayTasks.therapist;
   // 明日手术（提供给治疗师作为术前康复参考，但治疗师不再做手术决策）
