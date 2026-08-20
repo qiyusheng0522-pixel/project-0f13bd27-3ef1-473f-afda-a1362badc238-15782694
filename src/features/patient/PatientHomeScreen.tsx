@@ -218,20 +218,13 @@ export function PatientHomeScreen({
                     </div>
                     <p
                       className={cn(
-                        "min-w-0 flex-1 truncate text-[18px] font-bold leading-snug",
+                        "min-w-0 flex-1 text-[18px] font-bold leading-snug",
                         current.done && "text-foreground/40 line-through",
                       )}
                     >
                       {current.title}
                     </p>
-                    <span
-                      className={cn(
-                        "shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-bold",
-                        current.done ? "bg-success/15 text-success" : "bg-warning/15 text-warning",
-                      )}
-                    >
-                      {current.done ? "已完成" : "待完成"}
-                    </span>
+
                   </div>
 
                   <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[12px]">
