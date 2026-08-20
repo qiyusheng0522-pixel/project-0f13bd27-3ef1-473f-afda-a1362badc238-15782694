@@ -189,7 +189,7 @@ export function PatientCareScreen({
     >
       <header className="px-4 pb-3 pt-4 text-center">
         <h1 className="text-[19px] font-bold tracking-wide">健康方案</h1>
-        <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-card p-0.5 text-[13px] font-bold ring-1 ring-black/10">
+        <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-card p-0.5 text-[16px] font-bold ring-1 ring-black/10">
           <button
             onClick={() => setPurchased(false)}
             className={cn(
@@ -206,7 +206,7 @@ export function PatientCareScreen({
               purchased ? "bg-primary text-primary-foreground" : "text-muted-foreground",
             )}
           >
-            <Crown className="size-3.5" />已开通预览
+            <Crown className="size-4" />已开通预览
           </button>
         </div>
       </header>
@@ -221,11 +221,11 @@ export function PatientCareScreen({
             <div className="grid size-10 place-items-center rounded-full bg-primary/10">
               <IdCard className="size-5 text-primary" />
             </div>
-            <span className="text-[14px] text-muted-foreground">
+            <span className="text-[17px] text-muted-foreground">
               骨<span className="font-bold text-primary">安</span> · 个人健康画像
             </span>
           </div>
-          <span className="inline-flex items-center gap-0.5 text-[15px] font-semibold text-primary">
+          <span className="inline-flex items-center gap-0.5 text-[17px] font-semibold text-primary">
             我的健康档案 <ChevronRight className="size-4" />
           </span>
         </button>
@@ -241,7 +241,7 @@ export function PatientCareScreen({
         >
           <div className="mb-3 flex items-center justify-center gap-2">
             <span className="text-primary">◆</span>
-            <p className="text-[15px] font-bold">更好的康复从生活方式纠偏开始</p>
+            <p className="text-[17px] font-bold">更好的康复从生活方式纠偏开始</p>
             <span className="text-primary">◆</span>
           </div>
 
@@ -264,12 +264,12 @@ export function PatientCareScreen({
             <div className="my-3 h-px bg-border/60" />
             <button
               onClick={() => setHistoryOpen(true)}
-              className="flex w-full items-center justify-between text-[14px] text-muted-foreground active:opacity-70"
+              className="flex w-full items-center justify-between text-[17px] text-muted-foreground active:opacity-70"
             >
               <span className="inline-flex items-center gap-1.5">
                 <History className="size-4 text-primary" />
                 查看标签变更历史
-                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
+                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[14px] text-primary">
                   {REMOVED_TAGS.length} 项已移除
                 </span>
               </span>
@@ -299,16 +299,16 @@ export function PatientCareScreen({
                   {purchased ? "专属饮食方案" : "通用饮食方案"}
                 </h2>
                 {purchased ? (
-                  <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary ring-1 ring-primary/20">
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-[14px] font-bold text-primary ring-1 ring-primary/20">
                     <Crown className="size-3 text-amber-500" />专属定制
                   </span>
                 ) : (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground ring-1 ring-black/10">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[14px] font-bold text-muted-foreground ring-1 ring-black/10">
                     通用方案 · 免费
                   </span>
                 )}
               </div>
-              <p className="mt-0.5 text-[13px] text-muted-foreground">
+              <p className="mt-0.5 text-[16px] text-muted-foreground">
                 {purchased
                   ? "根据您的骨关节档案与口味偏好定制"
                   : "基于骨科术后营养指南的通用建议"}
@@ -328,7 +328,7 @@ export function PatientCareScreen({
                 key={t.k}
                 onClick={() => setPlan(t.k)}
                 className={cn(
-                  "rounded-t-xl px-4 py-2 text-[15px] font-bold transition-colors",
+                  "rounded-t-xl px-4 py-2 text-[17px] font-bold transition-colors",
                   plan === t.k ? "bg-card text-primary" : "text-foreground/55",
                 )}
               >
@@ -338,7 +338,7 @@ export function PatientCareScreen({
           </div>
 
           <div className="bg-card px-4 pb-4 pt-4">
-            <p className="text-center text-[14px] text-muted-foreground">
+            <p className="text-center text-[17px] text-muted-foreground">
               当前您执行的是{" "}
               <span className="font-bold text-warning">
                 {plan === "nutrition" ? "营养方案" : "药食同源方案"}
@@ -346,18 +346,18 @@ export function PatientCareScreen({
             </p>
 
             <div className="mt-3 flex items-center justify-between">
-              <p className="text-[14px]">
+              <p className="text-[17px]">
                 <span className="text-muted-foreground">用餐时间：</span>
                 <span className="font-bold tabular-nums">07:30–18:30</span>
               </p>
-              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[13px] font-bold text-primary">
+              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[16px] font-bold text-primary">
                 已选择该方案
               </span>
             </div>
 
             <div className="mt-3 flex items-center gap-4">
               <NutritionRing {...MACROS} />
-              <div className="flex-1 space-y-2 text-[14px]">
+              <div className="flex-1 space-y-2 text-[17px]">
                 <Legend color="#F59E0B" label="碳水化合物" value={`${MACROS.carb}g`} />
                 <Legend color="#2563EB" label="脂肪" value={`${MACROS.fat}g`} />
                 <Legend color="#38BDF8" label="蛋白质" value={`${MACROS.protein}g`} />
@@ -371,7 +371,7 @@ export function PatientCareScreen({
                     key={d}
                     onClick={() => setActiveDate(d)}
                     className={cn(
-                      "shrink-0 rounded-lg px-3 py-2 text-[14px] tabular-nums",
+                      "shrink-0 rounded-lg px-3 py-2 text-[17px] tabular-nums",
                       activeDate === d
                         ? "bg-primary/10 font-bold text-primary"
                         : "text-muted-foreground",
@@ -386,11 +386,11 @@ export function PatientCareScreen({
             <div className="mt-3 grid grid-cols-2 gap-3">
               <button
                 onClick={() => dishes[0] && onSwap(dishes[0])}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary/10 py-3 text-[15px] font-bold text-primary active:bg-primary/15"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary/10 py-3 text-[17px] font-bold text-primary active:bg-primary/15"
               >
                 <RefreshCw className="size-4" /> 不想吃全部换
               </button>
-              <button className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-warning/10 py-3 text-[15px] font-bold text-warning active:bg-warning/15">
+              <button className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-warning/10 py-3 text-[17px] font-bold text-warning active:bg-warning/15">
                 去买菜 <ChevronRight className="size-4" />
               </button>
             </div>
@@ -422,7 +422,7 @@ export function PatientCareScreen({
       </section>
 
       <div className="mt-4 px-4">
-        <p className="pb-2 text-center text-[13px] text-muted-foreground">
+        <p className="pb-2 text-center text-[16px] text-muted-foreground">
           {mode === "inpatient" ? "住院版" : "居家版"} · 方案内容一致，按当前阶段自动更新
         </p>
       </div>
@@ -466,7 +466,7 @@ function TagBlock({
     <div>
       <div className="mb-2 flex items-center gap-1.5 text-primary">
         {icon}
-        <span className="text-[15px] font-bold text-foreground">{title}</span>
+        <span className="text-[17px] font-bold text-foreground">{title}</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {tags.map((t) => (
@@ -474,7 +474,7 @@ function TagBlock({
             key={t.name}
             onClick={() => onTagClick(t)}
             className={cn(
-              "inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[14px] font-semibold ring-1 transition-transform active:scale-95",
+              "inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[17px] font-semibold ring-1 transition-transform active:scale-95",
               tagClass,
             )}
           >
@@ -520,7 +520,7 @@ function TagDetailContent({ tag }: { tag: TagItem }) {
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "rounded-md px-2.5 py-1 text-[15px] font-bold ring-1",
+              "rounded-md px-2.5 py-1 text-[17px] font-bold ring-1",
               isDisease
                 ? "bg-destructive/10 text-destructive ring-destructive/20"
                 : "bg-warning/10 text-warning ring-warning/20",
@@ -528,14 +528,14 @@ function TagDetailContent({ tag }: { tag: TagItem }) {
           >
             {tag.name}
           </span>
-          <span className="text-[13px] text-muted-foreground">
+          <span className="text-[16px] text-muted-foreground">
             {isDisease ? "疾病标签" : "生活方式标签"}
           </span>
         </div>
         <h3 className="mt-2 text-[17px] font-bold">获得原因</h3>
-        <p className="mt-1 text-[14px] leading-relaxed text-foreground/75">{tag.obtainedReason}</p>
+        <p className="mt-1 text-[17px] leading-relaxed text-foreground/75">{tag.obtainedReason}</p>
         <div className="flex items-center gap-1.5 pt-2 text-[12.5px] text-muted-foreground">
-          <FileText className="size-3.5" />
+          <FileText className="size-4" />
           来源：{tag.obtainedSource}
           {tag.since && <span className="ml-1">· 标记于 {tag.since}</span>}
         </div>
@@ -543,7 +543,7 @@ function TagDetailContent({ tag }: { tag: TagItem }) {
       <div className="bg-card px-5 py-4">
         <div className="mb-3 flex items-center gap-1.5">
           <Clock className="size-4 text-primary" />
-          <span className="text-[15px] font-bold">该标签的变化记录</span>
+          <span className="text-[17px] font-bold">该标签的变化记录</span>
         </div>
         <TimelineList events={tag.events} />
       </div>
@@ -555,7 +555,7 @@ function TagHistoryContent() {
   return (
     <div className="p-5">
       <h3 className="text-[18px] font-bold">标签变更历史</h3>
-      <p className="mt-1 text-[14px] text-muted-foreground">
+      <p className="mt-1 text-[17px] text-muted-foreground">
         您已成功移除 {REMOVED_TAGS.length} 个标签，继续保持！
       </p>
       <div className="mt-4 space-y-3">
@@ -563,14 +563,14 @@ function TagHistoryContent() {
           <div key={t.name} className="rounded-xl bg-muted/30 p-3 ring-1 ring-black/5">
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[15px] font-bold text-muted-foreground line-through decoration-muted-foreground/60">
+                <span className="text-[17px] font-bold text-muted-foreground line-through decoration-muted-foreground/60">
                   {t.name}
                 </span>
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[11px] text-emerald-700 ring-1 ring-emerald-200">
-                  <CheckCircle2 className="size-3" /> 已移除
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[14px] text-emerald-700 ring-1 ring-emerald-200">
+                  <CheckCircle2 className="size-4" /> 已移除
                 </span>
               </div>
-              <span className="text-[12px] text-muted-foreground">
+              <span className="text-[15px] text-muted-foreground">
                 {t.kind === "disease" ? "疾病" : "生活方式"}
               </span>
             </div>
@@ -586,17 +586,17 @@ function ArchiveContent({ rehab }: { rehab: CareRehabPlan }) {
   return (
     <div className="p-5">
       <h3 className="text-[18px] font-bold">我的健康档案</h3>
-      <p className="mt-1 text-[14px] text-muted-foreground">{rehab.title}</p>
+      <p className="mt-1 text-[17px] text-muted-foreground">{rehab.title}</p>
       <div className="mt-4 space-y-3">
         <div className="rounded-2xl bg-card p-4 ring-1 ring-black/5">
-          <div className="text-[15px] font-bold">康复目标</div>
-          <p className="mt-1 text-[14px] text-foreground/75">{rehab.goal}</p>
+          <div className="text-[17px] font-bold">康复目标</div>
+          <p className="mt-1 text-[17px] text-foreground/75">{rehab.goal}</p>
         </div>
         <div className="rounded-2xl bg-card p-4 ring-1 ring-black/5">
-          <div className="text-[15px] font-bold">饮食注意事项</div>
+          <div className="text-[17px] font-bold">饮食注意事项</div>
           <ul className="mt-2 space-y-1.5">
             {rehab.diet.map((d) => (
-              <li key={d} className="flex items-start gap-2 text-[14px]">
+              <li key={d} className="flex items-start gap-2 text-[17px]">
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
                 {d}
               </li>
@@ -604,10 +604,10 @@ function ArchiveContent({ rehab }: { rehab: CareRehabPlan }) {
           </ul>
         </div>
         <div className="rounded-2xl bg-card p-4 ring-1 ring-black/5">
-          <div className="text-[15px] font-bold">康复注意事项</div>
+          <div className="text-[17px] font-bold">康复注意事项</div>
           <ul className="mt-2 space-y-1.5">
             {rehab.cautions.map((d) => (
-              <li key={d} className="flex items-start gap-2 text-[14px]">
+              <li key={d} className="flex items-start gap-2 text-[17px]">
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-warning" />
                 {d}
               </li>
@@ -626,10 +626,10 @@ function TimelineList({ events, compact = false }: { events: TagEvent[]; compact
       {events.map((e, i) => (
         <li key={i} className="relative">
           <span className="absolute -left-4 top-1.5 size-[7px] rounded-full bg-primary ring-2 ring-background" />
-          <div className={cn("text-muted-foreground", compact ? "text-[12px]" : "text-[12.5px]")}>
+          <div className={cn("text-muted-foreground", compact ? "text-[15px]" : "text-[12.5px]")}>
             {e.date}
           </div>
-          <div className={cn("text-foreground/85", compact ? "text-[13px]" : "text-[14px]")}>
+          <div className={cn("text-foreground/85", compact ? "text-[16px]" : "text-[17px]")}>
             {e.text}
           </div>
         </li>
@@ -643,7 +643,7 @@ function Legend({ color, label, value }: { color: string; label: string; value: 
     <div className="flex items-center gap-2">
       <span className="size-2.5 rounded-full" style={{ background: color }} />
       <span className="text-foreground/75">{label}</span>
-      <span className="ml-auto text-[13px] tabular-nums text-foreground/55">{value}</span>
+      <span className="ml-auto text-[16px] tabular-nums text-foreground/55">{value}</span>
     </div>
   );
 }
@@ -704,7 +704,7 @@ function NutritionRing({
       <div className="absolute inset-0 grid place-items-center text-center">
         <div>
           <div className="text-[18px] font-extrabold tabular-nums">{kcal.toFixed(2)}</div>
-          <div className="text-[11px] text-muted-foreground">Kcal</div>
+          <div className="text-[14px] text-muted-foreground">Kcal</div>
         </div>
       </div>
     </div>
@@ -738,14 +738,14 @@ function MealCard({
           <ChevronDown
             className={cn("size-4 text-muted-foreground transition-transform", !open && "-rotate-90")}
           />
-          <span className="text-[16px] font-bold">{title}</span>
-          <span className="text-[13px] tabular-nums text-muted-foreground">约 {kcal} 千卡</span>
-          <span className="ml-1 text-[12px] text-muted-foreground/80">
+          <span className="text-[17px] font-bold">{title}</span>
+          <span className="text-[16px] tabular-nums text-muted-foreground">约 {kcal} 千卡</span>
+          <span className="ml-1 text-[15px] text-muted-foreground/80">
             · {purchased ? `${dishes.length} 道菜` : "推荐结构"}
           </span>
         </button>
         {purchased && (
-          <button className="inline-flex shrink-0 items-center gap-0.5 text-[14px] font-bold text-primary">
+          <button className="inline-flex shrink-0 items-center gap-0.5 text-[17px] font-bold text-primary">
             <CheckCircle2 className="size-4" /> 去打卡
           </button>
         )}
@@ -755,12 +755,12 @@ function MealCard({
         <div className="mt-2">
           {!purchased && generic ? (
             <div className="space-y-2.5 rounded-lg bg-card p-3 ring-1 ring-black/5">
-              <p className="text-[13px] leading-snug text-muted-foreground">{generic.intro}</p>
+              <p className="text-[16px] leading-snug text-muted-foreground">{generic.intro}</p>
               {generic.groups.map((g) => (
                 <div key={g.label} className="rounded-md bg-muted/40 px-2.5 py-2 ring-1 ring-black/5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[14px] font-bold">{g.label}</span>
-                    <span className="text-[12px] font-semibold tabular-nums text-primary">
+                    <span className="text-[17px] font-bold">{g.label}</span>
+                    <span className="text-[15px] font-semibold tabular-nums text-primary">
                       {g.portion}
                     </span>
                   </div>
@@ -768,14 +768,14 @@ function MealCard({
                     {g.examples.map((ex) => (
                       <span
                         key={ex}
-                        className="rounded-full bg-card px-2 py-0.5 text-[12px] text-foreground/75 ring-1 ring-black/10"
+                        className="rounded-full bg-card px-2 py-0.5 text-[15px] text-foreground/75 ring-1 ring-black/10"
                       >
                         {ex}
                       </span>
                     ))}
                   </div>
                   {g.note && (
-                    <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
+                    <p className="mt-1 text-[15px] leading-snug text-muted-foreground">
                       提示：{g.note}
                     </p>
                   )}
@@ -783,7 +783,7 @@ function MealCard({
               ))}
               <div className="flex items-center gap-2 rounded-md bg-primary/5 px-2.5 py-2 ring-1 ring-dashed ring-primary/25">
                 <Lock className="size-3.5 shrink-0 text-primary" />
-                <p className="flex-1 text-[12px] leading-snug text-foreground/75">
+                <p className="flex-1 text-[15px] leading-snug text-foreground/75">
                   开通后将基于您的口味与禁忌，生成
                   <span className="font-bold text-primary">具体菜品</span> 与
                   <span className="font-bold text-primary">名厨做法</span>
@@ -793,7 +793,7 @@ function MealCard({
           ) : (
             <div className="divide-y divide-border/60 rounded-lg bg-card ring-1 ring-black/5">
               {dishes.length === 0 && (
-                <p className="px-3 py-3 text-[13px] text-muted-foreground">本餐次暂无安排</p>
+                <p className="px-3 py-3 text-[16px] text-muted-foreground">本餐次暂无安排</p>
               )}
               {dishes.map((d) => (
                 <div key={d.id} className="px-3 py-3">
@@ -802,25 +802,25 @@ function MealCard({
                       <Utensils className="size-5 text-warning" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1 truncate text-[15px] font-semibold">
+                      <div className="flex items-center gap-1 truncate text-[17px] font-semibold">
                         {d.name}
                         <Info className="size-3.5 text-destructive" />
                       </div>
-                      <div className="text-[13px] text-muted-foreground">{d.benefit}</div>
+                      <div className="text-[16px] text-muted-foreground">{d.benefit}</div>
                     </div>
                     <button
                       onClick={() => onSwap(d)}
-                      className="shrink-0 rounded-full border border-primary/40 px-3 py-1.5 text-[14px] font-bold text-primary active:bg-primary/10"
+                      className="shrink-0 rounded-full border border-primary/40 px-3 py-1.5 text-[17px] font-bold text-primary active:bg-primary/10"
                     >
                       换一换
                     </button>
                   </div>
                   {purchased && (
                     <div className="ml-[60px] mt-2 rounded-lg bg-emerald-50/60 p-2.5 ring-1 ring-emerald-200/60">
-                      <div className="mb-1 inline-flex items-center gap-1 text-[12px] font-bold text-emerald-700">
-                        <Sparkles className="size-3" />手把手做法
+                      <div className="mb-1 inline-flex items-center gap-1 text-[15px] font-bold text-emerald-700">
+                        <Sparkles className="size-4" />手把手做法
                       </div>
-                      <p className="text-[13px] leading-relaxed text-foreground/80">
+                      <p className="text-[16px] leading-relaxed text-foreground/80">
                         食材洗净备好 → 中火煮 / 蒸 15-20 分钟 → 少油少盐调味，出锅前撒少许枸杞。
                       </p>
                     </div>
@@ -843,20 +843,20 @@ function ServicePlanCard({ purchased, onBuy }: { purchased: boolean; onBuy: () =
         style={{ background: "var(--gradient-hero)" }}
       >
         <div>
-          <div className="inline-flex items-center gap-1.5 text-[13px] opacity-90">
+          <div className="inline-flex items-center gap-1.5 text-[16px] opacity-90">
             <Crown className="size-4" /> 骨关节管理服务包
           </div>
           <div className="mt-1 text-[19px] font-extrabold">
             {purchased ? "已开通 · 专属方案生效中" : "解锁专属康复 + 饮食定制"}
           </div>
-          <div className="mt-1 text-[13px] opacity-85">
+          <div className="mt-1 text-[16px] opacity-85">
             医生审核 · 治疗师随访 · 营养师配餐
           </div>
         </div>
         {!purchased && (
           <button
             onClick={onBuy}
-            className="shrink-0 rounded-full bg-white px-4 py-2 text-[15px] font-bold text-primary active:scale-95"
+            className="shrink-0 rounded-full bg-white px-4 py-2 text-[17px] font-bold text-primary active:scale-95"
           >
             立即开通
           </button>
@@ -870,7 +870,7 @@ function ServicePlanCard({ purchased, onBuy }: { purchased: boolean; onBuy: () =
         ].map((s) => (
           <div key={s.l} className="px-2 py-3 text-center">
             <div className={cn("text-[19px] font-extrabold tabular-nums", s.tone)}>{s.v}</div>
-            <div className="mt-0.5 text-[12px] text-muted-foreground">{s.l}</div>
+            <div className="mt-0.5 text-[15px] text-muted-foreground">{s.l}</div>
           </div>
         ))}
       </div>
@@ -900,16 +900,16 @@ function WorkoutPlan({ purchased, rehab }: { purchased: boolean; rehab: CareReha
           <div className="inline-flex items-center gap-1.5">
             <h2 className="text-[19px] font-extrabold tracking-tight">今日运动</h2>
             {purchased ? (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary ring-1 ring-primary/20">
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-[14px] font-bold text-primary ring-1 ring-primary/20">
                 <Crown className="size-3 text-amber-500" />AI 定制
               </span>
             ) : (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground ring-1 ring-black/10">
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[14px] font-bold text-muted-foreground ring-1 ring-black/10">
                 通用方案 · 免费
               </span>
             )}
           </div>
-          <p className="mt-0.5 text-[13px] text-muted-foreground">{rehab.goal}</p>
+          <p className="mt-0.5 text-[16px] text-muted-foreground">{rehab.goal}</p>
         </div>
         <div className="grid size-11 place-items-center rounded-xl bg-primary/15">
           <HeartPulse className="size-6 text-primary" />
@@ -920,14 +920,14 @@ function WorkoutPlan({ purchased, rehab }: { purchased: boolean; rehab: CareReha
         <div className="rounded-xl bg-card p-3 ring-1 ring-black/5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] text-muted-foreground">今日打卡进度</p>
+              <p className="text-[16px] text-muted-foreground">今日打卡进度</p>
               <p className="mt-0.5 text-[20px] font-extrabold tabular-nums">
                 {done.length}
-                <span className="text-[13px] font-semibold text-muted-foreground"> / {total} 项</span>
+                <span className="text-[16px] font-semibold text-muted-foreground"> / {total} 项</span>
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[12px] text-muted-foreground">完成度</p>
+              <p className="text-[15px] text-muted-foreground">完成度</p>
               <p className="text-[18px] font-extrabold tabular-nums text-primary">{pct}%</p>
             </div>
           </div>
@@ -938,7 +938,7 @@ function WorkoutPlan({ purchased, rehab }: { purchased: boolean; rehab: CareReha
 
         {/* 风险提示 */}
         <div className="mt-3 rounded-xl bg-destructive/5 p-3 ring-1 ring-destructive/20">
-          <div className="mb-1.5 inline-flex items-center gap-1.5 text-[14px] font-bold text-destructive">
+          <div className="mb-1.5 inline-flex items-center gap-1.5 text-[17px] font-bold text-destructive">
             <AlertTriangle className="size-4" /> 运动风险提示
           </div>
           <ul className="space-y-1">
@@ -992,13 +992,13 @@ function WorkoutPlan({ purchased, rehab }: { purchased: boolean; rehab: CareReha
                 </div>
                 <p className="text-[20px] font-extrabold tabular-nums text-emerald-600">
                   {steps.toLocaleString()}
-                  <span className="text-[12px] font-semibold text-muted-foreground"> 步</span>
+                  <span className="text-[15px] font-semibold text-muted-foreground"> 步</span>
                 </p>
               </div>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                 <div className="h-full bg-emerald-500" style={{ width: `${stepPct}%` }} />
               </div>
-              <p className="mt-1 text-[12px] text-muted-foreground">
+              <p className="mt-1 text-[15px] text-muted-foreground">
                 今日目标 {goal.toLocaleString()} 步 · 已完成 {stepPct}%
               </p>
             </div>
@@ -1008,8 +1008,8 @@ function WorkoutPlan({ purchased, rehab }: { purchased: boolean; rehab: CareReha
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Activity className="size-4 text-primary" />
-            <span className="text-[16px] font-extrabold tracking-tight">今日运动清单</span>
-            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[12px] font-bold text-primary ring-1 ring-primary/20">
+            <span className="text-[17px] font-extrabold tracking-tight">今日运动清单</span>
+            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[15px] font-bold text-primary ring-1 ring-primary/20">
               {total} 项
             </span>
           </div>
@@ -1040,8 +1040,8 @@ function WorkoutPlan({ purchased, rehab }: { purchased: boolean; rehab: CareReha
                     <Play className="size-5 translate-x-[1px] fill-foreground text-foreground" />
                   </span>
                   {isDone && (
-                    <span className="absolute right-1 top-1 inline-flex items-center gap-0.5 rounded bg-emerald-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
-                      <CheckCircle2 className="size-3" />已完成
+                    <span className="absolute right-1 top-1 inline-flex items-center gap-0.5 rounded bg-emerald-600 px-1.5 py-0.5 text-[14px] font-bold text-white">
+                      <CheckCircle2 className="size-4" />已完成
                     </span>
                   )}
                 </span>
@@ -1049,10 +1049,10 @@ function WorkoutPlan({ purchased, rehab }: { purchased: boolean; rehab: CareReha
                   <span className="block truncate text-[17px] font-extrabold leading-tight">
                     {e.name}
                   </span>
-                  <span className="mt-1 block text-[14px] text-muted-foreground">{e.dose}</span>
+                  <span className="mt-1 block text-[17px] text-muted-foreground">{e.dose}</span>
                   <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[12.5px] text-muted-foreground">
                     <span className="inline-flex items-center gap-0.5">
-                      <Clock className="size-3" />
+                      <Clock className="size-4" />
                       {purchased ? "AI 排期" : "全天可做"}
                     </span>
                     <span className="text-primary">{isDone ? "已完成打卡" : "点击完成打卡"}</span>
@@ -1065,12 +1065,12 @@ function WorkoutPlan({ purchased, rehab }: { purchased: boolean; rehab: CareReha
 
         {/* 注意事项 */}
         <div className="mt-3 rounded-xl bg-card p-3 ring-1 ring-black/5">
-          <div className="mb-1.5 inline-flex items-center gap-1.5 text-[15px] font-bold">
+          <div className="mb-1.5 inline-flex items-center gap-1.5 text-[17px] font-bold">
             <AlertTriangle className="size-4 text-warning" /> 注意事项
           </div>
           <ul className="space-y-1">
             {rehab.cautions.map((c) => (
-              <li key={c} className="flex items-start gap-2 text-[14px] text-foreground/80">
+              <li key={c} className="flex items-start gap-2 text-[17px] text-foreground/80">
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-warning" />
                 {c}
               </li>

@@ -119,21 +119,21 @@ export function PatientHomeScreen({
             />
 
             <div className="relative mb-4 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-bold text-white/95 ring-1 ring-white/20">
-                <Sparkles className="size-3" /> 骨安 · 今日任务
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[15px] font-bold text-white/95 ring-1 ring-white/20">
+                <Sparkles className="size-4" /> 骨安 · 今日任务
               </span>
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={onOpenGuide}
-                  className="inline-flex h-8 items-center gap-1 rounded-full bg-white/15 px-3 text-[12px] font-bold text-white ring-1 ring-white/25 active:scale-95"
+                  className="inline-flex h-10 items-center gap-1 rounded-full bg-white/15 px-3 text-[15px] font-bold text-white ring-1 ring-white/25 active:scale-95"
                 >
-                  <Sparkles className="size-3" /> 引导
+                  <Sparkles className="size-4" /> 引导
                 </button>
                 <button
                   onClick={() => setQrOpen(true)}
-                  className="inline-flex h-8 items-center gap-1 rounded-full bg-white px-3 text-[12px] font-bold text-primary shadow-md active:scale-95"
+                  className="inline-flex h-10 items-center gap-1 rounded-full bg-white px-3 text-[15px] font-bold text-primary shadow-md active:scale-95"
                 >
-                  <QrCode className="size-3.5" /> 入群
+                  <QrCode className="size-4" /> 入群
                 </button>
               </div>
             </div>
@@ -142,14 +142,14 @@ export function PatientHomeScreen({
               <div className="min-w-0 pt-0.5">
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="size-3 text-white/90" />
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/85">
+                  <p className="text-[14px] font-bold uppercase tracking-[0.18em] text-white/85">
                     骨安 · 您的 AI 主治医生
                   </p>
                 </div>
                 <p className="mt-2 text-[23px] font-bold leading-snug">
                   {patientName}，今日 {remaining} 项待打卡
                 </p>
-                <p className="mt-2 text-[15px] leading-relaxed text-white/90">
+                <p className="mt-2 text-[17px] leading-relaxed text-white/90">
                   {mode === "inpatient" ? "康复训练 · 用药 · 宣教" : "居家康复 · 用药 · 饮食"}
                 </p>
               </div>
@@ -167,7 +167,7 @@ export function PatientHomeScreen({
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <span className="animate-breathe absolute -bottom-2 left-1/2 inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[12px] font-bold text-primary shadow-lg ring-2 ring-primary/20">
+                <span className="animate-breathe absolute -bottom-2 left-1/2 inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[15px] font-bold text-primary shadow-lg ring-2 ring-primary/20">
                   点我试试
                 </span>
               </button>
@@ -180,10 +180,10 @@ export function PatientHomeScreen({
                   <span className="inline-flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Clock className="size-4" />
                   </span>
-                  <span className="text-[16px] font-bold">今日任务</span>
+                  <span className="text-[17px] font-bold">今日任务</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="rounded-full bg-primary/10 px-2 py-1 text-[12px] font-bold text-primary">
+                  <span className="rounded-full bg-primary/10 px-2 py-1 text-[15px] font-bold text-primary">
                     {idx + 1}/{total}
                   </span>
                   <button
@@ -227,10 +227,10 @@ export function PatientHomeScreen({
 
                   </div>
 
-                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[12px]">
+                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[15px]">
                     {current.time && (
                       <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 font-bold text-primary">
-                        <Clock className="size-3" /> {current.time}
+                        <Clock className="size-4" /> {current.time}
                       </span>
                     )}
                     <span className="rounded-md bg-foreground/[0.06] px-2 py-0.5 font-semibold text-foreground/70">
@@ -239,17 +239,17 @@ export function PatientHomeScreen({
                   </div>
 
                   <div className="mt-2.5 flex items-end justify-between gap-3">
-                    <p className="min-w-0 flex-1 text-[14px] leading-snug text-foreground/75">
+                    <p className="min-w-0 flex-1 text-[17px] leading-snug text-foreground/75">
                       {current.detail}
                     </p>
                     {current.done ? (
-                      <span className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-success/10 px-3 text-[14px] font-bold text-success">
+                      <span className="inline-flex h-11 shrink-0 items-center gap-1 rounded-full bg-success/10 px-3 text-[17px] font-bold text-success">
                         <Check className="size-4" /> 已打卡
                       </span>
                     ) : (
                       <button
                         onClick={() => onToggle(current.id)}
-                        className="inline-flex h-9 shrink-0 items-center rounded-full bg-primary px-5 text-[14px] font-bold text-primary-foreground shadow-sm active:scale-95"
+                        className="inline-flex h-11 shrink-0 items-center rounded-full bg-primary px-5 text-[17px] font-bold text-primary-foreground shadow-sm active:scale-95"
                       >
                         确认
                       </button>
@@ -266,7 +266,7 @@ export function PatientHomeScreen({
                   <button
                     key={q}
                     onClick={() => onAskAI(q)}
-                    className="shrink-0 rounded-full bg-white/15 px-3 py-2 text-[13px] font-semibold text-white/95 ring-1 ring-white/25 transition-colors hover:bg-white hover:text-primary active:scale-95"
+                    className="shrink-0 rounded-full bg-white/15 px-3 py-2 text-[16px] font-semibold text-white/95 ring-1 ring-white/25 transition-colors hover:bg-white hover:text-primary active:scale-95"
                   >
                     {q}
                   </button>
@@ -286,8 +286,8 @@ export function PatientHomeScreen({
                   <Stethoscope className="size-5 text-primary" />
                 </div>
                 <div className="min-w-0 text-left">
-                  <div className="text-[15px] font-bold leading-tight">咨询关节外科医生？</div>
-                  <div className="mt-0.5 text-[12px] text-muted-foreground">
+                  <div className="text-[17px] font-bold leading-tight">咨询关节外科医生？</div>
+                  <div className="mt-0.5 text-[15px] text-muted-foreground">
                     主任 / 主治 1v1 · 住院期间锁定主管医护
                   </div>
                 </div>
@@ -299,8 +299,8 @@ export function PatientHomeScreen({
               aria-label="我的消息"
             >
               <Bell className="size-5 text-primary" />
-              <span className="mt-0.5 text-[12px] font-bold">消息</span>
-              <span className="absolute right-1.5 top-1.5 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+              <span className="mt-0.5 text-[15px] font-bold">消息</span>
+              <span className="absolute right-1.5 top-1.5 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-rose-500 px-1 text-[13px] font-bold text-white">
                 3
               </span>
             </button>
@@ -315,9 +315,9 @@ export function PatientHomeScreen({
                 <FileText className="size-5 text-primary" />
                 <div className="text-[17px] font-bold">我的入院单</div>
               </div>
-              <div className="mt-1 text-[14px] text-muted-foreground">{bedInfo}</div>
+              <div className="mt-1 text-[17px] text-muted-foreground">{bedInfo}</div>
               {admissionUploaded ? (
-                <div className="mt-3 flex items-center gap-2 rounded-xl bg-success/10 p-3 text-[15px] font-semibold text-success">
+                <div className="mt-3 flex items-center gap-2 rounded-xl bg-success/10 p-3 text-[17px] font-semibold text-success">
                   <Check className="size-5" /> 入院单已上传，护士已收到
                 </div>
               ) : (
@@ -339,11 +339,11 @@ export function PatientHomeScreen({
                   <MapPin className="size-6" />
                 </div>
                 <div>
-                  <div className="text-[13px] font-bold text-primary">
+                  <div className="text-[16px] font-bold text-primary">
                     第 {stageIdx + 1}/{stageTotal} 步
                   </div>
                   <div className="text-[19px] font-bold leading-tight">{stageLabel}</div>
-                  <div className="mt-0.5 text-[13px] text-muted-foreground">点击查看完整住院路径</div>
+                  <div className="mt-0.5 text-[16px] text-muted-foreground">点击查看完整住院路径</div>
                 </div>
               </div>
               <ChevronRight className="size-5 text-muted-foreground" />
@@ -361,26 +361,26 @@ export function PatientHomeScreen({
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-center gap-1.5">
-                  <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[11px] font-bold text-destructive">
+                  <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[14px] font-bold text-destructive">
                     待完成 2
                   </span>
-                  <span className="text-[12px] text-muted-foreground">本月 5/12 项</span>
+                  <span className="text-[15px] text-muted-foreground">本月 5/12 项</span>
                 </div>
                 <p className="truncate text-[17px] font-semibold leading-tight">
                   膝关节功能评估 · 术后必填
                 </p>
-                <p className="mt-0.5 text-[13px] text-muted-foreground">
+                <p className="mt-0.5 text-[16px] text-muted-foreground">
                   7 题 · 约 2 分钟，完成后同步治疗师
                 </p>
               </div>
-              <span className="shrink-0 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground">
+              <span className="shrink-0 rounded-full bg-primary px-4 py-2 text-[17px] font-bold text-primary-foreground">
                 去填写
               </span>
             </div>
-            <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-3 text-[12px] text-muted-foreground">
+            <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-3 text-[15px] text-muted-foreground">
               <span>更多生活问卷可选填，不强制</span>
               <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
-                进入评估中心 <ChevronRight className="size-3.5" />
+                进入评估中心 <ChevronRight className="size-4" />
               </span>
             </div>
           </button>
@@ -397,12 +397,12 @@ export function PatientHomeScreen({
             style={{ background: "var(--gradient-hero)" }}
           >
             <ShoppingBag className="absolute -bottom-6 -right-4 size-28 opacity-20" />
-            <div className="flex items-center gap-2 text-[13px] opacity-90">
+            <div className="flex items-center gap-2 text-[16px] opacity-90">
               <Sparkles className="size-4" /> 关节外科医生 & 康复治疗师联合甄选
             </div>
             <div className="mt-1 text-[21px] font-bold">骨关节全周期管理包</div>
-            <div className="mt-1 text-[13px] opacity-85">康复训练 · 药食同源餐 · 院内外衔接</div>
-            <div className="mt-3 flex items-center gap-3 text-[13px]">
+            <div className="mt-1 text-[16px] opacity-85">康复训练 · 药食同源餐 · 院内外衔接</div>
+            <div className="mt-3 flex items-center gap-3 text-[16px]">
               <span className="rounded-full bg-white/20 px-2.5 py-1">已为 8,326 位骨友服务</span>
               <span className="ml-auto inline-flex items-center gap-1 font-semibold">
                 查看服务 <ChevronRight className="size-4" />
@@ -425,8 +425,8 @@ export function PatientHomeScreen({
                 <div className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
                   <t.icon className="size-6" />
                 </div>
-                <p className="text-[14px] font-semibold">{t.label}</p>
-                <p className="text-[11px] text-muted-foreground">{t.desc}</p>
+                <p className="text-[17px] font-semibold">{t.label}</p>
+                <p className="text-[14px] text-muted-foreground">{t.desc}</p>
               </button>
             ))}
           </div>
@@ -445,13 +445,13 @@ export function PatientHomeScreen({
               <X className="size-4" />
             </button>
             <h3 className="text-[19px] font-bold">加入健康管理服务群</h3>
-            <p className="mt-1 text-[14px] text-muted-foreground">
+            <p className="mt-1 text-[17px] text-muted-foreground">
               医生 + 康复治疗师 + 营养师在群内为您答疑
             </p>
             <div className="mx-auto mt-4 grid size-44 place-items-center rounded-2xl bg-card ring-1 ring-black/10">
               <QrCode className="size-28 text-primary" />
             </div>
-            <p className="mt-3 text-center text-[13px] text-muted-foreground">
+            <p className="mt-3 text-center text-[16px] text-muted-foreground">
               长按二维码 · 使用微信扫码进群
             </p>
           </div>
@@ -475,14 +475,14 @@ function SectionHeader({
       <div className="flex items-center gap-2">
         <h2 className="text-[19px] font-bold tracking-tight">{title}</h2>
         {badge && (
-          <span className="rounded bg-primary/15 px-2 py-0.5 text-[11px] font-bold text-primary">
+          <span className="rounded bg-primary/15 px-2 py-0.5 text-[14px] font-bold text-primary">
             {badge}
           </span>
         )}
       </div>
       {action && (
-        <span className="inline-flex items-center gap-0.5 text-[13px] font-semibold text-muted-foreground">
-          {action} <ChevronRight className="size-3.5" />
+        <span className="inline-flex items-center gap-0.5 text-[16px] font-semibold text-muted-foreground">
+          {action} <ChevronRight className="size-4" />
         </span>
       )}
     </div>
