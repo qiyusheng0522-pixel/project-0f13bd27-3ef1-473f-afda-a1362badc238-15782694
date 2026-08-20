@@ -15,6 +15,7 @@ import {
 import type { Patient } from "@/lib/types";
 import { getArchive } from "@/lib/mock-records";
 import { addNote, usePatientNotes, type PatientNote } from "@/lib/patient-notes";
+import { DEMO_PATIENT_ID, useCaseFlow } from "@/lib/case-flow";
 
 export function PatientArchiveSheet({
   patient,
@@ -30,6 +31,10 @@ export function PatientArchiveSheet({
   const arc = getArchive(patient.id);
   const notes = usePatientNotes(patient.id);
   const [adding, setAdding] = useState(false);
+  const flow = useCaseFlow();
+  const intraOp = patient.id === DEMO_PATIENT_ID ? flow.intraOp : null;
+  const intraOpFields = intraOp ? intraOpFindings(intraOp) : [];
+  const intraOpAbnormal = intraOpFields.filter((f) => f.abnormal);
   return (
     <Sheet onClose={onClose} title="患者档案">
       <div className="space-y-3 p-3">
@@ -204,6 +209,62 @@ export function PatientArchiveSheet({
           ))}
         </div>
 
+        {/* 术中评估（依据术中量表填写内容） */}
+        {intraOp && (
+          <>
+            <SectionTitle icon={Stethoscope} text="术中评估 · 依据术中量表" tone="text-primary" />
+            <div className="rounded-xl border bg-primary/5 p-3 text-[11px]">
+              <div className="mb-1.5 flex items-center justify-between text-[10px] text-muted-foreground">
+                <span>填写时间：{intraOp.at}</span>
+                <span>填写人：{intraOp.by}</span>
+              </div>
+              {intraOpAbnormal.length > 0 && (
+                <div className="mb-2 flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-1 text-[10px] font-bold text-destructive">
+                  <AlertTriangle className="h-3 w-3" />
+                  术中存在 {intraOpAbnormal.length} 项异常，请重点关注
+                </div>
+              )}
+              <div className="flex flex-wrap gap-1">
+                {intraOpFields.map((f) => (
+                  <span
+                    key={f.label}
+                    className={`rounded-md px-1.5 py-0.5 text-[10px] ${
+                      f.abnormal
+                        ? "animate-pulse bg-destructive font-bold text-destructive-foreground ring-2 ring-destructive/40"
+                        : "bg-card text-muted-foreground"
+                    }`}
+                  >
+                    {f.abnormal && "⚠ "}
+                    {f.label} {f.value}
+                  </span>
+                ))}
+              </div>
+              {intraOpAbnormal.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {intraOpAbnormal.map((f) => (
+                    <div key={f.label} className="rounded-lg border border-destructive/30 bg-destructive/5 p-2 text-[10px] text-destructive">
+                      ⚠ {f.label} {f.value} · {f.note}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {intraOp.advice && (
+                <div className="mt-2 rounded-lg bg-card p-2 text-[11px]">
+                  <div className="mb-0.5 text-[9px] font-bold text-primary">医生建议（推送至治疗师）</div>
+                  {intraOp.advice}
+                </div>
+              )}
+              {flow.images.length > 0 && (
+                <div className="mt-2 grid grid-cols-4 gap-1.5">
+                  {flow.images.map((im) => (
+                    <img key={im.id} src={im.url} alt="术中影像" className="aspect-square w-full rounded object-cover" />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
         {/* 手术评估（医生建议） */}
         {arc.surgery && (
           <>
@@ -287,6 +348,43 @@ export function Sheet({ children, onClose, title }: { children: React.ReactNode;
       <div className="flex-1 overflow-y-auto">{children}</div>
     </div>
   );
+}
+
+/** 依据术中量表内容提炼术中评估项，并判定异常（与其他异常指标同样式高亮） */
+function intraOpFindings(rec: {
+  anesthesia: string;
+  bleeding: string;
+  implant: string;
+  duration: string;
+  complication: string;
+}): { label: string; value: string; abnormal: boolean; note: string }[] {
+  const num = (v: string) => Number((v.match(/[\d.]+/) ?? ["0"])[0]);
+  const bleeding = num(rec.bleeding);
+  const duration = num(rec.duration);
+  const complication = rec.complication.trim();
+  const hasComplication = complication !== "" && !/^(无|否|未见|正常)/.test(complication);
+  return [
+    { label: "麻醉方式", value: rec.anesthesia, abnormal: false, note: "" },
+    {
+      label: "术中出血",
+      value: rec.bleeding,
+      abnormal: bleeding >= 400,
+      note: "出血量偏多，警惕术后血红蛋白下降，需复查血常规",
+    },
+    {
+      label: "手术时长",
+      value: rec.duration,
+      abnormal: duration >= 120,
+      note: "手术时间偏长，注意感染与深静脉血栓预防",
+    },
+    {
+      label: "术中并发症",
+      value: complication || "无",
+      abnormal: hasComplication,
+      note: "存在术中并发症，需同步治疗师调整康复强度",
+    },
+    { label: "假体型号", value: rec.implant, abnormal: false, note: "" },
+  ];
 }
 
 function Field({ label, value }: { label: string; value: string }) {
