@@ -337,11 +337,14 @@ export function PatientWorkbench() {
         </div>
 
         {tab === "home" && (
-          <HomeTab
+          <PatientHomeScreen
             mode={mode}
-            patient={PATIENT}
-            stages={stages as unknown as { key: string; label: string }[]}
-            currentStageIdx={currentStageIdx}
+            patientName={PATIENT.name}
+            bedInfo={`${PATIENT.hospital} · ${mode === "inpatient" ? "关节外科 12 床" : "门诊随访"}`}
+            stageLabel={stages[currentStageIdx].label}
+            stageIdx={currentStageIdx}
+            stageTotal={stages.length}
+            onOpenPath={() => setPathOpen(true)}
             admissionUploaded={admissionUploaded}
             onUpload={() => {
               setAdmissionUploaded(true);
@@ -349,13 +352,18 @@ export function PatientWorkbench() {
             }}
             todos={currentTodos}
             onToggle={toggleTodo}
-            onAskAI={() => setAiOpen(true)}
+            onAskAI={(q) => {
+              setAiQuestion(q);
+              setAiOpen(true);
+            }}
             onOpenScale={() => setScaleOpen(true)}
+            onOpenGuide={() => setGuideStep(1)}
+            eduSlot={<EduSection />}
           />
         )}
 
         {tab === "plan" && (
-          <PlanTab
+          <PatientCareScreen
             mode={mode}
             rehab={rehab}
             dishes={dishes}
@@ -380,8 +388,26 @@ export function PatientWorkbench() {
           <SwapDishSheet dish={swapDish} onClose={() => setSwapDish(null)} onPick={swapDishTo} />
         )}
 
-        {/* AI 弹层 */}
-        {aiOpen && <BoneAISheet onClose={() => setAiOpen(false)} />}
+        {/* 完整住院路径 */}
+        {pathOpen && (
+          <PathSheet
+            stages={stages as unknown as { key: string; label: string }[]}
+            currentStageIdx={currentStageIdx}
+            onClose={() => setPathOpen(false)}
+          />
+        )}
+
+        {/* 骨灵大模型会话 */}
+        {aiOpen && (
+          <PatientAiChat
+            initialQuestion={aiQuestion}
+            onClose={() => {
+              setAiOpen(false);
+              setAiQuestion(undefined);
+            }}
+          />
+        )}
+
 
         {/* 第 1 步：健康档案上传 */}
         {archiveOpen && (
