@@ -204,6 +204,13 @@ function HomeTab({
         <div className="mt-0.5 text-[11px] opacity-90">今日工作台 · 点击数字可跳转对应清单</div>
       </div>
 
+      <CaseFlowBanner
+        hint="全流程演示病例：术前异常 → 手术确认 → 术中记录 → 推送治疗师"
+        actionLabel="去手术确认"
+        onAction={() => onJump("preop")}
+      />
+      <AbnormalPanel compact />
+
       {/* 今日工作台统计 - 全部可点击跳转（合并卡片） */}
       <div className="grid grid-cols-2 gap-2">
         <WorkStatCard
@@ -333,6 +340,8 @@ function PreOpTab({
 }) {
   return (
     <div className="space-y-3 p-3">
+      <CaseFlowBanner hint="术前异常已同步：请评估后决定是否如期手术" />
+      <AbnormalPanel />
       <div className="rounded-2xl border bg-info/5 p-3 text-[11px] text-info">
         <Sparkles className="mr-1 inline h-3 w-3" />
         AI 已根据值班医生录入的术前量表给出结论，请确认是否如期手术。
@@ -520,13 +529,27 @@ function IntraOpTab({
   list,
   filledIntraOp,
   onOpen,
+  onPushTherapist,
 }: {
   list: typeof patients;
   filledIntraOp: Record<string, number>;
   onOpen: (p: Patient) => void;
+  onPushTherapist: () => void;
 }) {
+  const flow = useCaseFlow();
   return (
     <div className="space-y-3 p-3">
+      <CaseFlowBanner
+        hint={
+          !flow.intraOp
+            ? "请填写术中记录并上传影像（团队任一成员均可）"
+            : flow.pushedToTherapist
+              ? "已推送治疗师，等待康复方案评估"
+              : "术中记录已保存，可推送治疗师进行康复方案评估"
+        }
+        actionLabel={flow.intraOp && !flow.pushedToTherapist ? "手术结束·推送治疗师" : undefined}
+        onAction={flow.intraOp && !flow.pushedToTherapist ? onPushTherapist : undefined}
+      />
       <div className="rounded-2xl border bg-primary/5 p-3 text-[11px] text-primary">
         ✏️ 团队任一成员可填写，保存后自动同步治疗师，并在列表中保留 3 天。
       </div>
