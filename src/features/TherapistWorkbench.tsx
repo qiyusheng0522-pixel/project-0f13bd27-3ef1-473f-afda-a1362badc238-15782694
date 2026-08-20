@@ -928,7 +928,15 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
-function PlanEditorSheet({ patient, onClose, onSave }: { patient: Patient; onClose: () => void; onSave: () => void }) {
+function PlanEditorSheet({
+  patient,
+  onClose,
+  onSave,
+}: {
+  patient: Patient;
+  onClose: () => void;
+  onSave: (planName: string, exercises: RehabExercise[]) => void;
+}) {
   const initial = aiRehabPlan(patient);
   const [templateName, setTemplateName] = useState(initial.templateName);
   const [goal, setGoal] = useState(initial.goal);
@@ -963,7 +971,7 @@ function PlanEditorSheet({ patient, onClose, onSave }: { patient: Patient; onClo
         <button onClick={onClose} className="text-[12px] text-muted-foreground">取消</button>
         <div className="text-[13px] font-semibold">编辑康复方案 · {patient.name}</div>
         <button
-          onClick={onSave}
+          onClick={() => onSave(templateName, exercises)}
           className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground active:opacity-90"
         >
           <Save className="h-3 w-3" />保存
