@@ -94,12 +94,8 @@ export function PatientAiChat({
   onClose: () => void;
   initialQuestion?: string;
 }) {
-  const [msgs, setMsgs] = useState<Msg[]>([
-    {
-      role: "ai",
-      text: "您好，我是骨安 · 骨灵 AI 主治医生。可以问我康复动作、用药、饮食运动或报告解读相关的问题。",
-    },
-  ]);
+  const [msgs, setMsgs] = useState<Msg[]>([]);
+
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const handledRef = useRef<string | undefined>(undefined);
