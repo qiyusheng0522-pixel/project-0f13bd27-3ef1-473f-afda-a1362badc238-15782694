@@ -326,7 +326,21 @@ export function PatientWorkbench() {
       }
     >
 
-      <div className="relative pb-24 text-[17px] leading-relaxed">
+      {/* 骨灵会话（全屏占满内容区） */}
+      {aiOpen && (
+        <div className="h-full">
+          <PatientAiChat
+            initialQuestion={aiQuestion}
+            onClose={() => {
+              setAiOpen(false);
+              setAiQuestion(undefined);
+            }}
+          />
+        </div>
+      )}
+
+      <div className={cn("relative pb-24 text-[17px] leading-relaxed", aiOpen && "hidden")}>
+
         {/* 自动识别版本提示（不再让老人手动切换） */}
         <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
           <div className="flex items-center gap-3">
