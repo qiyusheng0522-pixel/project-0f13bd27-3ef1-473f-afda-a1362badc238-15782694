@@ -274,7 +274,7 @@ export function PatientWorkbench() {
 
   const tabItems = [
     { key: "home", label: "首页", icon: Home },
-    { key: "ai", label: "骨灵大模型", icon: Sparkles },
+    { key: "ai", label: "骨灵", icon: Sparkles },
     { key: "plan", label: "方案", icon: ClipboardList },
     { key: "me", label: "我的", icon: User },
   ];
@@ -284,7 +284,7 @@ export function PatientWorkbench() {
       title="骨安 · 患者端"
       subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
       overlay={
-        guideStep && !archiveOpen && !scaleOpen ? (
+        archiveOpen || scaleOpen ? null : guideStep ? (
           <GuideSheet
             step={guideStep}
             onSkip={() => setGuideStep(null)}
@@ -297,8 +297,20 @@ export function PatientWorkbench() {
               }
             }}
           />
-        ) : null
+        ) : (
+          <div className="flex justify-end">
+            <button
+              onClick={() => setGuideStep(1)}
+              className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-[16px] font-bold text-primary-foreground shadow-lg active:scale-95"
+              style={{ boxShadow: "var(--shadow-elevated)" }}
+            >
+              <Sparkles className="h-5 w-5" />
+              引导
+            </button>
+          </div>
+        )
       }
+
       bottom={
         <TabBar
           items={tabItems}
@@ -423,7 +435,7 @@ export function PatientWorkbench() {
           />
         )}
 
-        {/* 骨灵大模型会话 */}
+        {/* 骨灵会话 */}
         {aiOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="h-[792px] w-[355px] overflow-hidden rounded-[32px] bg-background shadow-2xl">
@@ -700,7 +712,7 @@ function InpatientHomeTab({
         </button>
       </section>
 
-      {/* 骨灵大模型快捷入口 */}
+      {/* 骨灵快捷入口 */}
       <button
         onClick={onAskAI}
         className="flex w-full items-center gap-3 rounded-2xl p-4 text-left text-white active:scale-[0.99]"
@@ -708,7 +720,7 @@ function InpatientHomeTab({
       >
         <Sparkles className="h-8 w-8 shrink-0" />
         <div>
-          <div className="text-[20px] font-bold">问问骨灵大模型</div>
+          <div className="text-[20px] font-bold">问问骨灵</div>
           <div className="text-[15px] opacity-95">可以说话提问，随时解答康复疑问</div>
         </div>
       </button>
@@ -1050,7 +1062,7 @@ function SwapDishSheet({
   );
 }
 
-// ---------- 骨灵大模型 ----------
+// ---------- 骨灵 ----------
 function PathSheet({
   stages,
   currentStageIdx,

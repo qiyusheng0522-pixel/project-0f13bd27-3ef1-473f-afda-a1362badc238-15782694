@@ -422,17 +422,11 @@ export function PatientCareScreen({
       </section>
 
       <div className="mt-4 px-4">
-        <button
-          onClick={onSyncToTodo}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-[18px] font-bold text-primary-foreground shadow-lg active:scale-[0.98]"
-        >
-          <CheckCircle2 className="size-5" />
-          一键同步为今日打卡待办
-        </button>
-        <p className="mt-2 pb-2 text-center text-[13px] text-muted-foreground">
+        <p className="pb-2 text-center text-[13px] text-muted-foreground">
           {mode === "inpatient" ? "住院版" : "居家版"} · 方案内容一致，按当前阶段自动更新
         </p>
       </div>
+
 
       {/* 弹层 */}
       {selectedTag && (

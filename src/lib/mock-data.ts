@@ -337,7 +337,7 @@ export const roleMeta = {
   patient: {
     title: "患者 / 家属",
     subtitle: "Patient (Senior Friendly)",
-    description: "老年友好大字版：院内路径与每日任务、院外居家康复与营养药膳，一键骨灵大模型答疑。",
+    description: "老年友好大字版：院内路径与每日任务、院外居家康复与营养药膳，一键骨灵答疑。",
     accent: "from-orange-500 to-rose-500",
   },
 } as const;
