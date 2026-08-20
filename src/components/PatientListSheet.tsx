@@ -159,6 +159,11 @@ export function PatientListSheet({
                 {p.visitType === "revisit" && (
                   <span className="rounded bg-info/15 px-1 py-0.5 text-[9px] font-bold text-info">复诊</span>
                 )}
+                {p.dischargeDate && (
+                  <span className="rounded bg-muted px-1 py-0.5 text-[9px] font-bold text-muted-foreground">
+                    出院 {p.dischargeDate}
+                  </span>
+                )}
                 <ChevronRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
               </div>
               <div className="mt-1 text-[10px] text-muted-foreground">
