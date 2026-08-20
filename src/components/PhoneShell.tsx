@@ -13,6 +13,7 @@ export function PhoneShell({
   rightSlot,
   hideHeader,
   bottom,
+  overlay,
   className,
 }: {
   title?: string;
@@ -21,8 +22,11 @@ export function PhoneShell({
   rightSlot?: ReactNode;
   hideHeader?: boolean;
   bottom?: ReactNode;
+  /** 固定在底部导航上方、不随内容滚动的浮层（如使用引导） */
+  overlay?: ReactNode;
   className?: string;
 }) {
+
   const [time, setTime] = useState("09:41");
   useEffect(() => {
     const update = () => {
