@@ -683,7 +683,6 @@ const EDU_ITEMS: {
   tag: string;
   tagTint: string;
   author: string;
-  points: number;
   tint: string;
   icon: React.ElementType;
 }[] = [
@@ -694,7 +693,6 @@ const EDU_ITEMS: {
     tag: "必读",
     tagTint: "bg-sky-50 text-sky-700",
     author: "康复治疗师 · 王老师",
-    points: 50,
     tint: "from-teal-400 to-emerald-500",
     icon: Dumbbell,
   },
@@ -705,7 +703,6 @@ const EDU_ITEMS: {
     tag: "食谱",
     tagTint: "bg-emerald-50 text-emerald-700",
     author: "营养师 · 李老师",
-    points: 30,
     tint: "from-amber-400 to-orange-500",
     icon: Soup,
   },
@@ -716,7 +713,6 @@ const EDU_ITEMS: {
     tag: "预约",
     tagTint: "bg-orange-50 text-orange-700",
     author: "主任医师 · 张主任",
-    points: 80,
     tint: "from-sky-400 to-indigo-500",
     icon: HeartPulse,
   },
@@ -727,7 +723,6 @@ const EDU_ITEMS: {
     tag: "护理",
     tagTint: "bg-violet-50 text-violet-700",
     author: "骨科专科护士 · 赵老师",
-    points: 20,
     tint: "from-rose-400 to-pink-500",
     icon: MapPin,
   },
@@ -740,9 +735,6 @@ function EduSection() {
     <section className="overflow-hidden rounded-2xl border bg-card p-3">
       <div className="flex items-center gap-2">
         <div className="text-[20px] font-bold">健康百科</div>
-        <span className="rounded-md bg-orange-50 px-2 py-1 text-[14px] font-bold text-orange-600">
-          看完单篇得积分
-        </span>
         <button className="ml-auto flex items-center text-[16px] font-medium text-primary">
           进入百科
           <ChevronRight className="h-4 w-4" />
@@ -799,9 +791,6 @@ function EduSection() {
                     {it.tag}
                   </span>
                   <span className="truncate text-[15px] text-muted-foreground">{it.author}</span>
-                  <span className="ml-auto shrink-0 rounded-md bg-orange-50 px-2 py-1 text-[15px] font-bold text-orange-600">
-                    +{it.points} 积分
-                  </span>
                 </div>
               </div>
             </button>
