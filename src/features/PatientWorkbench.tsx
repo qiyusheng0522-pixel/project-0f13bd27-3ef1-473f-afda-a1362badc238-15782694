@@ -599,13 +599,14 @@ function HomeTab({
         </div>
       </section>
 
+      {/* ===== 宣教：健康百科 ===== */}
+      <EduSection />
+
       {/* ===== 健康服务包 ===== */}
       <section className="overflow-hidden rounded-2xl border bg-card p-3">
         <div className="mb-2.5 flex items-center gap-2">
           <div className="text-[20px] font-bold">骨安健康服务包</div>
-          <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[14px] font-bold text-emerald-700">
-            医生甄选
-          </span>
+
           <button className="ml-auto flex items-center text-[16px] font-medium text-primary">
             全部服务
             <ChevronRight className="h-4 w-4" />
