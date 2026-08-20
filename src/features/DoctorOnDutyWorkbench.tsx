@@ -21,9 +21,19 @@ import { Card, MiniStat, SearchBar } from "./SecretaryWorkbench";
 import { BarChart, ChartCard, LineChart, StatTile } from "@/components/WorkStats";
 import { ToastBanner } from "@/components/ActionSheet";
 import { PatientChatSheet } from "@/components/PatientChatSheet";
+import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
+import {
+  DEMO_PATIENT_ID,
+  admitPatient,
+  defaultAdmitDraft,
+  pushPreOpToTeam,
+  useCaseFlow,
+  type AdmitDraft,
+} from "@/lib/case-flow";
 import { patients, todayTasks } from "@/lib/mock-data";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
 
 type TabKey = "home" | "scales" | "chat" | "history" | "me";
 
