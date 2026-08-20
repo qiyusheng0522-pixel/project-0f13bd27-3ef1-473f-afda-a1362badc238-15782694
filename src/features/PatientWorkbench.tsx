@@ -70,7 +70,7 @@ const INPATIENT_TODOS: TodoItem[] = [
   { id: "t2", title: "直腿抬高", detail: "每次 15 下 · 缓慢抬起 5 秒", category: "运动", time: "上午 10:30" },
   { id: "t3", title: "术后护理宣教视频", detail: "约 3 分钟 · 看完点完成", category: "宣教", time: "上午 11:00" },
   { id: "t4", title: "服用止痛药", detail: "塞来昔布 1 粒 · 饭后", category: "用药", time: "中午 12:30" },
-  { id: "t5", title: "高蛋白午餐", detail: "鸡蛋羹 + 清蒸鱼 + 蔬菜汤", category: "饮食", time: "中午 12:00" },
+  { id: "t5", title: "助行器行走训练", detail: "床边站立 + 助行器行走 10 分钟", category: "运动", time: "中午 12:00" },
   { id: "t6", title: "下午冰敷", detail: "膝关节冰敷 15 分钟", category: "运动", time: "下午 15:00" },
 ];
 
