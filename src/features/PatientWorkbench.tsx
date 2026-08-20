@@ -404,14 +404,19 @@ export function PatientWorkbench() {
 
         {/* 骨灵大模型会话 */}
         {aiOpen && (
-          <PatientAiChat
-            initialQuestion={aiQuestion}
-            onClose={() => {
-              setAiOpen(false);
-              setAiQuestion(undefined);
-            }}
-          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="h-[792px] w-[355px] overflow-hidden rounded-[32px] bg-background shadow-2xl">
+              <PatientAiChat
+                initialQuestion={aiQuestion}
+                onClose={() => {
+                  setAiOpen(false);
+                  setAiQuestion(undefined);
+                }}
+              />
+            </div>
+          </div>
         )}
+
 
 
         {/* 第 1 步：健康档案上传 */}
