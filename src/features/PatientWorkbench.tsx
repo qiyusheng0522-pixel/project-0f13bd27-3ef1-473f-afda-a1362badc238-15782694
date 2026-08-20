@@ -1267,7 +1267,7 @@ function GuideSheet({
   const cfg = GUIDE_STEPS[step - 1];
   const Icon = cfg.icon;
   return (
-    <div className="absolute inset-0 z-50 flex flex-col justify-end bg-foreground/40 p-3">
+    <div className="z-50">
       <div className="overflow-hidden rounded-2xl bg-card shadow-2xl">
         <div
           className="flex items-center justify-between px-4 py-3 text-white"
