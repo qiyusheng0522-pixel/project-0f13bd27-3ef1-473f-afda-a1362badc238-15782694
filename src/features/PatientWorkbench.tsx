@@ -177,9 +177,43 @@ const INITIAL_DISHES: Dish[] = [
   },
 ];
 
+// ---------- 患者档案（后台状态，用于自动识别院内 / 院外版本） ----------
+type PatientProfile = {
+  name: string;
+  gender: "男" | "女";
+  age: number;
+  birthday: string;
+  hospital: string;
+  /** 后台同步的就诊状态，决定自动切换到哪一版 */
+  status: "admitted" | "post-op" | "rehab" | "discharged" | "outpatient";
+  diseaseHistory: { name: string; date: string }[];
+  pastTreatments: { date: string; note: string }[];
+  followUps: { date: string; note: string }[];
+  lifestyleRisks: string[];
+};
+
+const PATIENT: PatientProfile = {
+  name: "石美平",
+  gender: "女",
+  age: 64,
+  birthday: "1962年04月19日",
+  hospital: "南京鼓楼医院",
+  status: "post-op",
+  diseaseHistory: [{ name: "肩袖肌腱损伤", date: "2026-03-16" }],
+  pastTreatments: [{ date: "2026年03月16日", note: "住院处理建议：无" }],
+  followUps: [],
+  lifestyleRisks: ["膝关节疼痛", "抽烟", "饮水量不足", "消瘦"],
+};
+
+/** 由就诊状态自动判定版本：在院 → 住院版，其余 → 门诊/居家版 */
+function detectMode(status: PatientProfile["status"]): Mode {
+  return status === "admitted" || status === "post-op" || status === "rehab" ? "inpatient" : "home";
+}
+
 // ---------- 主组件 ----------
 export function PatientWorkbench() {
-  const [mode, setMode] = useState<Mode>("inpatient");
+  const [status, setStatus] = useState<PatientProfile["status"]>(PATIENT.status);
+  const mode = detectMode(status);
   const [tab, setTab] = useState<TabKey>("home");
   const [admissionUploaded, setAdmissionUploaded] = useState(false);
   const [todos, setTodos] = useState<TodoItem[]>(INPATIENT_TODOS);
@@ -221,46 +255,61 @@ export function PatientWorkbench() {
 
   const tabItems = [
     { key: "home", label: "首页", icon: Home },
-    { key: "plan", label: "健康方案", icon: ClipboardList },
-    { key: "tasks", label: "我的打卡", icon: Activity, badge: currentTodos.length - doneCount || undefined },
+    { key: "ai", label: "骨灵大模型", icon: Sparkles },
+    { key: "plan", label: "方案", icon: ClipboardList },
     { key: "me", label: "我的", icon: User },
   ];
 
   return (
     <PhoneShell
       title="骨安 · 患者端"
-      subtitle={`${mode === "inpatient" ? "院内陪护模式" : "居家康复模式"} · 大字版`}
+      subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
       bottom={
         <TabBar
           items={tabItems}
-          activeKey={tab}
-          onChange={(k) => setTab(k as TabKey)}
+          activeKey={tab === "tasks" ? "home" : tab}
+          onChange={(k) => {
+            if (k === "ai") {
+              setAiOpen(true);
+              return;
+            }
+            setTab(k as TabKey);
+          }}
         />
       }
     >
-      <div className="relative pb-24 text-[16px] leading-relaxed">
-        {/* 模式切换 */}
-        <div className="sticky top-0 z-10 flex gap-2 border-b bg-card px-3 py-2.5">
-          {(["inpatient", "home"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className={cn(
-                "flex-1 rounded-xl border py-2.5 text-[15px] font-bold transition-all",
-                mode === m
-                  ? "border-primary bg-primary text-primary-foreground shadow"
-                  : "border-border bg-background text-muted-foreground",
-              )}
+      <div className="relative pb-24 text-[17px] leading-relaxed">
+        {/* 自动识别版本提示（不再让老人手动切换） */}
+        <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: "var(--gradient-primary)" }}
             >
-              {m === "inpatient" ? "🏥 院内" : "🏠 院外居家"}
+              {mode === "inpatient" ? <Stethoscope className="h-6 w-6" /> : <HomeIcon className="h-6 w-6" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[19px] font-bold">
+                {mode === "inpatient" ? "住院版" : "门诊 / 居家版"}
+              </div>
+              <div className="text-[14px] text-muted-foreground">
+                已根据您的就诊状态自动为您切换
+              </div>
+            </div>
+            <button
+              onClick={() => setStatus(mode === "inpatient" ? "outpatient" : "post-op")}
+              className="shrink-0 rounded-full border px-3 py-2 text-[13px] text-muted-foreground active:bg-muted"
+            >
+              演示切换
             </button>
-          ))}
+          </div>
         </div>
 
-        {tab === "home" && (
+        {(tab === "home" || tab === "tasks") && (
           <HomeTab
             mode={mode}
-            stages={stages as any}
+            patient={PATIENT}
+            stages={stages as unknown as { key: string; label: string }[]}
             currentStageIdx={currentStageIdx}
             admissionUploaded={admissionUploaded}
             onUpload={() => {
@@ -269,6 +318,7 @@ export function PatientWorkbench() {
             }}
             todos={currentTodos}
             onToggle={toggleTodo}
+            onAskAI={() => setAiOpen(true)}
           />
         )}
 
@@ -282,22 +332,7 @@ export function PatientWorkbench() {
           />
         )}
 
-        {tab === "tasks" && <TasksTab todos={currentTodos} onToggle={toggleTodo} />}
-
         {tab === "me" && <MeTab mode={mode} doneCount={doneCount} total={currentTodos.length} />}
-
-        {/* 骨灵大模型 悬浮按钮 */}
-        <button
-          onClick={() => setAiOpen(true)}
-          className="fixed bottom-[78px] right-[calc(50%-180px+12px)] z-30 flex items-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-bold text-white shadow-xl active:scale-95"
-          style={{
-            background: "linear-gradient(135deg, #f97316, #e11d48)",
-            boxShadow: "0 8px 24px -4px rgba(225, 29, 72, 0.55)",
-          }}
-        >
-          <Sparkles className="h-5 w-5" />
-          骨灵问答
-        </button>
 
         {/* 换菜弹层 */}
         {swapDish && (
@@ -309,7 +344,7 @@ export function PatientWorkbench() {
 
         {/* Toast */}
         {toast && (
-          <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-foreground/90 px-4 py-2 text-[13px] font-medium text-background shadow-lg">
+          <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-foreground/90 px-4 py-2.5 text-[15px] font-medium text-background shadow-lg">
             {toast}
           </div>
         )}
@@ -317,6 +352,7 @@ export function PatientWorkbench() {
     </PhoneShell>
   );
 }
+
 
 // ---------- 首页 ----------
 function HomeTab({
