@@ -22,6 +22,14 @@ import {
   Bell,
   RefreshCw,
   X,
+  Stethoscope,
+  ScanLine,
+  Watch,
+  HeartPulse,
+  FileText,
+  History,
+  CalendarCheck,
+  Cigarette,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { cn } from "@/lib/utils";
@@ -286,7 +294,7 @@ export function PatientWorkbench() {
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
               style={{ background: "var(--gradient-primary)" }}
             >
-              {mode === "inpatient" ? <Stethoscope className="h-6 w-6" /> : <HomeIcon className="h-6 w-6" />}
+              {mode === "inpatient" ? <Stethoscope className="h-6 w-6" /> : <Home className="h-6 w-6" />}
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-[19px] font-bold">
