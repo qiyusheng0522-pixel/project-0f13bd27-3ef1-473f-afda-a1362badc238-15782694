@@ -434,6 +434,7 @@ function HomeTab({
   todos,
   onToggle,
   onAskAI,
+  onOpenScale,
 }: {
   mode: Mode;
   patient: PatientProfile;
@@ -444,6 +445,7 @@ function HomeTab({
   todos: TodoItem[];
   onToggle: (id: string) => void;
   onAskAI: () => void;
+  onOpenScale: () => void;
 }) {
   const currentStage = stages[currentStageIdx];
   const [pathOpen, setPathOpen] = useState(false);
@@ -452,31 +454,31 @@ function HomeTab({
 
   return (
     <div className="space-y-4 p-3">
-      {/* 患者信息卡（两版共用） */}
-      <div
-        className="rounded-2xl p-4 text-white"
-        style={{ background: "var(--gradient-primary)" }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-[24px] font-bold backdrop-blur">
-            {patient.name.slice(0, 1)}
-          </div>
-          <div className="min-w-0">
-            <div className="text-[26px] font-bold leading-tight">{patient.name}</div>
-            <div className="mt-1 text-[16px] opacity-95">
-              性别：{patient.gender}　年龄：{patient.age}岁
+      {/* 患者信息卡（住院版） */}
+      {mode === "inpatient" && (
+        <div
+          className="rounded-2xl p-4 text-white"
+          style={{ background: "var(--gradient-primary)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-[24px] font-bold backdrop-blur">
+              {patient.name.slice(0, 1)}
             </div>
-            <div className="text-[15px] opacity-90">出生日期：{patient.birthday}</div>
+            <div className="min-w-0">
+              <div className="text-[26px] font-bold leading-tight">{patient.name}</div>
+              <div className="mt-1 text-[16px] opacity-95">
+                性别：{patient.gender}　年龄：{patient.age}岁
+              </div>
+              <div className="text-[15px] opacity-90">出生日期：{patient.birthday}</div>
+            </div>
           </div>
-        </div>
-        {mode === "inpatient" && (
           <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 text-[16px] backdrop-blur">
             <MapPin className="h-5 w-5 shrink-0" />
             当前阶段：<b className="text-[18px]">{currentStage.label}</b>
           </div>
-        )}
-        <div className="mt-2 text-[14px] opacity-90">{patient.hospital} · 关节外科</div>
-      </div>
+          <div className="mt-2 text-[14px] opacity-90">{patient.hospital} · 关节外科</div>
+        </div>
+      )}
 
       {/* ===== 院内版专属：入院单上传 + 住院路径 ===== */}
       {mode === "inpatient" && (
