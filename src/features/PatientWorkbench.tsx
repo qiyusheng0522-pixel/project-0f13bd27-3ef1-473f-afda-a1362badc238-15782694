@@ -1059,3 +1059,69 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+
+// ---------- 完整住院路径 ----------
+function PathSheet({
+  stages,
+  currentStageIdx,
+  onClose,
+}: {
+  stages: { key: string; label: string }[];
+  currentStageIdx: number;
+  onClose: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-40 flex flex-col bg-background">
+      <div className="flex items-center justify-between border-b bg-card px-3 py-3">
+        <button onClick={onClose} className="text-muted-foreground">
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div className="text-[19px] font-bold">我的完整住院路径</div>
+        <div className="w-5" />
+      </div>
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="relative space-y-6 pl-1">
+          {stages.map((s, idx) => {
+            const done = idx < currentStageIdx;
+            const active = idx === currentStageIdx;
+            const last = idx === stages.length - 1;
+            return (
+              <div key={s.key} className="relative flex items-start gap-4">
+                {!last && (
+                  <div className="absolute left-5 top-10 h-[calc(100%+1.5rem)] w-0 border-l-2 border-dashed border-muted-foreground/30" />
+                )}
+                <div
+                  className={cn(
+                    "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[16px] font-bold",
+                    done && "bg-success text-white",
+                    active && "bg-primary text-white ring-4 ring-primary/20",
+                    !done && !active && "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {done ? <CheckCircle2 className="h-5 w-5" /> : idx + 1}
+                </div>
+                <div
+                  className={cn(
+                    "flex-1 rounded-2xl border p-3.5",
+                    active ? "border-primary bg-primary/5" : "bg-card",
+                  )}
+                >
+                  <div className={cn("text-[18px] font-bold", active && "text-primary")}>
+                    {s.label}
+                  </div>
+                  {active && (
+                    <div className="mt-1 text-[15px] font-bold text-primary">当前所处阶段</div>
+                  )}
+                  {done && <div className="mt-1 text-[14px] text-muted-foreground">已完成</div>}
+                  {!done && !active && (
+                    <div className="mt-1 text-[14px] text-muted-foreground">待进行</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
