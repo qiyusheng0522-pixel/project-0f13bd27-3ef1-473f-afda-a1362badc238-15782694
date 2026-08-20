@@ -11,25 +11,29 @@ import { cn } from "@/lib/utils";
 export function PatientListSheet({
   inpatientList,
   outpatientList,
+  dischargedList = [],
   onClose,
   onArchive,
   onChat,
 }: {
   inpatientList: Patient[];
   outpatientList: Patient[];
+  dischargedList?: Patient[];
   onClose: () => void;
   onArchive: (p: Patient) => void;
   onChat: (p: Patient) => void;
 }) {
+  const [category, setCategory] = useState<"active" | "history">("active");
   const [sub, setSub] = useState<"inpatient" | "outpatient">("inpatient");
   const [outpatientSub, setOutpatientSub] = useState<"all" | "first" | "revisit">("all");
   const [keyword, setKeyword] = useState("");
   const [noteFor, setNoteFor] = useState<Patient | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
 
-  const baseList = sub === "inpatient" ? inpatientList : outpatientList;
+  const baseList =
+    category === "history" ? dischargedList : sub === "inpatient" ? inpatientList : outpatientList;
   const filteredByVisitType =
-    sub === "outpatient" && outpatientSub !== "all"
+    category === "active" && sub === "outpatient" && outpatientSub !== "all"
       ? baseList.filter((p) => p.visitType === outpatientSub)
       : baseList;
   const list = filteredByVisitType.filter(
@@ -38,6 +42,8 @@ export function PatientListSheet({
 
   const firstCount = outpatientList.filter((p) => p.visitType === "first").length;
   const revisitCount = outpatientList.filter((p) => p.visitType === "revisit").length;
+  const activeCount = inpatientList.length + outpatientList.length;
+
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-background">
