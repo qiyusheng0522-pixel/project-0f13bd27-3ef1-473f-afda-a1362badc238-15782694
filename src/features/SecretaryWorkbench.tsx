@@ -30,6 +30,8 @@ import { VitalsSheet } from "@/components/VitalsSheet";
 import { EducationPushSheet } from "@/components/EducationPushSheet";
 import { FollowUpSheet } from "@/components/FollowUpSheet";
 import { BarChart, ChartCard, HBarRow, StatTile } from "@/components/WorkStats";
+import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
+import { DEMO_PATIENT_ID, addNurseRecord, generateHandover, useCaseFlow } from "@/lib/case-flow";
 import { patients, todayTasks } from "@/lib/mock-data";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -159,9 +161,40 @@ export function SecretaryWorkbench() {
         <PatientArchiveSheet patient={overlay.patient} onClose={() => setOverlay(null)} selfRole="护士" selfName="张护士长" />
       )}
       {overlay?.kind === "vitals" && (
-        <VitalsSheet patient={overlay.patient} onClose={() => setOverlay(null)} onSave={(t) => { showToast(t); setOverlay(null); }} />
+        <VitalsSheet
+          patient={overlay.patient}
+          onClose={() => setOverlay(null)}
+          onSave={(t, v) => {
+            if (overlay.patient.id === DEMO_PATIENT_ID) {
+              const abnormal: { label: string; value: string; note?: string }[] = [];
+              if (Number(v.temp) >= 37.5) abnormal.push({ label: "体温", value: `${v.temp}℃`, note: "术后发热，需警惕感染" });
+              const sys = Number(String(v.bp).split("/")[0]);
+              if (sys >= 140) abnormal.push({ label: "血压", value: `${v.bp} mmHg`, note: "血压偏高，复测并汇报值班医生" });
+              if (Number(v.spo2) < 95) abnormal.push({ label: "血氧 SpO₂", value: `${v.spo2}%`, note: "血氧偏低" });
+              if (Number(v.vas) >= 6) abnormal.push({ label: "疼痛 VAS", value: `${v.vas}/10`, note: "疼痛控制不佳" });
+              if (Number(v.drainage) >= 100) abnormal.push({ label: "引流量", value: `${v.drainage} ml`, note: "引流偏多，观察渗血" });
+              addNurseRecord({
+                nurse: "护士 · 张敏",
+                note: v.note?.trim() || `生命体征：T ${v.temp}℃ / P ${v.pulse} / BP ${v.bp} / SpO₂ ${v.spo2}% · VAS ${v.vas} · 引流 ${v.drainage}ml`,
+                abnormal,
+              });
+              showToast(abnormal.length ? `已保存，${abnormal.length} 项异常指标已同步医生/治疗师/患者端` : t);
+            } else {
+              showToast(t);
+            }
+            setOverlay(null);
+          }}
+        />
       )}
-      {overlay?.kind === "handover" && <HandoverSheet onClose={() => setOverlay(null)} />}
+      {overlay?.kind === "handover" && (
+        <HandoverSheet
+          onClose={() => setOverlay(null)}
+          onGenerate={() => {
+            generateHandover();
+            showToast("已按今日护理记录 + 异常指标生成交班记录");
+          }}
+        />
+      )}
       {overlay?.kind === "education" && (
         <EducationPushSheet
           candidates={overlay.candidates}
@@ -218,6 +251,7 @@ function HomeTab({
   onJumpInpatient: () => void;
   onJumpFollowUp: () => void;
 }) {
+  const flow = useCaseFlow();
   return (
     <div className="space-y-3 p-3">
       <div
@@ -240,6 +274,17 @@ function HomeTab({
           </button>
         </div>
       </div>
+
+      {flow.created && (
+        <>
+          <CaseFlowBanner
+            hint="演示病例：每日录入指标与备注 → 自动汇总生成交班记录，异常指标同步多端"
+            actionLabel="护理交班"
+            onAction={() => onQuick("handover")}
+          />
+          <AbnormalPanel compact />
+        </>
+      )}
 
       <div className="grid grid-cols-4 gap-2 rounded-2xl border bg-card p-3">
         <QuickAction icon={Camera} label="住院录入" tone="bg-info/15 text-info" onClick={() => onQuick("ocr")} />

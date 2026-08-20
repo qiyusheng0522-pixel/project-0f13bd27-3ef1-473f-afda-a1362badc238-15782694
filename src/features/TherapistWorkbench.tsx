@@ -30,6 +30,14 @@ import { PatientArchiveSheet } from "@/components/PatientArchiveSheet";
 import { PatientListSheet } from "@/components/PatientListSheet";
 import { RehabRecordSheet } from "@/components/RehabRecordSheet";
 import { ActionSheet, ToastBanner } from "@/components/ActionSheet";
+import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
+import {
+  DEMO_PATIENT_ID,
+  addDailyRehab,
+  approvePlan,
+  dischargePatient,
+  useCaseFlow,
+} from "@/lib/case-flow";
 import { patients, todayTasks } from "@/lib/mock-data";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -173,6 +181,12 @@ export function TherapistWorkbench() {
   // 出院评估完成的患者，保留 3 天用于后续追踪
   const [dischargedAt, setDischargedAt] = useState<Record<string, number>>({});
   const [toast, setToast] = useState<string | null>(null);
+  const flow = useCaseFlow();
+
+  // 演示病例：手术团队推送后即出现待审核方案
+  const statuses: Record<string, PlanStatus> = flow.created
+    ? { ...planStatuses, [DEMO_PATIENT_ID]: flow.planApproved ? "confirmed" : "ai-draft" }
+    : planStatuses;
 
   // 住院 + 门诊康复患者
   const inpatientList = patients.filter(
@@ -202,7 +216,7 @@ export function TherapistWorkbench() {
           onChange={(k) => setTab(k as TabKey)}
           items={[
             { key: "home", label: "首页", icon: Home, badge: tasks.length },
-            { key: "plans", label: "康复方案", icon: HeartPulse, badge: myPatients.filter((p) => planStatuses[p.id] === "ai-draft").length },
+            { key: "plans", label: "康复方案", icon: HeartPulse, badge: myPatients.filter((p) => statuses[p.id] === "ai-draft").length },
             { key: "records", label: "院内评估", icon: FileText, badge: inpatientList.length },
             { key: "me", label: "我的", icon: User },
           ]}
@@ -214,7 +228,7 @@ export function TherapistWorkbench() {
           tasks={tasks}
           inpatientCount={inpatientList.length}
           outpatientCount={outpatientList.length}
-          planPendingCount={myPatients.filter((p) => planStatuses[p.id] === "ai-draft").length}
+          planPendingCount={myPatients.filter((p) => statuses[p.id] === "ai-draft").length}
           chatPendingCount={3}
           onOpenPatients={() => setOverlay({ kind: "patient-list" })}
           onOpenChat={() => setOverlay({ kind: "chat-list" })}
@@ -225,7 +239,7 @@ export function TherapistWorkbench() {
       {tab === "plans" && (
         <PlansTab
           list={myPatients}
-          statuses={planStatuses}
+          statuses={statuses}
           onEdit={(p) => setPlanEditor(p)}
           onArchive={(p) => setOverlay({ kind: "archive", patient: p })}
         />
@@ -248,9 +262,14 @@ export function TherapistWorkbench() {
         <PlanEditorSheet
           patient={planEditor}
           onClose={() => setPlanEditor(null)}
-          onSave={() => {
-            setPlanStatuses((s) => ({ ...s, [planEditor.id]: "edited" }));
-            showToast(`已保存修改：${planEditor.name}`);
+          onSave={(planName) => {
+            setPlanStatuses((s) => ({ ...s, [planEditor.id]: "confirmed" }));
+            if (planEditor.id === DEMO_PATIENT_ID) {
+              approvePlan(planName);
+              showToast(`方案已审核通过，已生成患者端打卡待办：${planEditor.name}`);
+            } else {
+              showToast(`已保存修改：${planEditor.name}`);
+            }
             setPlanEditor(null);
           }}
         />
@@ -259,8 +278,18 @@ export function TherapistWorkbench() {
         <RehabRecordSheet
           patient={recordFor}
           onClose={() => setRecordFor(null)}
-          onSave={() => {
-            showToast(`已保存院内康复记录：${recordFor.name}`);
+          onSave={(r) => {
+            if (recordFor.id === DEMO_PATIENT_ID) {
+              addDailyRehab({
+                date: r.date,
+                painLevel: r.painLevel,
+                extension: r.extension,
+                flexion: r.flexion,
+                content: [r.standing, r.walking, r.other].filter(Boolean).join(" / "),
+                therapist: "朱年鑫",
+              });
+            }
+            showToast(`已保存每日康复评估：${recordFor.name}`);
             setRecordFor(null);
           }}
         />
@@ -285,8 +314,9 @@ export function TherapistWorkbench() {
         <DischargeSheet
           patient={overlay.patient}
           onClose={() => setOverlay(null)}
-          onConfirm={() => {
+          onConfirm={(note) => {
             setDischargedAt((s) => ({ ...s, [overlay.patient.id]: Date.now() }));
+            if (overlay.patient.id === DEMO_PATIENT_ID) dischargePatient(note);
             showToast(`已确认 ${overlay.patient.name} 出院 · 评估保留 3 天`);
             setOverlay(null);
           }}
@@ -491,11 +521,22 @@ function PlansTab({
   onArchive: (p: Patient) => void;
 }) {
   const [sub, setSub] = useState<"pending" | "all">("pending");
+  const flow = useCaseFlow();
   const pending = list.filter((p) => (statuses[p.id] ?? "ai-draft") === "ai-draft");
   const visible = sub === "pending" ? pending : list;
 
   return (
     <div className="space-y-3 p-3">
+      <CaseFlowBanner
+        hint={
+          !flow.pushedToTherapist
+            ? "等待手术团队推送术后患者"
+            : flow.planApproved
+              ? `方案已生成待办 ${flow.todos.length} 项，患者端可打卡执行`
+              : "术后患者已到达：请审核 AI 康复方案并保存生效"
+        }
+      />
+      <AbnormalPanel compact />
       <div className="rounded-2xl border bg-info/5 p-3 text-[11px] text-info">
         <Sparkles className="mr-1 inline h-3 w-3" />
         AI 已按病症自动生成康复方案，请按患者逐一审核；点击患者卡片查看详情。
@@ -593,12 +634,22 @@ function RecordsTab({
   onArchive: (p: Patient) => void;
 }) {
   const [sub, setSub] = useState<"tomorrow" | "postop">("postop");
+  const flow = useCaseFlow();
   // 术后康复 = 已手术 / 术后观察 / 康复中
   const postOpList = inpatientList;
   const visible = sub === "tomorrow" ? tomorrowSurgery : postOpList;
 
   return (
     <div className="space-y-3 p-3">
+      <CaseFlowBanner
+        hint={
+          !flow.planApproved
+            ? "请先在「康复方案」审核方案，再进行每日康复评估"
+            : flow.stage === "discharged"
+              ? "已确认出院，患者已进入历史出院列表（保留 3 天可追踪）"
+              : `已记录 ${flow.dailyRehab.length} 次每日康复评估 · 达标后可点「出院评估」`
+        }
+      />
       <div className="rounded-2xl border bg-info/5 p-2.5 text-[11px] text-info">
         <ClipboardCheck className="mr-1 inline h-3 w-3" />
         住院康复分为「明日手术」（术前 AI 评估）与「术后康复」（每日评估）。
@@ -898,7 +949,15 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
-function PlanEditorSheet({ patient, onClose, onSave }: { patient: Patient; onClose: () => void; onSave: () => void }) {
+function PlanEditorSheet({
+  patient,
+  onClose,
+  onSave,
+}: {
+  patient: Patient;
+  onClose: () => void;
+  onSave: (planName: string, exercises: RehabExercise[]) => void;
+}) {
   const initial = aiRehabPlan(patient);
   const [templateName, setTemplateName] = useState(initial.templateName);
   const [goal, setGoal] = useState(initial.goal);
@@ -933,7 +992,7 @@ function PlanEditorSheet({ patient, onClose, onSave }: { patient: Patient; onClo
         <button onClick={onClose} className="text-[12px] text-muted-foreground">取消</button>
         <div className="text-[13px] font-semibold">编辑康复方案 · {patient.name}</div>
         <button
-          onClick={onSave}
+          onClick={() => onSave(templateName, exercises)}
           className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground active:opacity-90"
         >
           <Save className="h-3 w-3" />保存

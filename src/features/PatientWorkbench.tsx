@@ -34,6 +34,8 @@ import {
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { PatientHomeScreen } from "@/features/patient/PatientHomeScreen";
+import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
+import { useCaseFlow, toggleTodo as toggleFlowTodo } from "@/lib/case-flow";
 import { PatientCareScreen } from "@/features/patient/PatientCareScreen";
 import { PatientAiChat } from "@/features/patient/PatientAiChat";
 import { cn } from "@/lib/utils";
@@ -224,6 +226,7 @@ function detectMode(status: PatientProfile["status"]): Mode {
 
 // ---------- 主组件 ----------
 export function PatientWorkbench() {
+  const flow = useCaseFlow();
   const [status, setStatus] = useState<PatientProfile["status"]>(PATIENT.status);
   const mode = detectMode(status);
   const [tab, setTab] = useState<TabKey>("home");
@@ -242,7 +245,17 @@ export function PatientWorkbench() {
   const [scaleOpen, setScaleOpen] = useState(false);
 
 
-  const currentTodos = mode === "inpatient" ? todos : homeTodos;
+  // 演示病例：治疗师审核康复方案后，患者端待办由方案自动生成
+  const flowTodos: TodoItem[] = flow.todos.map((t) => ({
+    id: t.id,
+    title: t.title,
+    detail: t.detail,
+    category: t.category === "评估" ? "复查" : t.category,
+    time: t.time,
+    done: t.done,
+  }));
+  const useFlowTodos = mode === "inpatient" && flow.planApproved && flowTodos.length > 0;
+  const currentTodos = useFlowTodos ? flowTodos : mode === "inpatient" ? todos : homeTodos;
   const setCurrentTodos = mode === "inpatient" ? setTodos : setHomeTodos;
   const stages = mode === "inpatient" ? INPATIENT_STAGES : HOME_STAGES;
   const currentStageIdx = mode === "inpatient" ? 3 : 1; // 演示当前阶段
@@ -256,6 +269,10 @@ export function PatientWorkbench() {
   };
 
   const toggleTodo = (id: string) => {
+    if (useFlowTodos) {
+      toggleFlowTodo(id);
+      return;
+    }
     setCurrentTodos((arr) => arr.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
   };
 
@@ -361,6 +378,19 @@ export function PatientWorkbench() {
           </button>
         </div>
 
+
+        {tab === "home" && mode === "inpatient" && flow.created && (
+          <div className="space-y-2 px-4 pt-1">
+            <CaseFlowBanner
+              hint={
+                flow.planApproved
+                  ? `康复方案「${flow.planName}」已生效 · 今日 ${flow.todos.length} 项打卡待办`
+                  : "手术已完成，治疗师正在制定康复方案"
+              }
+            />
+            <AbnormalPanel compact />
+          </div>
+        )}
 
         {tab === "home" && mode === "inpatient" && (
           <InpatientHomeTab

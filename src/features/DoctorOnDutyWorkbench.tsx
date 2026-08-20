@@ -21,9 +21,19 @@ import { Card, MiniStat, SearchBar } from "./SecretaryWorkbench";
 import { BarChart, ChartCard, LineChart, StatTile } from "@/components/WorkStats";
 import { ToastBanner } from "@/components/ActionSheet";
 import { PatientChatSheet } from "@/components/PatientChatSheet";
+import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
+import {
+  DEMO_PATIENT_ID,
+  admitPatient,
+  defaultAdmitDraft,
+  pushPreOpToTeam,
+  useCaseFlow,
+  type AdmitDraft,
+} from "@/lib/case-flow";
 import { patients, todayTasks } from "@/lib/mock-data";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
 
 type TabKey = "home" | "scales" | "chat" | "history" | "me";
 
@@ -38,7 +48,9 @@ export function DoctorOnDutyWorkbench() {
   const [editor, setEditor] = useState<Patient | null>(null);
   const [chatPatient, setChatPatient] = useState<Patient | null>(null);
   const [pushed, setPushed] = useState<Set<string>>(new Set());
+  const [admitOpen, setAdmitOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const flow = useCaseFlow();
 
   const myPatients = patients.filter((p) => p.responsibleDoctor === "朱医生");
 
@@ -54,6 +66,7 @@ export function DoctorOnDutyWorkbench() {
 
   const handlePush = (p: Patient) => {
     setPushed((s) => new Set(s).add(p.id));
+    if (p.id === DEMO_PATIENT_ID) pushPreOpToTeam();
     showToast(`已推送至 王主任团队 + 朱治疗师 → ${p.name}`);
   };
 
@@ -80,8 +93,15 @@ export function DoctorOnDutyWorkbench() {
           surgeryCount={todaySurgery.length}
           abnormalCount={abnormalCount}
           pendingPush={pendingPush}
+          flowHint={
+            !flow.created
+              ? "点击「住院录入」新建演示患者 杨阳，开始全流程闭环"
+              : !flow.pushedToTeam
+                ? "术前量表已录入，请到「术前量表」确认推送手术团队"
+                : "已推送手术团队，等待手术确认"
+          }
+          onAdmit={() => setAdmitOpen(true)}
           onOpenScales={() => setTab("scales")}
-          onOcr={() => showToast("启动 OCR 摄像头...")}
         />
       )}
       {tab === "scales" && (
@@ -90,11 +110,23 @@ export function DoctorOnDutyWorkbench() {
           pushed={pushed}
           onEdit={(p) => setEditor(p)}
           onPush={handlePush}
-          onOcr={() => showToast("启动 OCR 摄像头...")}
+          onAdmit={() => setAdmitOpen(true)}
         />
       )}
       {tab === "history" && <HistoryTab />}
       {tab === "me" && <MeTab />}
+
+      {admitOpen && (
+        <AdmitSheet
+          onClose={() => setAdmitOpen(false)}
+          onSubmit={(d) => {
+            admitPatient(d);
+            setAdmitOpen(false);
+            setTab("scales");
+            showToast(`已完成住院录入：${d.name}`);
+          }}
+        />
+      )}
 
       {editor && (
         <ScaleEditor
@@ -111,20 +143,131 @@ export function DoctorOnDutyWorkbench() {
   );
 }
 
+/* ---------- 住院录入（新建患者 + 术前量表） ---------- */
+function AdmitSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (d: AdmitDraft) => void }) {
+  const [d, setD] = useState<AdmitDraft>(defaultAdmitDraft());
+  const set = <K extends keyof AdmitDraft>(k: K, v: AdmitDraft[K]) => setD((s) => ({ ...s, [k]: v }));
+  const setFinding = (i: number, patch: Partial<AdmitDraft["findings"][number]>) =>
+    setD((s) => ({ ...s, findings: s.findings.map((f, idx) => (idx === i ? { ...f, ...patch } : f)) }));
+
+  return (
+    <div className="absolute inset-0 z-50 flex flex-col bg-background">
+      <div className="flex items-center justify-between border-b bg-card px-3 py-2.5">
+        <button onClick={onClose} className="text-[12px] text-muted-foreground">
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <div className="text-[13px] font-semibold">住院录入 · 新建患者</div>
+        <button
+          onClick={() => onSubmit(d)}
+          className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground"
+        >
+          <Save className="h-3 w-3" />提交
+        </button>
+      </div>
+
+      <div className="flex-1 space-y-3 overflow-y-auto p-3">
+        <div className="rounded-2xl border bg-info/5 p-3 text-[11px] text-info">
+          <Sparkles className="mr-1 inline h-3 w-3" />
+          可拍照 OCR 自动填充，识别后支持手工修改；提交后自动同步至手术团队与治疗师端。
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border bg-card">
+          <Field label="姓名" value={d.name} onChange={(v) => set("name", v)} />
+          <Field label="床号" value={d.bedNo} onChange={(v) => set("bedNo", v)} />
+          <Field label="年龄" value={String(d.age)} onChange={(v) => set("age", Number(v) || 0)} />
+          <div className="flex items-center justify-between border-t px-3 py-2">
+            <span className="text-[11px] text-muted-foreground">性别</span>
+            <div className="flex gap-1.5">
+              {(["男", "女"] as const).map((g) => (
+                <button
+                  key={g}
+                  onClick={() => set("gender", g)}
+                  className={cn(
+                    "rounded-full px-2.5 py-0.5 text-[11px]",
+                    d.gender === g ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+          </div>
+          <Field label="手机号" value={d.phone} onChange={(v) => set("phone", v)} />
+          <Field label="入院诊断" value={d.diagnosis} onChange={(v) => set("diagnosis", v)} />
+          <Field label="拟施手术" value={d.surgeryName} onChange={(v) => set("surgeryName", v)} />
+          <Field label="主刀/医疗组" value={d.director} onChange={(v) => set("director", v)} />
+          <Field label="手术日期" value={d.surgeryDate} onChange={(v) => set("surgeryDate", v)} />
+        </div>
+
+        <div className="text-[11px] font-semibold">术前检查量表</div>
+        <div className="space-y-2">
+          {d.findings.map((f, i) => (
+            <div
+              key={i}
+              className={cn("rounded-xl border p-3", f.abnormal ? "border-destructive/40 bg-destructive/5" : "bg-card")}
+            >
+              <div className="flex items-center justify-between">
+                <input
+                  value={f.label}
+                  onChange={(e) => setFinding(i, { label: e.target.value })}
+                  className="bg-transparent text-[11px] font-medium text-muted-foreground outline-none"
+                />
+                <label className="flex items-center gap-1 text-[10px] text-destructive">
+                  <input
+                    type="checkbox"
+                    checked={f.abnormal}
+                    onChange={(e) => setFinding(i, { abnormal: e.target.checked })}
+                  />
+                  标记异常
+                </label>
+              </div>
+              <input
+                value={f.value}
+                onChange={(e) => setFinding(i, { value: e.target.value })}
+                className="mt-1 w-full bg-transparent text-[14px] font-bold outline-none"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t bg-card px-3 py-2 text-center text-[10px] text-muted-foreground">
+        异常项将自动进入「异常指标（多端同步）」，护士 / 手术团队 / 治疗师 / 患者端均可见
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center justify-between gap-2 border-t px-3 py-2 first:border-t-0">
+      <span className="shrink-0 text-[11px] text-muted-foreground">{label}</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="min-w-0 flex-1 bg-transparent text-right text-[12px] font-medium outline-none"
+      />
+    </div>
+  );
+}
+
+
 function HomeTab({
   tasks,
   surgeryCount,
   abnormalCount,
   pendingPush,
+  flowHint,
   onOpenScales,
-  onOcr,
+  onAdmit,
 }: {
   tasks: typeof todayTasks["doctor-on-duty"];
   surgeryCount: number;
   abnormalCount: number;
   pendingPush: number;
+  flowHint: string;
   onOpenScales: () => void;
-  onOcr: () => void;
+  onAdmit: () => void;
 }) {
   return (
     <div className="space-y-3 p-3">
@@ -140,14 +283,20 @@ function HomeTab({
         </div>
       </div>
 
+      <CaseFlowBanner hint={flowHint} actionLabel="去术前量表" onAction={onOpenScales} />
+
       <button
-        onClick={onOcr}
+        onClick={onAdmit}
         className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-medium text-primary-foreground active:opacity-90"
         style={{ background: "var(--gradient-primary)" }}
       >
         <Camera className="h-5 w-5" />
-        OCR 录入新量表
+        住院录入（拍照 OCR / 手工）
       </button>
+
+      <AbnormalPanel compact />
+
+
 
 
       <Card title="今日待办" rightLabel={`${tasks.length} 项`}>
@@ -187,26 +336,27 @@ function ScalesTab({
   pushed,
   onEdit,
   onPush,
-  onOcr,
+  onAdmit,
 }: {
   list: typeof patients;
   pushed: Set<string>;
   onEdit: (p: Patient) => void;
   onPush: (p: Patient) => void;
-  onOcr: () => void;
+  onAdmit: () => void;
 }) {
   return (
     <div className="space-y-3 p-3">
       <SearchBar placeholder="搜索患者 / 床号" />
 
       <button
-        onClick={onOcr}
+        onClick={onAdmit}
         className="flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-sm font-medium text-primary-foreground active:opacity-90"
         style={{ background: "var(--gradient-primary)" }}
       >
         <Camera className="h-4 w-4" />
-        OCR 录入 / 拍照识别
+        住院录入 / 拍照识别
       </button>
+
 
       <div className="text-xs font-semibold">明日手术 · {list.length} 例</div>
 

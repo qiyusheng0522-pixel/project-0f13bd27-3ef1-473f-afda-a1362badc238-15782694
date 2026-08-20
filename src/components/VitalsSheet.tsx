@@ -12,7 +12,7 @@ export function VitalsSheet({
 }: {
   patient: Patient;
   onClose: () => void;
-  onSave: (text: string) => void;
+  onSave: (text: string, vitals: Record<string, string>) => void;
 }) {
   const [vitals, setVitals] = useState({
     temp: "36.8",
@@ -38,7 +38,7 @@ export function VitalsSheet({
         </button>
         <div className="text-[13px] font-semibold">住院指标记录</div>
         <button
-          onClick={() => onSave(`${patient.name} 指标已保存`)}
+          onClick={() => onSave(`${patient.name} 指标已保存`, vitals)}
           className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground"
         >
           <Save className="h-3 w-3" />保存
