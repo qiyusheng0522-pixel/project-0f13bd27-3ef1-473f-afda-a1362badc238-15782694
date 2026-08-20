@@ -144,3 +144,26 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
+
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@utility animate-shimmer {
+  animation: shimmer 2.8s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 8px 16px -4px oklch(0.55 0.16 240 / 0.35); }
+  50% { transform: translateX(-50%) scale(1.1); box-shadow: 0 16px 28px -6px oklch(0.55 0.16 240 / 0.55); }
+}
+@utility animate-breathe {
+  animation: breathe 1.8s ease-in-out infinite;
+}
