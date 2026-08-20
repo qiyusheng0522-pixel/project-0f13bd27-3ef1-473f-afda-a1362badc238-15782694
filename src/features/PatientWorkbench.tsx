@@ -455,8 +455,63 @@ export function PatientWorkbench() {
 }
 
 
-// ---------- 首页 ----------
+// ---------- 健康百科 ----------
+type EduKind = "视频" | "图文" | "直播";
+const EDU_FILTERS: ("全部" | EduKind)[] = ["全部", "视频", "图文", "直播"];
+const EDU_ITEMS: {
+  id: string;
+  kind: EduKind;
+  title: string;
+  author: string;
+  tag: string;
+  icon: React.ElementType;
+  tint: string;
+  tagTint: string;
+}[] = [
+  {
+    id: "e1",
+    kind: "视频",
+    title: "膝关节置换术后第一周：踝泵与直腿抬高怎么做",
+    author: "康复治疗师 李敏 · 4 分钟",
+    tag: "必看",
+    icon: Dumbbell,
+    tint: "from-sky-400 to-blue-600",
+    tagTint: "bg-primary/10 text-primary",
+  },
+  {
+    id: "e2",
+    kind: "图文",
+    title: "骨科术后补钙怎么吃？药食同源 5 款汤品",
+    author: "临床营养师 张薇 · 6 分钟",
+    tag: "食谱",
+    icon: Soup,
+    tint: "from-emerald-400 to-teal-600",
+    tagTint: "bg-success/10 text-success",
+  },
+  {
+    id: "e3",
+    kind: "图文",
+    title: "居家防跌倒 8 个细节：浴室、楼梯、夜间起夜",
+    author: "护士长 王芳 · 3 分钟",
+    tag: "安全",
+    icon: AlertTriangle,
+    tint: "from-orange-400 to-amber-600",
+    tagTint: "bg-warning/10 text-warning",
+  },
+  {
+    id: "e4",
+    kind: "直播",
+    title: "本周四 19:30 · 人工关节使用寿命与日常保养",
+    author: "关节外科 王渭君主任 · 直播预约",
+    tag: "预约",
+    icon: HeartPulse,
+    tint: "from-violet-400 to-purple-600",
+    tagTint: "bg-primary/10 text-primary",
+  },
+];
+
 function EduSection() {
+
   const [filter, setFilter] = useState<"全部" | EduKind>("全部");
   const list = EDU_ITEMS.filter((i) => filter === "全部" || i.kind === filter);
   return (
