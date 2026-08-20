@@ -539,73 +539,40 @@ function HomeTab({
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border bg-card">
-        <div className="flex items-center gap-2 bg-success px-4 py-3 text-[20px] font-bold text-white">
-          <CheckCircle2 className="h-6 w-6" />
-          已完成
+      {/* ===== 健康服务包 ===== */}
+      <section className="overflow-hidden rounded-2xl border bg-card p-3">
+        <div className="mb-2.5 flex items-center gap-2">
+          <div className="text-[20px] font-bold">骨安健康服务包</div>
+          <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[14px] font-bold text-emerald-700">
+            医生甄选
+          </span>
+          <button className="ml-auto flex items-center text-[16px] font-medium text-primary">
+            全部服务
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
-        <div className="space-y-2.5 p-3">
-          {finished.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
-              <FileText className="h-10 w-10 opacity-40" />
-              <span className="text-[16px]">暂无数据</span>
-            </div>
-          ) : (
-            finished.map((t) => <TodoRow key={t.id} todo={t} onToggle={onToggle} />)
-          )}
-        </div>
+        <button
+          className="relative w-full overflow-hidden rounded-2xl p-4 text-left text-white active:scale-[0.99]"
+          style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
+        >
+          <div className="flex items-center gap-2 text-[16px] opacity-95">
+            <Sparkles className="h-5 w-5" />
+            骨科医生 &amp; 营养师联合甄选
+          </div>
+          <div className="mt-2 text-[24px] font-bold">骨安健康服务包</div>
+          <div className="mt-1 text-[16px] opacity-90">营养餐 · 专病服务包 · 院内可对接</div>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <span className="rounded-full bg-white/20 px-3 py-1.5 text-[15px] backdrop-blur">
+              已为 12,488 位骨友服务
+            </span>
+            <span className="flex items-center text-[17px] font-bold">
+              查看服务
+              <ChevronRight className="h-5 w-5" />
+            </span>
+          </div>
+        </button>
       </section>
 
-      {/* ===== 两版共用：疾病史 / 既往治疗 / 随访 ===== */}
-      <ColorSection title="疾病史" icon={FileText} bar="bg-orange-400">
-        {patient.diseaseHistory.map((d) => (
-          <div key={d.name} className="rounded-xl bg-muted/60 p-3.5">
-            <div className="text-[18px] font-bold">疾病名称：{d.name}</div>
-            <div className="mt-1 text-[17px]">诊断日期：{d.date}</div>
-          </div>
-        ))}
-      </ColorSection>
-
-      <ColorSection title="既往治疗情况" icon={History} bar="bg-emerald-400">
-        {patient.pastTreatments.map((t) => (
-          <div key={t.date} className="flex items-start gap-3 rounded-xl bg-muted/60 p-3.5">
-            <span className="mt-2 h-3.5 w-3.5 shrink-0 rounded-full border-[3px] border-primary" />
-            <div>
-              <div className="text-[18px] font-bold">{t.date}</div>
-              <div className="mt-0.5 text-[17px] text-muted-foreground">{t.note}</div>
-            </div>
-          </div>
-        ))}
-      </ColorSection>
-
-      <ColorSection title="随访记录" icon={CalendarCheck} bar="bg-purple-400">
-        {patient.followUps.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
-            <FileText className="h-10 w-10 opacity-40" />
-            <span className="text-[16px]">暂无数据</span>
-          </div>
-        ) : (
-          patient.followUps.map((f) => (
-            <div key={f.date} className="rounded-xl bg-muted/60 p-3.5 text-[17px]">
-              {f.date} · {f.note}
-            </div>
-          ))
-        )}
-      </ColorSection>
-
-      <div className="rounded-2xl bg-muted/60 p-4">
-        <div className="flex items-center gap-2 text-[16px] text-muted-foreground">
-          <Cigarette className="h-5 w-5" />
-          不良生活方式：
-        </div>
-        <div className="mt-1 text-[19px] font-bold">{patient.lifestyleRisks.join("，")}</div>
-      </div>
-      <div className="rounded-2xl bg-destructive/10 p-4">
-        <div className="text-[16px] text-destructive">疾病：</div>
-        <div className="mt-1 text-[20px] font-bold text-destructive">
-          {patient.diseaseHistory.map((d) => d.name).join("、")}
-        </div>
-      </div>
 
       {/* 骨灵大模型快捷入口 */}
       <button
