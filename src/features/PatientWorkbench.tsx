@@ -341,11 +341,31 @@ export function PatientWorkbench() {
           </div>
         </div>
 
-        {tab === "home" && (
+        {tab === "home" && mode === "inpatient" && (
+          <InpatientHomeTab
+            patient={PATIENT}
+            stages={stages as unknown as { key: string; label: string }[]}
+            currentStageIdx={currentStageIdx}
+            admissionUploaded={admissionUploaded}
+            onUpload={() => {
+              setAdmissionUploaded(true);
+              showToast("入院单上传成功");
+            }}
+            todos={currentTodos}
+            onToggle={toggleTodo}
+            onAskAI={() => {
+              setAiQuestion(undefined);
+              setAiOpen(true);
+            }}
+            onOpenPath={() => setPathOpen(true)}
+          />
+        )}
+
+        {tab === "home" && mode === "home" && (
           <PatientHomeScreen
             mode={mode}
             patientName={PATIENT.name}
-            bedInfo={`${PATIENT.hospital} · ${mode === "inpatient" ? "关节外科 12 床" : "门诊随访"}`}
+            bedInfo={`${PATIENT.hospital} · 门诊随访`}
             stageLabel={stages[currentStageIdx].label}
             stageIdx={currentStageIdx}
             stageTotal={stages.length}
@@ -366,6 +386,7 @@ export function PatientWorkbench() {
             eduSlot={<EduSection />}
           />
         )}
+
 
         {tab === "plan" && (
           <PatientCareScreen
@@ -515,7 +536,188 @@ const EDU_ITEMS: {
   },
 ];
 
+// ---------- 住院版首页（保持原有样式） ----------
+function InpatientHomeTab({
+  patient,
+  stages,
+  currentStageIdx,
+  admissionUploaded,
+  onUpload,
+  todos,
+  onToggle,
+  onAskAI,
+  onOpenPath,
+}: {
+  patient: PatientProfile;
+  stages: { key: string; label: string }[];
+  currentStageIdx: number;
+  admissionUploaded: boolean;
+  onUpload: () => void;
+  todos: TodoItem[];
+  onToggle: (id: string) => void;
+  onAskAI: () => void;
+  onOpenPath: () => void;
+}) {
+  const currentStage = stages[currentStageIdx];
+  const doing = todos.filter((t) => !t.done);
+  const finished = todos.filter((t) => t.done);
+
+  return (
+    <div className="space-y-4 p-3">
+      {/* 患者信息卡 */}
+      <div className="rounded-2xl p-4 text-white" style={{ background: "var(--gradient-primary)" }}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-[24px] font-bold backdrop-blur">
+            {patient.name.slice(0, 1)}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[26px] font-bold leading-tight">{patient.name}</div>
+            <div className="mt-1 text-[16px] opacity-95">
+              性别：{patient.gender}　年龄：{patient.age}岁
+            </div>
+            <div className="text-[15px] opacity-90">出生日期：{patient.birthday}</div>
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 text-[16px] backdrop-blur">
+          <MapPin className="h-5 w-5 shrink-0" />
+          当前阶段：<b className="text-[18px]">{currentStage.label}</b>
+        </div>
+        <div className="mt-2 text-[14px] opacity-90">{patient.hospital} · 关节外科</div>
+      </div>
+
+      {/* 入院单上传 */}
+      <button
+        onClick={admissionUploaded ? undefined : onUpload}
+        className={cn(
+          "flex w-full items-center justify-between rounded-2xl border-2 border-dashed p-4 text-left",
+          admissionUploaded ? "border-success bg-success/5" : "border-primary/50 bg-primary/5",
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "flex h-14 w-14 items-center justify-center rounded-xl",
+              admissionUploaded ? "bg-success text-white" : "bg-primary text-white",
+            )}
+          >
+            {admissionUploaded ? <CheckCircle2 className="h-7 w-7" /> : <Upload className="h-7 w-7" />}
+          </div>
+          <div>
+            <div className="text-[19px] font-bold">
+              {admissionUploaded ? "入院单已上传" : "上传入院单"}
+            </div>
+            <div className="text-[15px] text-muted-foreground">
+              {admissionUploaded ? "护士已收到，正在为您办理" : "拍照上传，护士为您预办入院"}
+            </div>
+          </div>
+        </div>
+        {!admissionUploaded && <Camera className="h-7 w-7 text-primary" />}
+      </button>
+
+      {/* 住院进度 */}
+      <section className="rounded-2xl border bg-card p-3">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[18px] font-bold">
+            <MapPin className="h-5 w-5 text-primary" />
+            我的住院进度
+          </div>
+          <span className="text-[15px] text-muted-foreground">
+            第 {currentStageIdx + 1} / {stages.length} 阶段
+          </span>
+        </div>
+        <button
+          onClick={onOpenPath}
+          className="flex w-full items-center justify-between rounded-xl bg-primary/5 p-3 text-left active:bg-primary/10"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-[20px] font-bold text-white shadow-sm">
+              {currentStageIdx + 1}
+            </div>
+            <div>
+              <div className="text-[15px] text-muted-foreground">当前所处阶段</div>
+              <div className="text-[22px] font-bold text-foreground">{currentStage.label}</div>
+            </div>
+          </div>
+          <div className="flex flex-col items-center text-primary">
+            <span className="text-[13px] font-medium">查看完整路径</span>
+            <ChevronRight className="h-6 w-6" />
+          </div>
+        </button>
+      </section>
+
+      {/* 我的任务 */}
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div className="flex items-center justify-between bg-teal-500 px-4 py-3 text-white">
+          <div className="flex items-center gap-2 text-[20px] font-bold">
+            <Bell className="h-6 w-6" />
+            我的任务
+          </div>
+          <div className="text-[16px]">
+            {finished.length}/{todos.length}
+          </div>
+        </div>
+        <div className="space-y-2.5 p-3">
+          {doing.length === 0 && (
+            <div className="py-4 text-center text-[16px] text-muted-foreground">今日任务已全部完成 🎉</div>
+          )}
+          {doing.map((t) => (
+            <TodoRow key={t.id} todo={t} onToggle={onToggle} />
+          ))}
+        </div>
+      </section>
+
+      {/* 宣教：健康百科 */}
+      <EduSection />
+
+      {/* 健康服务包 */}
+      <section className="overflow-hidden rounded-2xl border bg-card p-3">
+        <div className="mb-2.5 flex items-center gap-2">
+          <div className="text-[20px] font-bold">骨安健康服务包</div>
+          <button className="ml-auto flex items-center text-[16px] font-medium text-primary">
+            全部服务
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+        <button
+          className="relative w-full overflow-hidden rounded-2xl p-4 text-left text-white active:scale-[0.99]"
+          style={{ background: "linear-gradient(135deg, #1677d2, #0b62c4)" }}
+        >
+          <div className="flex items-center gap-2 text-[16px] opacity-95">
+            <Sparkles className="h-5 w-5" />
+            骨科医生 &amp; 营养师联合甄选
+          </div>
+          <div className="mt-2 text-[24px] font-bold">骨安健康服务包</div>
+          <div className="mt-1 text-[16px] opacity-90">营养餐 · 专病服务包 · 院内可对接</div>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <span className="rounded-full bg-white/20 px-3 py-1.5 text-[15px] backdrop-blur">
+              已为 12,488 位骨友服务
+            </span>
+            <span className="flex items-center text-[17px] font-bold">
+              查看服务
+              <ChevronRight className="h-5 w-5" />
+            </span>
+          </div>
+        </button>
+      </section>
+
+      {/* 骨灵大模型快捷入口 */}
+      <button
+        onClick={onAskAI}
+        className="flex w-full items-center gap-3 rounded-2xl p-4 text-left text-white active:scale-[0.99]"
+        style={{ background: "linear-gradient(135deg, #f97316, #e11d48)" }}
+      >
+        <Sparkles className="h-8 w-8 shrink-0" />
+        <div>
+          <div className="text-[20px] font-bold">问问骨灵大模型</div>
+          <div className="text-[15px] opacity-95">可以说话提问，随时解答康复疑问</div>
+        </div>
+      </button>
+    </div>
+  );
+}
+
 function EduSection() {
+
 
   const [filter, setFilter] = useState<"全部" | EduKind>("全部");
   const list = EDU_ITEMS.filter((i) => filter === "全部" || i.kind === filter);
