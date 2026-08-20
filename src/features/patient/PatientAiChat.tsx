@@ -192,7 +192,7 @@ export function PatientAiChat({
         ))}
       </div>
 
-      </div>
+
 
       {/* 分类 + 输入 */}
       <div className="shrink-0 border-t bg-card/95 px-3 pb-3 pt-2 backdrop-blur">
