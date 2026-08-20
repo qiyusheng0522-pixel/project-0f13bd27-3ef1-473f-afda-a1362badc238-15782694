@@ -22,12 +22,20 @@ import {
   Bell,
   RefreshCw,
   X,
+  Stethoscope,
+  ScanLine,
+  Watch,
+  HeartPulse,
+  FileText,
+  History,
+  CalendarCheck,
+  Cigarette,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { cn } from "@/lib/utils";
 
 type Mode = "inpatient" | "home";
-type TabKey = "home" | "plan" | "tasks" | "me";
+type TabKey = "home" | "plan" | "me";
 
 // ---------- 路径图阶段 ----------
 const INPATIENT_STAGES = [
@@ -177,9 +185,43 @@ const INITIAL_DISHES: Dish[] = [
   },
 ];
 
+// ---------- 患者档案（后台状态，用于自动识别院内 / 院外版本） ----------
+type PatientProfile = {
+  name: string;
+  gender: "男" | "女";
+  age: number;
+  birthday: string;
+  hospital: string;
+  /** 后台同步的就诊状态，决定自动切换到哪一版 */
+  status: "admitted" | "post-op" | "rehab" | "discharged" | "outpatient";
+  diseaseHistory: { name: string; date: string }[];
+  pastTreatments: { date: string; note: string }[];
+  followUps: { date: string; note: string }[];
+  lifestyleRisks: string[];
+};
+
+const PATIENT: PatientProfile = {
+  name: "石美平",
+  gender: "女",
+  age: 64,
+  birthday: "1962年04月19日",
+  hospital: "南京鼓楼医院",
+  status: "post-op",
+  diseaseHistory: [{ name: "肩袖肌腱损伤", date: "2026-03-16" }],
+  pastTreatments: [{ date: "2026年03月16日", note: "住院处理建议：无" }],
+  followUps: [],
+  lifestyleRisks: ["膝关节疼痛", "抽烟", "饮水量不足", "消瘦"],
+};
+
+/** 由就诊状态自动判定版本：在院 → 住院版，其余 → 门诊/居家版 */
+function detectMode(status: PatientProfile["status"]): Mode {
+  return status === "admitted" || status === "post-op" || status === "rehab" ? "inpatient" : "home";
+}
+
 // ---------- 主组件 ----------
 export function PatientWorkbench() {
-  const [mode, setMode] = useState<Mode>("inpatient");
+  const [status, setStatus] = useState<PatientProfile["status"]>(PATIENT.status);
+  const mode = detectMode(status);
   const [tab, setTab] = useState<TabKey>("home");
   const [admissionUploaded, setAdmissionUploaded] = useState(false);
   const [todos, setTodos] = useState<TodoItem[]>(INPATIENT_TODOS);
@@ -221,46 +263,61 @@ export function PatientWorkbench() {
 
   const tabItems = [
     { key: "home", label: "首页", icon: Home },
-    { key: "plan", label: "健康方案", icon: ClipboardList },
-    { key: "tasks", label: "我的打卡", icon: Activity, badge: currentTodos.length - doneCount || undefined },
+    { key: "ai", label: "骨灵大模型", icon: Sparkles },
+    { key: "plan", label: "方案", icon: ClipboardList },
     { key: "me", label: "我的", icon: User },
   ];
 
   return (
     <PhoneShell
       title="骨安 · 患者端"
-      subtitle={`${mode === "inpatient" ? "院内陪护模式" : "居家康复模式"} · 大字版`}
+      subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
       bottom={
         <TabBar
           items={tabItems}
           activeKey={tab}
-          onChange={(k) => setTab(k as TabKey)}
+          onChange={(k) => {
+            if (k === "ai") {
+              setAiOpen(true);
+              return;
+            }
+            setTab(k as TabKey);
+          }}
         />
       }
     >
-      <div className="relative pb-24 text-[16px] leading-relaxed">
-        {/* 模式切换 */}
-        <div className="sticky top-0 z-10 flex gap-2 border-b bg-card px-3 py-2.5">
-          {(["inpatient", "home"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className={cn(
-                "flex-1 rounded-xl border py-2.5 text-[15px] font-bold transition-all",
-                mode === m
-                  ? "border-primary bg-primary text-primary-foreground shadow"
-                  : "border-border bg-background text-muted-foreground",
-              )}
+      <div className="relative pb-24 text-[17px] leading-relaxed">
+        {/* 自动识别版本提示（不再让老人手动切换） */}
+        <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: "var(--gradient-primary)" }}
             >
-              {m === "inpatient" ? "🏥 院内" : "🏠 院外居家"}
+              {mode === "inpatient" ? <Stethoscope className="h-6 w-6" /> : <Home className="h-6 w-6" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[19px] font-bold">
+                {mode === "inpatient" ? "住院版" : "门诊 / 居家版"}
+              </div>
+              <div className="text-[14px] text-muted-foreground">
+                已根据您的就诊状态自动为您切换
+              </div>
+            </div>
+            <button
+              onClick={() => setStatus(mode === "inpatient" ? "outpatient" : "post-op")}
+              className="shrink-0 rounded-full border px-3 py-2 text-[13px] text-muted-foreground active:bg-muted"
+            >
+              演示切换
             </button>
-          ))}
+          </div>
         </div>
 
         {tab === "home" && (
           <HomeTab
             mode={mode}
-            stages={stages as any}
+            patient={PATIENT}
+            stages={stages as unknown as { key: string; label: string }[]}
             currentStageIdx={currentStageIdx}
             admissionUploaded={admissionUploaded}
             onUpload={() => {
@@ -269,6 +326,7 @@ export function PatientWorkbench() {
             }}
             todos={currentTodos}
             onToggle={toggleTodo}
+            onAskAI={() => setAiOpen(true)}
           />
         )}
 
@@ -282,22 +340,7 @@ export function PatientWorkbench() {
           />
         )}
 
-        {tab === "tasks" && <TasksTab todos={currentTodos} onToggle={toggleTodo} />}
-
         {tab === "me" && <MeTab mode={mode} doneCount={doneCount} total={currentTodos.length} />}
-
-        {/* 骨灵大模型 悬浮按钮 */}
-        <button
-          onClick={() => setAiOpen(true)}
-          className="fixed bottom-[78px] right-[calc(50%-180px+12px)] z-30 flex items-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-bold text-white shadow-xl active:scale-95"
-          style={{
-            background: "linear-gradient(135deg, #f97316, #e11d48)",
-            boxShadow: "0 8px 24px -4px rgba(225, 29, 72, 0.55)",
-          }}
-        >
-          <Sparkles className="h-5 w-5" />
-          骨灵问答
-        </button>
 
         {/* 换菜弹层 */}
         {swapDish && (
@@ -309,7 +352,7 @@ export function PatientWorkbench() {
 
         {/* Toast */}
         {toast && (
-          <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-foreground/90 px-4 py-2 text-[13px] font-medium text-background shadow-lg">
+          <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-foreground/90 px-4 py-2.5 text-[15px] font-medium text-background shadow-lg">
             {toast}
           </div>
         )}
@@ -318,134 +361,304 @@ export function PatientWorkbench() {
   );
 }
 
+
 // ---------- 首页 ----------
 function HomeTab({
   mode,
+  patient,
   stages,
   currentStageIdx,
   admissionUploaded,
   onUpload,
   todos,
   onToggle,
+  onAskAI,
 }: {
   mode: Mode;
+  patient: PatientProfile;
   stages: { key: string; label: string }[];
   currentStageIdx: number;
   admissionUploaded: boolean;
   onUpload: () => void;
   todos: TodoItem[];
   onToggle: (id: string) => void;
+  onAskAI: () => void;
 }) {
   const currentStage = stages[currentStageIdx];
+  const doing = todos.filter((t) => !t.done);
+  const finished = todos.filter((t) => t.done);
+
   return (
     <div className="space-y-4 p-3">
-      {/* 问候 */}
+      {/* 患者信息卡（两版共用） */}
       <div
         className="rounded-2xl p-4 text-white"
-        style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7))" }}
+        style={{ background: "var(--gradient-primary)" }}
       >
-        <div className="text-[20px] font-bold">您好,张爷爷 👋</div>
-        <div className="mt-1 text-[14px] opacity-90">
-          {mode === "inpatient" ? "今天是术后第 3 天,按方案恢复中" : "您已出院 12 天,继续加油!"}
+        <div className="flex items-center gap-3">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-[24px] font-bold backdrop-blur">
+            {patient.name.slice(0, 1)}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[26px] font-bold leading-tight">{patient.name}</div>
+            <div className="mt-1 text-[16px] opacity-95">
+              性别：{patient.gender}　年龄：{patient.age}岁
+            </div>
+            <div className="text-[15px] opacity-90">出生日期：{patient.birthday}</div>
+          </div>
         </div>
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-[13px] backdrop-blur">
-          <MapPin className="h-4 w-4" />
-          当前阶段:<b className="text-[15px]">{currentStage.label}</b>
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 text-[16px] backdrop-blur">
+          <MapPin className="h-5 w-5 shrink-0" />
+          当前阶段：<b className="text-[18px]">{currentStage.label}</b>
         </div>
+        <div className="mt-2 text-[14px] opacity-90">{patient.hospital} · 关节外科</div>
       </div>
 
-      {/* 院内: 入院单上传 */}
+      {/* ===== 院内版专属：入院单上传 + 住院路径 ===== */}
       {mode === "inpatient" && (
-        <button
-          onClick={admissionUploaded ? undefined : onUpload}
-          className={cn(
-            "flex w-full items-center justify-between rounded-2xl border-2 border-dashed p-4 text-left",
-            admissionUploaded ? "border-success bg-success/5" : "border-primary/40 bg-primary/5",
-          )}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "flex h-12 w-12 items-center justify-center rounded-xl",
-                admissionUploaded ? "bg-success text-white" : "bg-primary text-white",
-              )}
-            >
-              {admissionUploaded ? <CheckCircle2 className="h-6 w-6" /> : <Upload className="h-6 w-6" />}
-            </div>
-            <div>
-              <div className="text-[16px] font-bold">
-                {admissionUploaded ? "入院单已上传" : "上传入院单"}
+        <>
+          <button
+            onClick={admissionUploaded ? undefined : onUpload}
+            className={cn(
+              "flex w-full items-center justify-between rounded-2xl border-2 border-dashed p-4 text-left",
+              admissionUploaded ? "border-success bg-success/5" : "border-primary/50 bg-primary/5",
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  "flex h-14 w-14 items-center justify-center rounded-xl",
+                  admissionUploaded ? "bg-success text-white" : "bg-primary text-white",
+                )}
+              >
+                {admissionUploaded ? <CheckCircle2 className="h-7 w-7" /> : <Upload className="h-7 w-7" />}
               </div>
-              <div className="text-[13px] text-muted-foreground">
-                {admissionUploaded ? "护士已收到,正在为您办理" : "拍照上传,护士将为您预办入院"}
+              <div>
+                <div className="text-[19px] font-bold">
+                  {admissionUploaded ? "入院单已上传" : "上传入院单"}
+                </div>
+                <div className="text-[15px] text-muted-foreground">
+                  {admissionUploaded ? "护士已收到，正在为您办理" : "拍照上传，护士为您预办入院"}
+                </div>
               </div>
             </div>
-          </div>
-          {!admissionUploaded && <Camera className="h-6 w-6 text-primary" />}
-        </button>
+            {!admissionUploaded && <Camera className="h-7 w-7 text-primary" />}
+          </button>
+
+          <section className="rounded-2xl border bg-card p-4">
+            <div className="mb-3 flex items-center gap-2 text-[19px] font-bold">
+              <MapPin className="h-6 w-6 text-primary" />
+              我的住院路径
+            </div>
+            <div className="space-y-2.5">
+              {stages.map((s, idx) => {
+                const done = idx < currentStageIdx;
+                const active = idx === currentStageIdx;
+                return (
+                  <div key={s.key} className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-[17px] font-bold",
+                        done && "bg-success text-white",
+                        active && "bg-primary text-white ring-4 ring-primary/25",
+                        !done && !active && "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {done ? <CheckCircle2 className="h-6 w-6" /> : idx + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className={cn("text-[18px]", active ? "font-bold text-foreground" : "text-foreground")}>
+                        {s.label}
+                      </div>
+                      {active && <div className="text-[15px] font-bold text-primary">● 当前所处阶段</div>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </>
       )}
 
-      {/* 路径图 */}
-      <section className="rounded-2xl border bg-card p-4">
-        <div className="mb-3 flex items-center gap-2 text-[15px] font-bold">
-          <MapPin className="h-5 w-5 text-primary" />
-          {mode === "inpatient" ? "我的住院路径" : "居家康复路径"}
-        </div>
-        <div className="space-y-2">
-          {stages.map((s, idx) => {
-            const done = idx < currentStageIdx;
-            const active = idx === currentStageIdx;
-            return (
-              <div key={s.key} className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[14px] font-bold",
-                    done && "bg-success text-white",
-                    active && "bg-primary text-white ring-4 ring-primary/20",
-                    !done && !active && "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {done ? <CheckCircle2 className="h-5 w-5" /> : idx + 1}
-                </div>
-                <div className="flex-1">
-                  <div
-                    className={cn(
-                      "text-[15px]",
-                      active ? "font-bold text-foreground" : done ? "text-muted-foreground" : "text-foreground",
-                    )}
-                  >
-                    {s.label}
-                  </div>
-                  {active && (
-                    <div className="text-[12px] text-primary">● 当前所处阶段</div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {/* ===== 门诊 / 居家版专属：AI 扫描 + 常用服务 ===== */}
+      {mode === "home" && (
+        <>
+          <button
+            onClick={onUpload}
+            className="w-full rounded-2xl border-2 border-dashed border-primary/50 bg-card p-5 text-center active:bg-primary/5"
+          >
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <ScanLine className="h-9 w-9" />
+            </div>
+            <div className="mt-3 text-[20px] font-bold">AI 扫描，智能识别就诊信息</div>
+            <div className="mt-2 text-[16px] font-bold text-warning">
+              * 我们将为您定制更全面的营养方案
+            </div>
+          </button>
 
-      {/* 今日任务 */}
-      <section className="rounded-2xl border bg-card p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[15px] font-bold">
-            <Bell className="h-5 w-5 text-primary" />
-            今日任务
+          <div className="grid grid-cols-2 gap-3">
+            <QuickCard
+              icon={Stethoscope}
+              title="专科服务"
+              desc="骨科门诊 · 康复评估"
+              tint="bg-emerald-50 text-emerald-700"
+            />
+            <QuickCard icon={Watch} title="智能设备" desc="护具 · 手环 · 监测" tint="bg-sky-50 text-sky-700" />
+            <QuickCard icon={Pill} title="用药提醒" desc="添加提醒" tint="bg-violet-50 text-violet-700" />
+            <QuickCard icon={HeartPulse} title="健康评估" desc="立即评估" tint="bg-rose-50 text-rose-700" />
           </div>
-          <div className="text-[13px] text-muted-foreground">
-            {todos.filter((t) => t.done).length}/{todos.length}
+        </>
+      )}
+
+      {/* ===== 两版共用：我的任务（进行中 / 已完成） ===== */}
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div className="flex items-center justify-between bg-teal-500 px-4 py-3 text-white">
+          <div className="flex items-center gap-2 text-[20px] font-bold">
+            <Bell className="h-6 w-6" />
+            我的任务
+          </div>
+          <div className="text-[16px]">
+            {finished.length}/{todos.length}
           </div>
         </div>
-        <div className="space-y-2">
-          {todos.slice(0, 4).map((t) => (
+        <div className="space-y-2.5 p-3">
+          {doing.length === 0 && (
+            <div className="py-4 text-center text-[16px] text-muted-foreground">今日任务已全部完成 🎉</div>
+          )}
+          {doing.map((t) => (
             <TodoRow key={t.id} todo={t} onToggle={onToggle} />
           ))}
         </div>
       </section>
+
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div className="flex items-center gap-2 bg-success px-4 py-3 text-[20px] font-bold text-white">
+          <CheckCircle2 className="h-6 w-6" />
+          已完成
+        </div>
+        <div className="space-y-2.5 p-3">
+          {finished.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+              <FileText className="h-10 w-10 opacity-40" />
+              <span className="text-[16px]">暂无数据</span>
+            </div>
+          ) : (
+            finished.map((t) => <TodoRow key={t.id} todo={t} onToggle={onToggle} />)
+          )}
+        </div>
+      </section>
+
+      {/* ===== 两版共用：疾病史 / 既往治疗 / 随访 ===== */}
+      <ColorSection title="疾病史" icon={FileText} bar="bg-orange-400">
+        {patient.diseaseHistory.map((d) => (
+          <div key={d.name} className="rounded-xl bg-muted/60 p-3.5">
+            <div className="text-[18px] font-bold">疾病名称：{d.name}</div>
+            <div className="mt-1 text-[17px]">诊断日期：{d.date}</div>
+          </div>
+        ))}
+      </ColorSection>
+
+      <ColorSection title="既往治疗情况" icon={History} bar="bg-emerald-400">
+        {patient.pastTreatments.map((t) => (
+          <div key={t.date} className="flex items-start gap-3 rounded-xl bg-muted/60 p-3.5">
+            <span className="mt-2 h-3.5 w-3.5 shrink-0 rounded-full border-[3px] border-primary" />
+            <div>
+              <div className="text-[18px] font-bold">{t.date}</div>
+              <div className="mt-0.5 text-[17px] text-muted-foreground">{t.note}</div>
+            </div>
+          </div>
+        ))}
+      </ColorSection>
+
+      <ColorSection title="随访记录" icon={CalendarCheck} bar="bg-purple-400">
+        {patient.followUps.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+            <FileText className="h-10 w-10 opacity-40" />
+            <span className="text-[16px]">暂无数据</span>
+          </div>
+        ) : (
+          patient.followUps.map((f) => (
+            <div key={f.date} className="rounded-xl bg-muted/60 p-3.5 text-[17px]">
+              {f.date} · {f.note}
+            </div>
+          ))
+        )}
+      </ColorSection>
+
+      <div className="rounded-2xl bg-muted/60 p-4">
+        <div className="flex items-center gap-2 text-[16px] text-muted-foreground">
+          <Cigarette className="h-5 w-5" />
+          不良生活方式：
+        </div>
+        <div className="mt-1 text-[19px] font-bold">{patient.lifestyleRisks.join("，")}</div>
+      </div>
+      <div className="rounded-2xl bg-destructive/10 p-4">
+        <div className="text-[16px] text-destructive">疾病：</div>
+        <div className="mt-1 text-[20px] font-bold text-destructive">
+          {patient.diseaseHistory.map((d) => d.name).join("、")}
+        </div>
+      </div>
+
+      {/* 骨灵大模型快捷入口 */}
+      <button
+        onClick={onAskAI}
+        className="flex w-full items-center gap-3 rounded-2xl p-4 text-left text-white active:scale-[0.99]"
+        style={{ background: "linear-gradient(135deg, #f97316, #e11d48)" }}
+      >
+        <Sparkles className="h-8 w-8 shrink-0" />
+        <div>
+          <div className="text-[20px] font-bold">问问骨灵大模型</div>
+          <div className="text-[15px] opacity-95">可以说话提问，随时解答康复疑问</div>
+        </div>
+      </button>
     </div>
   );
 }
+
+function QuickCard({
+  icon: Icon,
+  title,
+  desc,
+  tint,
+}: {
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  tint: string;
+}) {
+  return (
+    <button className="rounded-2xl border bg-card p-4 text-left active:bg-muted/50">
+      <div className={cn("flex h-14 w-14 items-center justify-center rounded-xl", tint)}>
+        <Icon className="h-7 w-7" />
+      </div>
+      <div className="mt-2.5 text-[19px] font-bold">{title}</div>
+      <div className="text-[15px] text-muted-foreground">{desc}</div>
+    </button>
+  );
+}
+
+function ColorSection({
+  title,
+  icon: Icon,
+  bar,
+  children,
+}: {
+  title: string;
+  icon: React.ElementType;
+  bar: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-2xl border bg-card">
+      <div className={cn("flex items-center gap-2 px-4 py-3 text-[20px] font-bold text-white", bar)}>
+        <Icon className="h-6 w-6" />
+        {title}
+      </div>
+      <div className="space-y-2.5 p-3">{children}</div>
+    </section>
+  );
+}
+
 
 function categoryStyle(c: TodoItem["category"]) {
   switch (c) {
@@ -479,15 +692,15 @@ function TodoRow({ todo, onToggle }: { todo: TodoItem; onToggle: (id: string) =>
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "text-[15px] font-bold",
+              "text-[18px] font-bold",
               todo.done ? "text-muted-foreground line-through" : "text-foreground",
             )}
           >
             {todo.title}
           </span>
         </div>
-        <div className="mt-0.5 text-[13px] text-muted-foreground">{todo.detail}</div>
-        {todo.time && <div className="mt-0.5 text-[12px] text-primary">⏰ {todo.time}</div>}
+        <div className="mt-0.5 text-[16px] text-muted-foreground">{todo.detail}</div>
+        {todo.time && <div className="mt-0.5 text-[15px] text-primary">⏰ {todo.time}</div>}
       </div>
       {todo.done ? (
         <CheckCircle2 className="h-7 w-7 shrink-0 text-success" />
@@ -521,7 +734,7 @@ function PlanTab({
         style={{ background: "linear-gradient(135deg, #10b981, #0ea5e9)" }}
       >
         <div className="text-[18px] font-bold">{rehab.title}</div>
-        <div className="mt-1 text-[14px] opacity-95">🎯 {rehab.goal}</div>
+        <div className="mt-1 text-[17px] opacity-95">🎯 {rehab.goal}</div>
       </div>
 
       {/* 院外才显示营养方案切换 */}
@@ -530,7 +743,7 @@ function PlanTab({
           <button
             onClick={() => setSection("rehab")}
             className={cn(
-              "flex-1 rounded-xl py-2.5 text-[15px] font-bold",
+              "flex-1 rounded-xl py-2.5 text-[18px] font-bold",
               section === "rehab" ? "bg-card text-foreground shadow" : "text-muted-foreground",
             )}
           >
@@ -539,7 +752,7 @@ function PlanTab({
           <button
             onClick={() => setSection("nutrition")}
             className={cn(
-              "flex-1 rounded-xl py-2.5 text-[15px] font-bold",
+              "flex-1 rounded-xl py-2.5 text-[18px] font-bold",
               section === "nutrition" ? "bg-card text-foreground shadow" : "text-muted-foreground",
             )}
           >
@@ -554,8 +767,8 @@ function PlanTab({
           <Section icon={Dumbbell} title="康复运动" tint="bg-sky-50 text-sky-700">
             {rehab.exercises.map((e, i) => (
               <div key={i} className="rounded-xl border bg-background p-3">
-                <div className="text-[15px] font-bold">{i + 1}. {e.name}</div>
-                <div className="mt-1 text-[13px] text-muted-foreground">{e.dose}</div>
+                <div className="text-[18px] font-bold">{i + 1}. {e.name}</div>
+                <div className="mt-1 text-[16px] text-muted-foreground">{e.dose}</div>
               </div>
             ))}
           </Section>
@@ -563,7 +776,7 @@ function PlanTab({
           {/* 注意事项 */}
           <Section icon={AlertTriangle} title="注意事项" tint="bg-orange-50 text-orange-700">
             {rehab.cautions.map((c, i) => (
-              <div key={i} className="flex items-start gap-2 text-[14px]">
+              <div key={i} className="flex items-start gap-2 text-[17px]">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-orange-500" />
                 <span>{c}</span>
               </div>
@@ -573,7 +786,7 @@ function PlanTab({
           {/* 饮食 */}
           <Section icon={Apple} title="饮食建议" tint="bg-emerald-50 text-emerald-700">
             {rehab.diet.map((c, i) => (
-              <div key={i} className="flex items-start gap-2 text-[14px]">
+              <div key={i} className="flex items-start gap-2 text-[17px]">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
                 <span>{c}</span>
               </div>
@@ -585,25 +798,25 @@ function PlanTab({
       {mode === "home" && section === "nutrition" && (
         <>
           <Section icon={Leaf} title="营养方案 · 药食同源" tint="bg-emerald-50 text-emerald-700">
-            <div className="text-[13px] text-muted-foreground">
+            <div className="text-[16px] text-muted-foreground">
               依据您的康复阶段定制 · 不喜欢的菜可一键更换
             </div>
             {dishes.map((d) => (
               <div key={d.id} className="rounded-xl border bg-background p-3">
                 <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[12px] font-bold text-primary">
+                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[15px] font-bold text-primary">
                     {d.meal}
                   </span>
                   <button
                     onClick={() => onSwap(d)}
-                    className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[12px] font-medium text-foreground"
+                    className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[15px] font-medium text-foreground"
                   >
                     <RefreshCw className="h-3.5 w-3.5" />
                     换一道
                   </button>
                 </div>
-                <div className="mt-2 text-[16px] font-bold">{d.name}</div>
-                <div className="mt-1 text-[13px] text-muted-foreground">💚 {d.benefit}</div>
+                <div className="mt-2 text-[19px] font-bold">{d.name}</div>
+                <div className="mt-1 text-[16px] text-muted-foreground">💚 {d.benefit}</div>
               </div>
             ))}
           </Section>
@@ -612,7 +825,7 @@ function PlanTab({
 
       <button
         onClick={onSyncToTodo}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-[16px] font-bold text-primary-foreground shadow-lg active:scale-[0.98]"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-[19px] font-bold text-primary-foreground shadow-lg active:scale-[0.98]"
       >
         <CheckCircle2 className="h-5 w-5" />
         一键同步为今日打卡待办
@@ -638,38 +851,10 @@ function Section({
         <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", tint)}>
           <Icon className="h-5 w-5" />
         </div>
-        <div className="text-[16px] font-bold">{title}</div>
+        <div className="text-[19px] font-bold">{title}</div>
       </div>
       <div className="space-y-2">{children}</div>
     </section>
-  );
-}
-
-// ---------- 打卡 Tab ----------
-function TasksTab({ todos, onToggle }: { todos: TodoItem[]; onToggle: (id: string) => void }) {
-  const done = todos.filter((t) => t.done).length;
-  const pct = Math.round((done / todos.length) * 100);
-  return (
-    <div className="space-y-4 p-3">
-      <div className="rounded-2xl border bg-card p-4">
-        <div className="text-[15px] font-bold">今日打卡进度</div>
-        <div className="mt-2 flex items-end gap-2">
-          <div className="text-[36px] font-bold text-primary">{done}</div>
-          <div className="pb-2 text-[14px] text-muted-foreground">/ {todos.length} 项 ({pct}%)</div>
-        </div>
-        <div className="mt-2 h-3 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${pct}%`, background: "linear-gradient(90deg, hsl(var(--primary)), #10b981)" }}
-          />
-        </div>
-      </div>
-      <div className="space-y-2">
-        {todos.map((t) => (
-          <TodoRow key={t.id} todo={t} onToggle={onToggle} />
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -683,7 +868,7 @@ function MeTab({ mode, doneCount, total }: { mode: Mode; doneCount: number; tota
         </div>
         <div>
           <div className="text-[18px] font-bold">张建国</div>
-          <div className="text-[13px] text-muted-foreground">
+          <div className="text-[16px] text-muted-foreground">
             68 岁 · 右膝关节置换术后 · 主管医生:王主任
           </div>
         </div>
@@ -709,12 +894,12 @@ function MeTab({ mode, doneCount, total }: { mode: Mode; doneCount: number; tota
             )}
           >
             <it.icon className="h-6 w-6 text-primary" />
-            <span className="flex-1 text-[15px] font-medium">{it.label}</span>
-            <span className="text-[13px] text-muted-foreground">›</span>
+            <span className="flex-1 text-[18px] font-medium">{it.label}</span>
+            <span className="text-[16px] text-muted-foreground">›</span>
           </button>
         ))}
       </div>
-      <div className="px-2 text-center text-[12px] text-muted-foreground">
+      <div className="px-2 text-center text-[15px] text-muted-foreground">
         当前模式:{mode === "inpatient" ? "院内陪护" : "居家康复"} · 数据已加密
       </div>
     </div>
@@ -724,7 +909,7 @@ function MeTab({ mode, doneCount, total }: { mode: Mode; doneCount: number; tota
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border bg-card p-4">
-      <div className="text-[13px] text-muted-foreground">{label}</div>
+      <div className="text-[16px] text-muted-foreground">{label}</div>
       <div className="mt-1 text-[22px] font-bold text-primary">{value}</div>
     </div>
   );
@@ -746,14 +931,14 @@ function SwapDishSheet({
         <button onClick={onClose} className="text-muted-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <div className="text-[16px] font-bold">更换菜品</div>
+        <div className="text-[19px] font-bold">更换菜品</div>
         <div className="w-5" />
       </div>
       <div className="flex-1 overflow-y-auto p-4">
-        <div className="rounded-2xl bg-muted p-3 text-[14px]">
+        <div className="rounded-2xl bg-muted p-3 text-[17px]">
           当前:<b>{dish.name}</b>
         </div>
-        <div className="mt-3 text-[14px] font-bold text-muted-foreground">为您推荐</div>
+        <div className="mt-3 text-[17px] font-bold text-muted-foreground">为您推荐</div>
         <div className="mt-2 space-y-2">
           {dish.alternates.map((a) => (
             <button
@@ -762,10 +947,10 @@ function SwapDishSheet({
               className="flex w-full items-center justify-between rounded-2xl border bg-card p-4 text-left active:bg-muted/50"
             >
               <div>
-                <div className="text-[16px] font-bold">{a}</div>
-                <div className="mt-0.5 text-[12px] text-muted-foreground">药食同源 · 营养均衡</div>
+                <div className="text-[19px] font-bold">{a}</div>
+                <div className="mt-0.5 text-[15px] text-muted-foreground">药食同源 · 营养均衡</div>
               </div>
-              <span className="rounded-full bg-primary px-3 py-1 text-[13px] font-bold text-primary-foreground">
+              <span className="rounded-full bg-primary px-3 py-1 text-[16px] font-bold text-primary-foreground">
                 选它
               </span>
             </button>
@@ -809,7 +994,7 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
         <button onClick={onClose}>
           <X className="h-5 w-5" />
         </button>
-        <div className="flex items-center gap-2 text-[16px] font-bold">
+        <div className="flex items-center gap-2 text-[19px] font-bold">
           <Sparkles className="h-5 w-5" />
           骨灵大模型
         </div>
@@ -823,7 +1008,7 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
           >
             <div
               className={cn(
-                "max-w-[80%] rounded-2xl px-3 py-2.5 text-[15px] leading-relaxed",
+                "max-w-[80%] rounded-2xl px-3 py-2.5 text-[18px] leading-relaxed",
                 m.role === "user"
                   ? "bg-primary text-primary-foreground"
                   : "bg-card border text-foreground",
@@ -840,7 +1025,7 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
             <button
               key={q}
               onClick={() => send(q)}
-              className="rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[12px] text-primary"
+              className="rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[15px] text-primary"
             >
               {q}
             </button>
@@ -852,7 +1037,7 @@ function BoneAISheet({ onClose }: { onClose: () => void }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(input)}
             placeholder="请输入您的问题…"
-            className="flex-1 rounded-full border bg-background px-4 py-2.5 text-[15px] outline-none focus:border-primary"
+            className="flex-1 rounded-full border bg-background px-4 py-2.5 text-[18px] outline-none focus:border-primary"
           />
           <button
             onClick={() => send(input)}
