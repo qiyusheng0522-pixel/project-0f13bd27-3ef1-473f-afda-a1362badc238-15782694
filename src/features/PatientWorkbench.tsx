@@ -446,35 +446,82 @@ function HomeTab({
           </button>
 
           <section className="rounded-2xl border bg-card p-4">
-            <div className="mb-3 flex items-center gap-2 text-[19px] font-bold">
+            <div className="mb-4 flex items-center gap-2 text-[19px] font-bold">
               <MapPin className="h-6 w-6 text-primary" />
               我的住院路径
             </div>
-            <div className="space-y-2.5">
-              {stages.map((s, idx) => {
-                const done = idx < currentStageIdx;
-                const active = idx === currentStageIdx;
-                return (
-                  <div key={s.key} className="flex items-center gap-3">
+            <div className="relative">
+              {/* S 弯曲线背景 */}
+              <svg
+                className="absolute left-0 top-0 h-full w-full"
+                preserveAspectRatio="none"
+                viewBox="0 0 320 420"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M60 35 C60 85, 260 85, 260 135 C260 185, 60 185, 60 235 C60 285, 260 285, 260 335 C260 385, 60 385, 60 420"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeDasharray="8 6"
+                  className="text-muted-foreground/25"
+                />
+              </svg>
+
+              <div className="relative space-y-5">
+                {stages.map((s, idx) => {
+                  const done = idx < currentStageIdx;
+                  const active = idx === currentStageIdx;
+                  const isLeft = idx % 2 === 0;
+                  return (
                     <div
+                      key={s.key}
                       className={cn(
-                        "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-[17px] font-bold",
-                        done && "bg-success text-white",
-                        active && "bg-primary text-white ring-4 ring-primary/25",
-                        !done && !active && "bg-muted text-muted-foreground",
+                        "flex w-full items-center",
+                        isLeft ? "justify-start" : "justify-end",
                       )}
                     >
-                      {done ? <CheckCircle2 className="h-6 w-6" /> : idx + 1}
-                    </div>
-                    <div className="flex-1">
-                      <div className={cn("text-[18px]", active ? "font-bold text-foreground" : "text-foreground")}>
-                        {s.label}
+                      <div
+                        className={cn(
+                          "relative flex items-center gap-3 rounded-2xl border px-3.5 py-3 shadow-sm",
+                          "w-[58%]",
+                          active && "border-primary bg-primary/8 ring-2 ring-primary/20",
+                          done && !active && "border-success/50 bg-success/8",
+                          !done && !active && "border-border bg-card",
+                          isLeft ? "flex-row" : "flex-row-reverse text-right",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-[17px] font-bold",
+                            done && "bg-success text-white",
+                            active && "bg-primary text-white ring-4 ring-primary/25",
+                            !done && !active && "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {done ? <CheckCircle2 className="h-6 w-6" /> : idx + 1}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div
+                            className={cn(
+                              "truncate text-[18px]",
+                              active ? "font-bold text-foreground" : "text-foreground",
+                            )}
+                          >
+                            {s.label}
+                          </div>
+                          {active && (
+                            <div className="text-[15px] font-bold text-primary">当前所处阶段</div>
+                          )}
+                          {done && !active && (
+                            <div className="text-[14px] text-muted-foreground">已完成</div>
+                          )}
+                        </div>
                       </div>
-                      {active && <div className="text-[15px] font-bold text-primary">● 当前所处阶段</div>}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </section>
         </>
