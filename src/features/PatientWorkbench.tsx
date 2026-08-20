@@ -283,6 +283,7 @@ export function PatientWorkbench() {
     <PhoneShell
       title="骨安 · 患者端"
       subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
+      hideHeader={aiOpen}
       overlay={
         archiveOpen || scaleOpen || aiOpen ? null : guideStep ? (
           <GuideSheet
@@ -314,12 +315,14 @@ export function PatientWorkbench() {
       bottom={
         <TabBar
           items={tabItems}
-          activeKey={tab}
+          activeKey={aiOpen ? "ai" : tab}
           onChange={(k) => {
             if (k === "ai") {
               setAiOpen(true);
               return;
             }
+            setAiOpen(false);
+            setAiQuestion(undefined);
             setTab(k as TabKey);
           }}
         />
