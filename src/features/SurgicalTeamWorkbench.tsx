@@ -602,50 +602,102 @@ function IntraOpTab({
 }
 
 /* ---------- 术中量表编辑 ---------- */
-function IntraOpEditor({ patient, onClose, onSave }: { patient: Patient; onClose: () => void; onSave: () => void }) {
-  const [photos, setPhotos] = useState<string[]>([]);
+const TEAM_MEMBERS = ["王主任（主刀）", "李医生（一助）", "陈医生（二助）", "朱年鑫（治疗师）"];
+
+function IntraOpEditor({
+  patient,
+  onClose,
+  onSave,
+}: {
+  patient: Patient;
+  onClose: () => void;
+  onSave: (rec: {
+    anesthesia: string;
+    bleeding: string;
+    implant: string;
+    duration: string;
+    complication: string;
+    advice: string;
+  }) => void;
+}) {
+  const flow = useCaseFlow();
+  const isDemo = patient.id === DEMO_PATIENT_ID;
+  const [uploader, setUploader] = useState(TEAM_MEMBERS[1]);
+  const [rec, setRec] = useState({
+    anesthesia: "全麻 + 神经阻滞",
+    bleeding: "180 ml",
+    implant: "DePuy Sigma #4",
+    duration: "92 min",
+    complication: "无",
+    advice: "术后第1日开始 SLR 训练；屈膝训练 0-60° 起步；注意伤口引流，24小时后拔管。",
+  });
+  const set = (k: keyof typeof rec, v: string) => setRec((s) => ({ ...s, [k]: v }));
+  const [localPhotos, setLocalPhotos] = useState<string[]>([]);
+
   const addPhotos = (files: FileList | null) => {
     if (!files) return;
-    const urls = Array.from(files).map((f) => URL.createObjectURL(f));
-    setPhotos((p) => [...p, ...urls]);
+    const arr = Array.from(files).map((f) => ({ url: URL.createObjectURL(f), label: f.name }));
+    if (isDemo) addSurgeryImages(arr, uploader);
+    else setLocalPhotos((p) => [...p, ...arr.map((a) => a.url)]);
   };
+
+  const photos = isDemo
+    ? flow.images.map((i) => ({ id: i.id, url: i.url, by: i.by }))
+    : localPhotos.map((u, i) => ({ id: `l${i}`, url: u, by: "本机" }));
+
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-background">
       <div className="flex items-center justify-between border-b bg-card px-3 py-2.5">
         <button onClick={onClose} className="text-[12px] text-muted-foreground">
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="text-[13px] font-semibold">术中量表 · {patient.name}</div>
-        <button onClick={onSave} className="rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground">
-          保存推送
+        <div className="text-[13px] font-semibold">术中记录 · {patient.name}</div>
+        <button
+          onClick={() => onSave(rec)}
+          className="rounded-full bg-primary px-3 py-1 text-[11px] font-medium text-primary-foreground"
+        >
+          保存
         </button>
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto p-3">
         <div className="rounded-2xl border bg-warning/5 p-3 text-[10px] text-warning-foreground">
           <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono font-bold text-primary">{patient.bedNo}床</span>{" "}
-          {patient.surgeryName} · 朱医生 编辑中
+          {patient.surgeryName} · 团队任一成员均可填写与上传
         </div>
-        <FormField label="麻醉方式" value="全麻 + 神经阻滞" />
-        <FormField label="术中出血量" value="180 ml" />
-        <FormField label="假体型号" value="DePuy Sigma #4" />
-        <FormField label="手术时长" value="92 min" />
-        <FormField label="术中并发症" value="无" />
 
-        {/* 量表图片 - 支持相册/拍照 */}
+        <div className="rounded-2xl border bg-card p-2.5">
+          <div className="mb-1.5 text-[10px] font-medium text-muted-foreground">当前填写人 / 上传人</div>
+          <div className="flex flex-wrap gap-1.5">
+            {TEAM_MEMBERS.map((m) => (
+              <button
+                key={m}
+                onClick={() => setUploader(m)}
+                className={cn(
+                  "rounded-full px-2 py-1 text-[10px]",
+                  uploader === m ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                )}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <FormField label="麻醉方式" value={rec.anesthesia} onChange={(v) => set("anesthesia", v)} />
+        <FormField label="术中出血量" value={rec.bleeding} onChange={(v) => set("bleeding", v)} />
+        <FormField label="假体型号" value={rec.implant} onChange={(v) => set("implant", v)} />
+        <FormField label="手术时长" value={rec.duration} onChange={(v) => set("duration", v)} />
+        <FormField label="术中并发症" value={rec.complication} onChange={(v) => set("complication", v)} />
+
+        {/* 手术影像 - 支持相册/拍照，团队成员共享可见 */}
         <div className="rounded-2xl border bg-card p-2.5">
           <div className="mb-1.5 flex items-center justify-between">
-            <div className="text-[10px] font-medium text-muted-foreground">量表照片 / 影像</div>
+            <div className="text-[10px] font-medium text-muted-foreground">手术影像 / 量表照片（团队共享）</div>
             <div className="flex gap-1.5">
               <label className="flex cursor-pointer items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] text-foreground active:bg-muted/70">
                 <Activity className="h-3 w-3" />
                 相册选择
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => addPhotos(e.target.files)}
-                />
+                <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => addPhotos(e.target.files)} />
               </label>
               <label className="flex cursor-pointer items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[10px] text-primary active:opacity-80">
                 + 拍照
@@ -665,11 +717,16 @@ function IntraOpEditor({ patient, onClose, onSave }: { patient: Patient; onClose
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-1.5">
-              {photos.map((u, i) => (
-                <div key={i} className="relative">
-                  <img src={u} alt={`量表${i + 1}`} className="aspect-square w-full rounded object-cover" />
+              {photos.map((ph) => (
+                <div key={ph.id} className="relative">
+                  <img src={ph.url} alt="手术影像" className="aspect-square w-full rounded object-cover" />
+                  <span className="absolute inset-x-0 bottom-0 truncate rounded-b bg-black/55 px-1 text-[8px] text-white">
+                    {ph.by}
+                  </span>
                   <button
-                    onClick={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
+                    onClick={() =>
+                      isDemo ? removeSurgeryImage(ph.id) : setLocalPhotos((p) => p.filter((u) => u !== ph.url))
+                    }
                     className="absolute right-0 top-0 rounded-full bg-black/60 px-1.5 text-[10px] text-white"
                   >
                     ×
@@ -685,23 +742,28 @@ function IntraOpEditor({ patient, onClose, onSave }: { patient: Patient; onClose
           <textarea
             className="w-full rounded-lg border bg-card p-2 text-[11px] outline-none focus:border-primary"
             rows={4}
-            defaultValue="术后第1日开始 SLR 训练；屈膝训练 0-60° 起步；注意伤口引流，24小时后拔管。"
+            value={rec.advice}
+            onChange={(e) => set("advice", e.target.value)}
           />
         </div>
       </div>
       <div className="border-t bg-muted/20 px-3 py-2 text-[10px] text-muted-foreground">
-        保存后将推送至 <span className="font-medium text-primary">朱年鑫 治疗师</span> · 列表保留 3 天
+        保存后回到列表点击「手术结束·推送治疗师」发送至 <span className="font-medium text-primary">朱年鑫 治疗师</span>
       </div>
     </div>
   );
 }
 
 
-function FormField({ label, value }: { label: string; value: string }) {
+function FormField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex items-center justify-between rounded-lg border bg-card px-2.5 py-2">
-      <span className="text-[10px] text-muted-foreground">{label}</span>
-      <input className="bg-transparent text-right text-[11px] font-medium outline-none" defaultValue={value} />
+      <span className="shrink-0 text-[10px] text-muted-foreground">{label}</span>
+      <input
+        className="min-w-0 flex-1 bg-transparent text-right text-[11px] font-medium outline-none"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </div>
   );
 }
