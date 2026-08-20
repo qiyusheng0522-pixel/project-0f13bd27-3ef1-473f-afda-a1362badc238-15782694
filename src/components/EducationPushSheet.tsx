@@ -23,7 +23,7 @@ export function EducationPushSheet({
 }: {
   candidates: Patient[];
   onClose: () => void;
-  onPush: (msg: string) => void;
+  onPush: (msg: string, items?: { title: string; desc: string; tag: string }[]) => void;
   lockSinglePatient?: boolean;
 }) {
   const singleMode = !!lockSinglePatient && candidates.length === 1;
@@ -163,13 +163,15 @@ export function EducationPushSheet({
         <button
           disabled={!canPush}
           onClick={() => {
-            const titles = TEMPLATES.filter((t) => selectedTemplates.includes(t.id))
-              .map((t) => t.title)
-              .join("、");
+            const picked = TEMPLATES.filter((t) => selectedTemplates.includes(t.id));
+            const titles = picked.map((t) => t.title).join("、");
             const target = singleMode
               ? singlePatient!.name
               : `${selectedPatients.length} 位患者`;
-            onPush(`已推送 [${titles}] (${selectedTemplates.length} 条) 至 ${target}`);
+            onPush(
+              `已推送 [${titles}] (${selectedTemplates.length} 条) 至 ${target}`,
+              picked.map((t) => ({ title: t.title, desc: t.desc, tag: t.tag })),
+            );
             onClose();
           }}
           className="flex w-full items-center justify-center gap-1.5 rounded-full py-2.5 text-[13px] font-medium text-primary-foreground disabled:opacity-40"

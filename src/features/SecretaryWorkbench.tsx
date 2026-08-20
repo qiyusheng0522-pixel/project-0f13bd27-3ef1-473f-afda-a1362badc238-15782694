@@ -31,7 +31,7 @@ import { EducationPushSheet } from "@/components/EducationPushSheet";
 import { FollowUpSheet } from "@/components/FollowUpSheet";
 import { BarChart, ChartCard, HBarRow, StatTile } from "@/components/WorkStats";
 import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
-import { DEMO_PATIENT_ID, addNurseRecord, generateHandover, useCaseFlow } from "@/lib/case-flow";
+import { DEMO_PATIENT_ID, addNurseRecord, generateHandover, pushEducation, useCaseFlow } from "@/lib/case-flow";
 import { patients, todayTasks } from "@/lib/mock-data";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -173,7 +173,16 @@ export function SecretaryWorkbench() {
               if (Number(v.spo2) < 95) abnormal.push({ label: "血氧 SpO₂", value: `${v.spo2}%`, note: "血氧偏低" });
               if (Number(v.vas) >= 6) abnormal.push({ label: "疼痛 VAS", value: `${v.vas}/10`, note: "疼痛控制不佳" });
               if (Number(v.drainage) >= 100) abnormal.push({ label: "引流量", value: `${v.drainage} ml`, note: "引流偏多，观察渗血" });
+              if (Number(v.caprini) >= 5)
+                abnormal.push({ label: "血栓风险 Caprini", value: `${v.caprini} 分`, note: "高危，需启动抗凝预防方案" });
+              if (Number(v.wells) >= 2)
+                abnormal.push({ label: "血栓风险 Wells", value: `${v.wells} 分`, note: "DVT 可能性中高，建议下肢血管超声" });
+              if (Number(v.dDimer) > 0.5)
+                abnormal.push({ label: "D-二聚体", value: `${v.dDimer} mg/L`, note: "升高，警惕下肢深静脉血栓" });
+              if (v.calfSwelling && !["无", "否", "-"].includes(v.calfSwelling.trim()))
+                abnormal.push({ label: "小腿肿胀/压痛", value: v.calfSwelling, note: "血栓体征，需立即汇报值班医生" });
               addNurseRecord({
+
                 nurse: "护士 · 张敏",
                 note: v.note?.trim() || `生命体征：T ${v.temp}℃ / P ${v.pulse} / BP ${v.bp} / SpO₂ ${v.spo2}% · VAS ${v.vas} · 引流 ${v.drainage}ml`,
                 abnormal,
@@ -200,7 +209,15 @@ export function SecretaryWorkbench() {
           candidates={overlay.candidates}
           lockSinglePatient={overlay.lockSinglePatient}
           onClose={() => setOverlay(null)}
-          onPush={showToast}
+          onPush={(msg, items) => {
+            const hasDemo = overlay.candidates.some((p) => p.id === DEMO_PATIENT_ID);
+            if (hasDemo && items?.length) {
+              pushEducation(items, "护士 · 张敏");
+              showToast(`${msg} · 已在患者端【消息】提醒查看`);
+            } else {
+              showToast(msg);
+            }
+          }}
         />
       )}
       {overlay?.kind === "followup" && (
