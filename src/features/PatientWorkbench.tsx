@@ -890,6 +890,70 @@ function MeTab({
           </button>
         ))}
       </div>
+
+      {/* 已完成任务 */}
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div className="flex items-center gap-2 bg-success px-4 py-3 text-[20px] font-bold text-white">
+          <CheckCircle2 className="h-6 w-6" />
+          已完成
+        </div>
+        <div className="space-y-2.5 p-3">
+          {finished.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+              <FileText className="h-10 w-10 opacity-40" />
+              <span className="text-[16px]">暂无数据</span>
+            </div>
+          ) : (
+            finished.map((t) => <TodoRow key={t.id} todo={t} onToggle={onToggle} />)
+          )}
+        </div>
+      </section>
+
+      {/* 疾病史 / 既往治疗 / 随访 */}
+      <ColorSection title="疾病史" icon={FileText} bar="bg-orange-400">
+        {patient.diseaseHistory.map((d) => (
+          <div key={d.name} className="rounded-xl bg-muted/60 p-3.5">
+            <div className="text-[18px] font-bold">疾病名称：{d.name}</div>
+            <div className="mt-1 text-[17px]">诊断日期：{d.date}</div>
+          </div>
+        ))}
+      </ColorSection>
+
+      <ColorSection title="既往治疗情况" icon={History} bar="bg-emerald-400">
+        {patient.pastTreatments.map((t) => (
+          <div key={t.date} className="flex items-start gap-3 rounded-xl bg-muted/60 p-3.5">
+            <span className="mt-2 h-3.5 w-3.5 shrink-0 rounded-full border-[3px] border-primary" />
+            <div>
+              <div className="text-[18px] font-bold">{t.date}</div>
+              <div className="mt-0.5 text-[17px] text-muted-foreground">{t.note}</div>
+            </div>
+          </div>
+        ))}
+      </ColorSection>
+
+      <ColorSection title="随访记录" icon={CalendarCheck} bar="bg-purple-400">
+        {patient.followUps.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+            <FileText className="h-10 w-10 opacity-40" />
+            <span className="text-[16px]">暂无数据</span>
+          </div>
+        ) : (
+          patient.followUps.map((f) => (
+            <div key={f.date} className="rounded-xl bg-muted/60 p-3.5 text-[17px]">
+              {f.date} · {f.note}
+            </div>
+          ))
+        )}
+      </ColorSection>
+
+      <div className="rounded-2xl bg-muted/60 p-4">
+        <div className="flex items-center gap-2 text-[16px] text-muted-foreground">
+          <Cigarette className="h-5 w-5" />
+          不良生活方式：
+        </div>
+        <div className="mt-1 text-[19px] font-bold">{patient.lifestyleRisks.join("，")}</div>
+      </div>
+
       <div className="px-2 text-center text-[15px] text-muted-foreground">
         当前模式:{mode === "inpatient" ? "院内陪护" : "居家康复"} · 数据已加密
       </div>
