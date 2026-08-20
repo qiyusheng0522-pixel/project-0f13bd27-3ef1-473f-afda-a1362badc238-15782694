@@ -365,131 +365,300 @@ export function PatientWorkbench() {
 // ---------- 首页 ----------
 function HomeTab({
   mode,
+  patient,
   stages,
   currentStageIdx,
   admissionUploaded,
   onUpload,
   todos,
   onToggle,
+  onAskAI,
 }: {
   mode: Mode;
+  patient: PatientProfile;
   stages: { key: string; label: string }[];
   currentStageIdx: number;
   admissionUploaded: boolean;
   onUpload: () => void;
   todos: TodoItem[];
   onToggle: (id: string) => void;
+  onAskAI: () => void;
 }) {
   const currentStage = stages[currentStageIdx];
+  const doing = todos.filter((t) => !t.done);
+  const finished = todos.filter((t) => t.done);
+
   return (
     <div className="space-y-4 p-3">
-      {/* 问候 */}
+      {/* 患者信息卡（两版共用） */}
       <div
         className="rounded-2xl p-4 text-white"
-        style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7))" }}
+        style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.72))" }}
       >
-        <div className="text-[20px] font-bold">您好,张爷爷 👋</div>
-        <div className="mt-1 text-[14px] opacity-90">
-          {mode === "inpatient" ? "今天是术后第 3 天,按方案恢复中" : "您已出院 12 天,继续加油!"}
+        <div className="flex items-center gap-3">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-[24px] font-bold backdrop-blur">
+            {patient.name.slice(0, 1)}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[26px] font-bold leading-tight">{patient.name}</div>
+            <div className="mt-1 text-[16px] opacity-95">
+              性别：{patient.gender}　年龄：{patient.age}岁
+            </div>
+            <div className="text-[15px] opacity-90">出生日期：{patient.birthday}</div>
+          </div>
         </div>
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-[13px] backdrop-blur">
-          <MapPin className="h-4 w-4" />
-          当前阶段:<b className="text-[15px]">{currentStage.label}</b>
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/20 px-3 py-2.5 text-[16px] backdrop-blur">
+          <MapPin className="h-5 w-5 shrink-0" />
+          当前阶段：<b className="text-[18px]">{currentStage.label}</b>
         </div>
+        <div className="mt-2 text-[14px] opacity-90">{patient.hospital} · 关节外科</div>
       </div>
 
-      {/* 院内: 入院单上传 */}
+      {/* ===== 院内版专属：入院单上传 + 住院路径 ===== */}
       {mode === "inpatient" && (
-        <button
-          onClick={admissionUploaded ? undefined : onUpload}
-          className={cn(
-            "flex w-full items-center justify-between rounded-2xl border-2 border-dashed p-4 text-left",
-            admissionUploaded ? "border-success bg-success/5" : "border-primary/40 bg-primary/5",
-          )}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                "flex h-12 w-12 items-center justify-center rounded-xl",
-                admissionUploaded ? "bg-success text-white" : "bg-primary text-white",
-              )}
-            >
-              {admissionUploaded ? <CheckCircle2 className="h-6 w-6" /> : <Upload className="h-6 w-6" />}
-            </div>
-            <div>
-              <div className="text-[16px] font-bold">
-                {admissionUploaded ? "入院单已上传" : "上传入院单"}
+        <>
+          <button
+            onClick={admissionUploaded ? undefined : onUpload}
+            className={cn(
+              "flex w-full items-center justify-between rounded-2xl border-2 border-dashed p-4 text-left",
+              admissionUploaded ? "border-success bg-success/5" : "border-primary/50 bg-primary/5",
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  "flex h-14 w-14 items-center justify-center rounded-xl",
+                  admissionUploaded ? "bg-success text-white" : "bg-primary text-white",
+                )}
+              >
+                {admissionUploaded ? <CheckCircle2 className="h-7 w-7" /> : <Upload className="h-7 w-7" />}
               </div>
-              <div className="text-[13px] text-muted-foreground">
-                {admissionUploaded ? "护士已收到,正在为您办理" : "拍照上传,护士将为您预办入院"}
+              <div>
+                <div className="text-[19px] font-bold">
+                  {admissionUploaded ? "入院单已上传" : "上传入院单"}
+                </div>
+                <div className="text-[15px] text-muted-foreground">
+                  {admissionUploaded ? "护士已收到，正在为您办理" : "拍照上传，护士为您预办入院"}
+                </div>
               </div>
             </div>
-          </div>
-          {!admissionUploaded && <Camera className="h-6 w-6 text-primary" />}
-        </button>
+            {!admissionUploaded && <Camera className="h-7 w-7 text-primary" />}
+          </button>
+
+          <section className="rounded-2xl border bg-card p-4">
+            <div className="mb-3 flex items-center gap-2 text-[19px] font-bold">
+              <MapPin className="h-6 w-6 text-primary" />
+              我的住院路径
+            </div>
+            <div className="space-y-2.5">
+              {stages.map((s, idx) => {
+                const done = idx < currentStageIdx;
+                const active = idx === currentStageIdx;
+                return (
+                  <div key={s.key} className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-[17px] font-bold",
+                        done && "bg-success text-white",
+                        active && "bg-primary text-white ring-4 ring-primary/25",
+                        !done && !active && "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {done ? <CheckCircle2 className="h-6 w-6" /> : idx + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className={cn("text-[18px]", active ? "font-bold text-foreground" : "text-foreground")}>
+                        {s.label}
+                      </div>
+                      {active && <div className="text-[15px] font-bold text-primary">● 当前所处阶段</div>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </>
       )}
 
-      {/* 路径图 */}
-      <section className="rounded-2xl border bg-card p-4">
-        <div className="mb-3 flex items-center gap-2 text-[15px] font-bold">
-          <MapPin className="h-5 w-5 text-primary" />
-          {mode === "inpatient" ? "我的住院路径" : "居家康复路径"}
-        </div>
-        <div className="space-y-2">
-          {stages.map((s, idx) => {
-            const done = idx < currentStageIdx;
-            const active = idx === currentStageIdx;
-            return (
-              <div key={s.key} className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[14px] font-bold",
-                    done && "bg-success text-white",
-                    active && "bg-primary text-white ring-4 ring-primary/20",
-                    !done && !active && "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {done ? <CheckCircle2 className="h-5 w-5" /> : idx + 1}
-                </div>
-                <div className="flex-1">
-                  <div
-                    className={cn(
-                      "text-[15px]",
-                      active ? "font-bold text-foreground" : done ? "text-muted-foreground" : "text-foreground",
-                    )}
-                  >
-                    {s.label}
-                  </div>
-                  {active && (
-                    <div className="text-[12px] text-primary">● 当前所处阶段</div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {/* ===== 门诊 / 居家版专属：AI 扫描 + 常用服务 ===== */}
+      {mode === "home" && (
+        <>
+          <button
+            onClick={onUpload}
+            className="w-full rounded-2xl border-2 border-dashed border-primary/50 bg-card p-5 text-center active:bg-primary/5"
+          >
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <ScanLine className="h-9 w-9" />
+            </div>
+            <div className="mt-3 text-[20px] font-bold">AI 扫描，智能识别就诊信息</div>
+            <div className="mt-2 text-[16px] font-bold text-warning">
+              * 我们将为您定制更全面的营养方案
+            </div>
+          </button>
 
-      {/* 今日任务 */}
-      <section className="rounded-2xl border bg-card p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[15px] font-bold">
-            <Bell className="h-5 w-5 text-primary" />
-            今日任务
+          <div className="grid grid-cols-2 gap-3">
+            <QuickCard
+              icon={Stethoscope}
+              title="专科服务"
+              desc="骨科门诊 · 康复评估"
+              tint="bg-emerald-50 text-emerald-700"
+            />
+            <QuickCard icon={Watch} title="智能设备" desc="护具 · 手环 · 监测" tint="bg-sky-50 text-sky-700" />
+            <QuickCard icon={Pill} title="用药提醒" desc="添加提醒" tint="bg-violet-50 text-violet-700" />
+            <QuickCard icon={HeartPulse} title="健康评估" desc="立即评估" tint="bg-rose-50 text-rose-700" />
           </div>
-          <div className="text-[13px] text-muted-foreground">
-            {todos.filter((t) => t.done).length}/{todos.length}
+        </>
+      )}
+
+      {/* ===== 两版共用：我的任务（进行中 / 已完成） ===== */}
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div className="flex items-center justify-between bg-teal-500 px-4 py-3 text-white">
+          <div className="flex items-center gap-2 text-[20px] font-bold">
+            <Bell className="h-6 w-6" />
+            我的任务
+          </div>
+          <div className="text-[16px]">
+            {finished.length}/{todos.length}
           </div>
         </div>
-        <div className="space-y-2">
-          {todos.slice(0, 4).map((t) => (
+        <div className="space-y-2.5 p-3">
+          {doing.length === 0 && (
+            <div className="py-4 text-center text-[16px] text-muted-foreground">今日任务已全部完成 🎉</div>
+          )}
+          {doing.map((t) => (
             <TodoRow key={t.id} todo={t} onToggle={onToggle} />
           ))}
         </div>
       </section>
+
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <div className="flex items-center gap-2 bg-success px-4 py-3 text-[20px] font-bold text-white">
+          <CheckCircle2 className="h-6 w-6" />
+          已完成
+        </div>
+        <div className="space-y-2.5 p-3">
+          {finished.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+              <FileText className="h-10 w-10 opacity-40" />
+              <span className="text-[16px]">暂无数据</span>
+            </div>
+          ) : (
+            finished.map((t) => <TodoRow key={t.id} todo={t} onToggle={onToggle} />)
+          )}
+        </div>
+      </section>
+
+      {/* ===== 两版共用：疾病史 / 既往治疗 / 随访 ===== */}
+      <ColorSection title="疾病史" icon={FileText} bar="bg-orange-400">
+        {patient.diseaseHistory.map((d) => (
+          <div key={d.name} className="rounded-xl bg-muted/60 p-3.5">
+            <div className="text-[18px] font-bold">疾病名称：{d.name}</div>
+            <div className="mt-1 text-[17px]">诊断日期：{d.date}</div>
+          </div>
+        ))}
+      </ColorSection>
+
+      <ColorSection title="既往治疗情况" icon={History} bar="bg-emerald-400">
+        {patient.pastTreatments.map((t) => (
+          <div key={t.date} className="flex items-start gap-3 rounded-xl bg-muted/60 p-3.5">
+            <span className="mt-2 h-3.5 w-3.5 shrink-0 rounded-full border-[3px] border-primary" />
+            <div>
+              <div className="text-[18px] font-bold">{t.date}</div>
+              <div className="mt-0.5 text-[17px] text-muted-foreground">{t.note}</div>
+            </div>
+          </div>
+        ))}
+      </ColorSection>
+
+      <ColorSection title="随访记录" icon={CalendarCheck} bar="bg-purple-400">
+        {patient.followUps.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+            <FileText className="h-10 w-10 opacity-40" />
+            <span className="text-[16px]">暂无数据</span>
+          </div>
+        ) : (
+          patient.followUps.map((f) => (
+            <div key={f.date} className="rounded-xl bg-muted/60 p-3.5 text-[17px]">
+              {f.date} · {f.note}
+            </div>
+          ))
+        )}
+      </ColorSection>
+
+      <div className="rounded-2xl bg-muted/60 p-4">
+        <div className="flex items-center gap-2 text-[16px] text-muted-foreground">
+          <Cigarette className="h-5 w-5" />
+          不良生活方式：
+        </div>
+        <div className="mt-1 text-[19px] font-bold">{patient.lifestyleRisks.join("，")}</div>
+      </div>
+      <div className="rounded-2xl bg-destructive/10 p-4">
+        <div className="text-[16px] text-destructive">疾病：</div>
+        <div className="mt-1 text-[20px] font-bold text-destructive">
+          {patient.diseaseHistory.map((d) => d.name).join("、")}
+        </div>
+      </div>
+
+      {/* 骨灵大模型快捷入口 */}
+      <button
+        onClick={onAskAI}
+        className="flex w-full items-center gap-3 rounded-2xl p-4 text-left text-white active:scale-[0.99]"
+        style={{ background: "linear-gradient(135deg, #f97316, #e11d48)" }}
+      >
+        <Sparkles className="h-8 w-8 shrink-0" />
+        <div>
+          <div className="text-[20px] font-bold">问问骨灵大模型</div>
+          <div className="text-[15px] opacity-95">可以说话提问，随时解答康复疑问</div>
+        </div>
+      </button>
     </div>
   );
 }
+
+function QuickCard({
+  icon: Icon,
+  title,
+  desc,
+  tint,
+}: {
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  tint: string;
+}) {
+  return (
+    <button className="rounded-2xl border bg-card p-4 text-left active:bg-muted/50">
+      <div className={cn("flex h-14 w-14 items-center justify-center rounded-xl", tint)}>
+        <Icon className="h-7 w-7" />
+      </div>
+      <div className="mt-2.5 text-[19px] font-bold">{title}</div>
+      <div className="text-[15px] text-muted-foreground">{desc}</div>
+    </button>
+  );
+}
+
+function ColorSection({
+  title,
+  icon: Icon,
+  bar,
+  children,
+}: {
+  title: string;
+  icon: React.ElementType;
+  bar: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-2xl border bg-card">
+      <div className={cn("flex items-center gap-2 px-4 py-3 text-[20px] font-bold text-white", bar)}>
+        <Icon className="h-6 w-6" />
+        {title}
+      </div>
+      <div className="space-y-2.5 p-3">{children}</div>
+    </section>
+  );
+}
+
 
 function categoryStyle(c: TodoItem["category"]) {
   switch (c) {
