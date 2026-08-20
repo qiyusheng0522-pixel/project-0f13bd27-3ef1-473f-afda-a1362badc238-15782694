@@ -278,6 +278,22 @@ export function PatientWorkbench() {
     <PhoneShell
       title="骨安 · 患者端"
       subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
+      overlay={
+        guideStep && !archiveOpen && !scaleOpen ? (
+          <GuideSheet
+            step={guideStep}
+            onSkip={() => setGuideStep(null)}
+            onAction={() => {
+              if (guideStep === 1) setArchiveOpen(true);
+              else if (guideStep === 2) setScaleOpen(true);
+              else {
+                setGuideStep(null);
+                setTab("plan");
+              }
+            }}
+          />
+        ) : null
+      }
       bottom={
         <TabBar
           items={tabItems}
@@ -292,6 +308,7 @@ export function PatientWorkbench() {
         />
       }
     >
+
       <div className="relative pb-24 text-[17px] leading-relaxed">
         {/* 自动识别版本提示（不再让老人手动切换） */}
         <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
@@ -390,21 +407,8 @@ export function PatientWorkbench() {
           />
         )}
 
-        {/* 新用户使用引导 */}
-        {guideStep && !archiveOpen && !scaleOpen && (
-          <GuideSheet
-            step={guideStep}
-            onSkip={() => setGuideStep(null)}
-            onAction={() => {
-              if (guideStep === 1) setArchiveOpen(true);
-              else if (guideStep === 2) setScaleOpen(true);
-              else {
-                setGuideStep(null);
-                setTab("plan");
-              }
-            }}
-          />
-        )}
+
+
 
 
         {/* Toast */}
@@ -595,13 +599,14 @@ function HomeTab({
         </div>
       </section>
 
+      {/* ===== 宣教：健康百科 ===== */}
+      <EduSection />
+
       {/* ===== 健康服务包 ===== */}
       <section className="overflow-hidden rounded-2xl border bg-card p-3">
         <div className="mb-2.5 flex items-center gap-2">
           <div className="text-[20px] font-bold">骨安健康服务包</div>
-          <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[14px] font-bold text-emerald-700">
-            医生甄选
-          </span>
+
           <button className="ml-auto flex items-center text-[16px] font-medium text-primary">
             全部服务
             <ChevronRight className="h-4 w-4" />
@@ -667,6 +672,147 @@ function QuickCard({
     </button>
   );
 }
+
+// ---------- 宣教：健康百科 ----------
+type EduKind = "视频" | "图文" | "直播";
+const EDU_FILTERS: ("全部" | EduKind)[] = ["全部", "视频", "图文", "直播"];
+const EDU_ITEMS: {
+  id: string;
+  kind: EduKind;
+  title: string;
+  tag: string;
+  tagTint: string;
+  author: string;
+  points: number;
+  tint: string;
+  icon: React.ElementType;
+}[] = [
+  {
+    id: "e1",
+    kind: "视频",
+    title: "膝关节置换术后如何正确做直腿抬高",
+    tag: "必读",
+    tagTint: "bg-sky-50 text-sky-700",
+    author: "康复治疗师 · 王老师",
+    points: 50,
+    tint: "from-teal-400 to-emerald-500",
+    icon: Dumbbell,
+  },
+  {
+    id: "e2",
+    kind: "图文",
+    title: "骨关节炎患者 5 款高钙护骨家常菜",
+    tag: "食谱",
+    tagTint: "bg-emerald-50 text-emerald-700",
+    author: "营养师 · 李老师",
+    points: 30,
+    tint: "from-amber-400 to-orange-500",
+    icon: Soup,
+  },
+  {
+    id: "e3",
+    kind: "直播",
+    title: "本周四 20:00 · 骨质疏松与跌倒预防公开课",
+    tag: "预约",
+    tagTint: "bg-orange-50 text-orange-700",
+    author: "主任医师 · 张主任",
+    points: 80,
+    tint: "from-sky-400 to-indigo-500",
+    icon: HeartPulse,
+  },
+  {
+    id: "e4",
+    kind: "图文",
+    title: "术后拐杖、助行器怎么用才安全不摔倒",
+    tag: "护理",
+    tagTint: "bg-violet-50 text-violet-700",
+    author: "骨科专科护士 · 赵老师",
+    points: 20,
+    tint: "from-rose-400 to-pink-500",
+    icon: MapPin,
+  },
+];
+
+function EduSection() {
+  const [filter, setFilter] = useState<"全部" | EduKind>("全部");
+  const list = EDU_ITEMS.filter((i) => filter === "全部" || i.kind === filter);
+  return (
+    <section className="overflow-hidden rounded-2xl border bg-card p-3">
+      <div className="flex items-center gap-2">
+        <div className="text-[20px] font-bold">健康百科</div>
+        <span className="rounded-md bg-orange-50 px-2 py-1 text-[14px] font-bold text-orange-600">
+          看完单篇得积分
+        </span>
+        <button className="ml-auto flex items-center text-[16px] font-medium text-primary">
+          进入百科
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* 分类 */}
+      <div className="mt-2.5 flex gap-2 overflow-x-auto pb-1">
+        {EDU_FILTERS.map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={cn(
+              "shrink-0 rounded-full border px-4 py-2 text-[16px] font-medium",
+              filter === f
+                ? "border-transparent bg-primary text-white"
+                : "bg-background text-muted-foreground",
+            )}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* 列表 */}
+      <div className="mt-1 space-y-2.5">
+        {list.map((it) => {
+          const Icon = it.icon;
+          return (
+            <button
+              key={it.id}
+              className="flex w-full items-center gap-3 rounded-2xl bg-muted/40 p-2.5 text-left active:bg-muted"
+            >
+              <div
+                className={cn(
+                  "relative flex h-[76px] w-[104px] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white",
+                  it.tint,
+                )}
+              >
+                <Icon className="h-9 w-9 opacity-90" />
+                <span className="absolute left-1 top-1 rounded-md bg-black/45 px-1.5 py-0.5 text-[13px] font-bold backdrop-blur">
+                  {it.kind}
+                </span>
+                {it.kind === "视频" && (
+                  <PlayCircle className="absolute bottom-1 right-1 h-6 w-6" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[18px] font-bold leading-snug">{it.title}</div>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <span
+                    className={cn("rounded-md px-2 py-0.5 text-[14px] font-bold", it.tagTint)}
+                  >
+                    {it.tag}
+                  </span>
+                  <span className="truncate text-[15px] text-muted-foreground">{it.author}</span>
+                  <span className="ml-auto shrink-0 rounded-md bg-orange-50 px-2 py-1 text-[15px] font-bold text-orange-600">
+                    +{it.points} 积分
+                  </span>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+
 
 function ColorSection({
   title,
@@ -1263,7 +1409,7 @@ function GuideSheet({
   const cfg = GUIDE_STEPS[step - 1];
   const Icon = cfg.icon;
   return (
-    <div className="absolute inset-0 z-50 flex flex-col justify-end bg-foreground/40 p-3">
+    <div className="z-50">
       <div className="overflow-hidden rounded-2xl bg-card shadow-2xl">
         <div
           className="flex items-center justify-between px-4 py-3 text-white"

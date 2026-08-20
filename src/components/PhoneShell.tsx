@@ -13,6 +13,7 @@ export function PhoneShell({
   rightSlot,
   hideHeader,
   bottom,
+  overlay,
   className,
 }: {
   title?: string;
@@ -21,8 +22,11 @@ export function PhoneShell({
   rightSlot?: ReactNode;
   hideHeader?: boolean;
   bottom?: ReactNode;
+  /** 固定在底部导航上方、不随内容滚动的浮层（如使用引导） */
+  overlay?: ReactNode;
   className?: string;
 }) {
+
   const [time, setTime] = useState("09:41");
   useEffect(() => {
     const update = () => {
@@ -77,8 +81,12 @@ export function PhoneShell({
       {/* 内容区 */}
       <div className="flex-1 overflow-y-auto bg-muted/30 pb-2">{children}</div>
 
+      {/* 冻结浮层（位于底部导航上方，不随页面滚动） */}
+      {overlay && <div className="relative z-40 shrink-0 px-3 pb-2 pt-1">{overlay}</div>}
+
       {/* 底部 Tab 栏 / 自定义底部 */}
       {bottom && <div className="border-t bg-card">{bottom}</div>}
+
 
       {/* Home indicator */}
       <div className="flex justify-center bg-card pb-1.5 pt-1">
