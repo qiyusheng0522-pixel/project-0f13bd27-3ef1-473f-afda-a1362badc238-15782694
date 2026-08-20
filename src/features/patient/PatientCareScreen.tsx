@@ -215,20 +215,19 @@ export function PatientCareScreen({
       <section className="px-4">
         <button
           onClick={() => setArchiveOpen(true)}
-          className="flex w-full items-center justify-between rounded-2xl bg-card/80 px-4 py-3.5 ring-1 ring-black/5 backdrop-blur transition-transform active:scale-[0.99]"
+          className="flex w-full items-center gap-2 rounded-2xl bg-card/80 px-3.5 py-3.5 ring-1 ring-black/5 backdrop-blur transition-transform active:scale-[0.99]"
         >
-          <div className="flex items-center gap-2.5">
-            <div className="grid size-10 place-items-center rounded-full bg-primary/10">
-              <IdCard className="size-5 text-primary" />
-            </div>
-            <span className="text-[17px] text-muted-foreground">
-              骨<span className="font-bold text-primary">安</span> · 个人健康画像
-            </span>
+          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10">
+            <IdCard className="size-5 text-primary" />
           </div>
-          <span className="inline-flex items-center gap-0.5 text-[17px] font-semibold text-primary">
+          <span className="min-w-0 flex-1 truncate text-left text-[16px] text-muted-foreground">
+            骨<span className="font-bold text-primary">安</span> · 个人健康画像
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[16px] font-semibold text-primary">
             我的健康档案 <ChevronRight className="size-4" />
           </span>
         </button>
+
       </section>
 
       {/* 健康分析 · 标签 */}
