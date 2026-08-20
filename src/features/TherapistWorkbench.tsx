@@ -641,6 +641,15 @@ function RecordsTab({
 
   return (
     <div className="space-y-3 p-3">
+      <CaseFlowBanner
+        hint={
+          !flow.planApproved
+            ? "请先在「康复方案」审核方案，再进行每日康复评估"
+            : flow.stage === "discharged"
+              ? "已确认出院，患者已进入历史出院列表（保留 3 天可追踪）"
+              : `已记录 ${flow.dailyRehab.length} 次每日康复评估 · 达标后可点「出院评估」`
+        }
+      />
       <div className="rounded-2xl border bg-info/5 p-2.5 text-[11px] text-info">
         <ClipboardCheck className="mr-1 inline h-3 w-3" />
         住院康复分为「明日手术」（术前 AI 评估）与「术后康复」（每日评估）。
