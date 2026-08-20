@@ -284,7 +284,7 @@ export function PatientWorkbench() {
       title="骨安 · 患者端"
       subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
       overlay={
-        archiveOpen || scaleOpen ? null : guideStep ? (
+        archiveOpen || scaleOpen || aiOpen ? null : guideStep ? (
           <GuideSheet
             step={guideStep}
             onSkip={() => setGuideStep(null)}
