@@ -30,6 +30,7 @@ import {
   History,
   CalendarCheck,
   Cigarette,
+  ChevronRight,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { cn } from "@/lib/utils";
