@@ -492,182 +492,90 @@ function StatEntry({
 function PlansTab({
   list,
   statuses,
-  edits,
-  onEditExercise,
   onEdit,
-  onConfirm,
-  onClear,
-  onChat,
   onArchive,
 }: {
   list: typeof patients;
   statuses: Record<string, PlanStatus>;
-  edits: Record<string, { dosage?: string; notes?: string }>;
-  onEditExercise: (pid: string, eid: string, patch: { dosage?: string; notes?: string }) => void;
   onEdit: (p: Patient) => void;
-  onConfirm: (p: Patient) => void;
-  onClear: (p: Patient) => void;
-  onChat: (p: Patient) => void;
   onArchive: (p: Patient) => void;
 }) {
+  const [sub, setSub] = useState<"pending" | "all">("pending");
+  const pending = list.filter((p) => (statuses[p.id] ?? "ai-draft") === "ai-draft");
+  const visible = sub === "pending" ? pending : list;
+
   return (
     <div className="space-y-3 p-3">
       <div className="rounded-2xl border bg-info/5 p-3 text-[11px] text-info">
         <Sparkles className="mr-1 inline h-3 w-3" />
-        AI 已根据术中量表与医生建议自动生成康复方案，请确认、修改或清空。
+        AI 已按病症自动生成康复方案，请按患者逐一审核；点击患者卡片查看详情。
       </div>
 
-      {list.map((p) => {
+      <div className="grid grid-cols-2 overflow-hidden rounded-full border bg-muted/30 p-0.5 text-[12px]">
+        <button
+          onClick={() => setSub("pending")}
+          className={cn(
+            "rounded-full py-1.5 font-medium transition-colors",
+            sub === "pending" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+          )}
+        >
+          待审核 · {pending.length}
+        </button>
+        <button
+          onClick={() => setSub("all")}
+          className={cn(
+            "rounded-full py-1.5 font-medium transition-colors",
+            sub === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+          )}
+        >
+          全部患者 · {list.length}
+        </button>
+      </div>
+
+      {visible.length === 0 && (
+        <div className="rounded-2xl border bg-card p-6 text-center text-[12px] text-muted-foreground">
+          暂无待审核康复方案
+        </div>
+      )}
+
+      {visible.map((p) => {
         const status = statuses[p.id] ?? "ai-draft";
         const plan = aiRehabPlan(p);
         return (
           <div key={p.id} className="overflow-hidden rounded-2xl border bg-card" style={{ boxShadow: "var(--shadow-card)" }}>
-            <div className="flex items-start justify-between gap-2 border-b p-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  {p.bedNo && (
-                    <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
-                      {p.bedNo}床
-                    </span>
-                  )}
-                  <span className="text-sm font-bold">{p.name}</span>
-                  <span className="text-[10px] text-muted-foreground">{p.gender}·{p.age}</span>
-                </div>
-                <div className="mt-1 text-[10px] text-muted-foreground">
-                  {p.surgeryName} · 术日 {p.surgeryDate}
-                </div>
-              </div>
-              <PlanStatusBadge status={status} />
-            </div>
-
-            {status === "empty" ? (
-              <div className="flex flex-col items-center gap-1.5 p-4 text-[11px] text-muted-foreground">
-                <Trash2 className="h-4 w-4" />
-                方案已清空
-                <button
-                  onClick={() => onConfirm(p)}
-                  className="mt-1 flex items-center gap-1 rounded-full bg-info/10 px-3 py-1 text-[10px] text-info"
-                >
-                  <Sparkles className="h-3 w-3" />重新生成 AI 方案
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="border-b bg-info/5 px-3 py-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-[10px] font-bold text-info">康复目标</div>
-                    <span className="rounded-full bg-info/10 px-1.5 py-0.5 text-[9px] text-info">
-                      模板：{plan.templateName.split("（")[0]}
-                    </span>
-                  </div>
-                  <div className="mt-0.5 text-[11px]">{plan.goal}</div>
-                </div>
-                {plan.weightBearing && (
-                  <div className="border-b px-3 py-2">
-                    <div className="text-[10px] font-bold text-warning">负重注意事项</div>
-                    <div className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground line-clamp-2">
-                      {plan.weightBearing}
-                    </div>
-                  </div>
+            <button onClick={() => onArchive(p)} className="block w-full p-3 text-left active:bg-muted/30">
+              <div className="flex items-center gap-1.5">
+                {p.bedNo ? (
+                  <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
+                    {p.bedNo}床
+                  </span>
+                ) : (
+                  <span className="rounded-md bg-info/10 px-1.5 py-0.5 text-[10px] font-bold text-info">门诊</span>
                 )}
-                <div className="space-y-2 p-3">
-                  <div className="text-[10px] font-bold text-foreground">训练动作 · {plan.exercises.length} 项 · 可逐项自定义</div>
-                  {plan.exercises.map((ex, idx) => {
-                    const k = `${p.id}_${ex.id}`;
-                    const ed = edits[k] ?? {};
-                    const dosage = ed.dosage ?? ex.dosage;
-                    const notes = ed.notes ?? ex.notes;
-                    const customized = ed.dosage !== undefined || ed.notes !== undefined;
-                    return (
-                      <div key={ex.id} className="rounded-xl border bg-muted/10 p-2">
-                        <div className="flex items-start gap-1.5">
-                          <span className="mt-[2px] inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary">
-                            {idx + 1}
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1">
-                              <span className="text-[11px] font-medium text-foreground">{ex.name}</span>
-                              {customized && (
-                                <span className="rounded bg-success/15 px-1 py-0.5 text-[9px] font-bold text-success">已自定义</span>
-                              )}
-                            </div>
-                            <div className="mt-0.5 text-[10px] text-muted-foreground line-clamp-2">{ex.description}</div>
-                          </div>
-                        </div>
-                        <div className="mt-1.5 grid grid-cols-1 gap-1.5">
-                          <label className="block">
-                            <div className="text-[9px] text-muted-foreground">动作及角度（剂量）</div>
-                            <input
-                              value={dosage}
-                              onChange={(e) => onEditExercise(p.id, ex.id, { dosage: e.target.value })}
-                              placeholder={`默认：${ex.dosage}`}
-                              className="mt-0.5 h-7 w-full rounded border bg-card px-1.5 text-[11px] outline-none focus:border-primary"
-                            />
-                          </label>
-                          <label className="block">
-                            <div className="text-[9px] text-muted-foreground">注意事项</div>
-                            <textarea
-                              rows={2}
-                              value={notes}
-                              onChange={(e) => onEditExercise(p.id, ex.id, { notes: e.target.value })}
-                              placeholder={`默认：${ex.notes}`}
-                              className="mt-0.5 w-full rounded border bg-card px-1.5 py-1 text-[11px] outline-none focus:border-primary"
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-
+                <span className="text-sm font-bold">{p.name}</span>
+                <span className="text-[10px] text-muted-foreground">{p.gender}·{p.age}</span>
+                <span className="ml-auto flex items-center gap-1">
+                  <PlanStatusBadge status={status} />
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                </span>
+              </div>
+              <div className="mt-1 text-[10px] text-muted-foreground">
+                {p.diagnosis} · {p.surgeryName ?? "保守治疗"}
+              </div>
+              <div className="mt-1 rounded-lg bg-info/5 p-1.5 text-[10px] text-info">
+                <span className="font-bold">方案模板：</span>
+                {plan.templateName.split("（")[0]} · 训练动作 {plan.exercises.length} 项
+              </div>
+            </button>
             <div className="flex items-center justify-between border-t bg-muted/20 px-3 py-1.5">
-              <div className="flex gap-1">
-                <button onClick={() => onArchive(p)} className="rounded-full bg-muted p-1.5 text-muted-foreground active:bg-muted/70">
-                  <FileSearch className="h-3 w-3" />
-                </button>
-                <button onClick={() => onChat(p)} className="rounded-full bg-info/10 p-1.5 text-info active:opacity-80">
-                  <MessageCircle className="h-3 w-3" />
-                </button>
-              </div>
-              <div className="flex gap-1">
-                {status !== "empty" && (
-                  <button
-                    onClick={() => onClear(p)}
-                    className="flex items-center gap-1 rounded-full border border-destructive/30 px-2 py-1 text-[10px] text-destructive active:bg-destructive/5"
-                  >
-                    <Trash2 className="h-3 w-3" />清空
-                  </button>
-                )}
-                {status !== "empty" && (
-                  <button
-                    onClick={() => onEdit(p)}
-                    className="flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[11px] text-foreground active:bg-muted/70"
-                  >
-                    <Edit3 className="h-3 w-3" />修改
-                  </button>
-                )}
-                {status === "ai-draft" && (
-                  <button
-                    onClick={() => onConfirm(p)}
-                    className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium text-primary-foreground active:opacity-80"
-                    style={{ background: "var(--gradient-primary)" }}
-                  >
-                    <CheckCircle2 className="h-3 w-3" />确认方案
-                  </button>
-                )}
-                {status === "confirmed" && (
-                  <span className="flex items-center gap-1 rounded-full border border-success/40 px-2 py-1 text-[11px] text-success">
-                    <CheckCircle2 className="h-3 w-3" />已确认
-                  </span>
-                )}
-                {status === "edited" && (
-                  <span className="flex items-center gap-1 rounded-full border border-primary/40 px-2 py-1 text-[11px] text-primary">
-                    <Edit3 className="h-3 w-3" />已修改
-                  </span>
-                )}
-              </div>
+              <div className="text-[10px] text-muted-foreground">点击卡片查看患者详情</div>
+              <button
+                onClick={() => onEdit(p)}
+                className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium text-primary-foreground active:opacity-80"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                <ClipboardCheck className="h-3 w-3" />方案审核
+              </button>
             </div>
           </div>
         );
@@ -675,6 +583,7 @@ function PlansTab({
     </div>
   );
 }
+
 
 function RecordsTab({
   inpatientList,
