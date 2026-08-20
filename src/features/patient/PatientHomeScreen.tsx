@@ -149,9 +149,11 @@ export function PatientHomeScreen({
                 <p className="mt-2 text-[23px] font-bold leading-snug">
                   {patientName}，今日 {remaining} 项待打卡
                 </p>
-                <p className="mt-2 text-[17px] leading-relaxed text-white/90">
-                  {mode === "inpatient" ? "康复训练 · 用药 · 宣教" : "居家康复 · 用药 · 饮食"}
-                </p>
+                {mode === "inpatient" && (
+                  <p className="mt-2 text-[17px] leading-relaxed text-white/90">
+                    康复训练 · 用药 · 宣教
+                  </p>
+                )}
               </div>
               <button
                 onClick={() => onAskAI()}
