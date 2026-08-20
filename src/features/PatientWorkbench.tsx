@@ -834,8 +834,24 @@ function Section({
 }
 
 // ---------- 我的 ----------
-function MeTab({ mode, doneCount, total }: { mode: Mode; doneCount: number; total: number }) {
+function MeTab({
+  mode,
+  doneCount,
+  total,
+  patient,
+  todos,
+  onToggle,
+}: {
+  mode: Mode;
+  doneCount: number;
+  total: number;
+  patient: PatientProfile;
+  todos: TodoItem[];
+  onToggle: (id: string) => void;
+}) {
+  const finished = todos.filter((t) => t.done);
   return (
+
     <div className="space-y-4 p-3">
       <div className="flex items-center gap-3 rounded-2xl border bg-card p-4">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-[24px] font-bold text-primary">
