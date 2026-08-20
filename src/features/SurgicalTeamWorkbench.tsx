@@ -25,6 +25,17 @@ import { ToastBanner } from "@/components/ActionSheet";
 import { PatientChatSheet } from "@/components/PatientChatSheet";
 import { PatientChatListView, PatientChatEntryCard } from "@/components/PatientChatListSheet";
 import { PatientListSheet } from "@/components/PatientListSheet";
+import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
+import {
+  DEMO_PATIENT_ID,
+  addSurgeryImages,
+  getCaseFlow,
+  pushToTherapist,
+  removeSurgeryImage,
+  saveIntraOp,
+  setTeamDecision,
+  useCaseFlow,
+} from "@/lib/case-flow";
 import { patients, todayTasks } from "@/lib/mock-data";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -42,6 +53,7 @@ export function SurgicalTeamWorkbench() {
   const [chatPatient, setChatPatient] = useState<Patient | null>(null);
   const [showPatientList, setShowPatientList] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const flow = useCaseFlow();
 
   const tomorrowSurgery = patients.filter((p) => p.status === "admitted" && p.preOpFindings);
   const todaySurgery = patients.filter((p) => p.status === "in-surgery");
@@ -94,6 +106,7 @@ export function SurgicalTeamWorkbench() {
           decisions={decisions}
           onGo={(p) => {
             setDecisions((s) => ({ ...s, [p.id]: "go" }));
+            if (p.id === DEMO_PATIENT_ID) setTeamDecision("go");
             showToast(`已确认如期手术：${p.name}`);
           }}
           onHold={(p) => setReasonFor({ patient: p, decision: "hold" })}
@@ -105,6 +118,10 @@ export function SurgicalTeamWorkbench() {
           list={intraOpList}
           filledIntraOp={filledIntraOp}
           onOpen={(p) => setIntraOpFor(p)}
+          onPushTherapist={() => {
+            pushToTherapist();
+            showToast("手术结束，已推送至 朱年鑫 治疗师");
+          }}
         />
       )}
       {tab === "chat" && (
@@ -149,9 +166,10 @@ export function SurgicalTeamWorkbench() {
         <IntraOpEditor
           patient={intraOpFor}
           onClose={() => setIntraOpFor(null)}
-          onSave={() => {
+          onSave={(rec) => {
             setFilledIntraOp((s) => ({ ...s, [intraOpFor.id]: Date.now() }));
-            showToast(`术中量表已推送至治疗师 → ${intraOpFor.name} · 保留 3 天`);
+            if (intraOpFor.id === DEMO_PATIENT_ID) saveIntraOp({ ...rec, by: "李医生（一助）" });
+            showToast(`术中记录已保存 → ${intraOpFor.name} · 保留 3 天`);
             setIntraOpFor(null);
           }}
         />
