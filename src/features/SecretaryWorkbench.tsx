@@ -251,6 +251,7 @@ function HomeTab({
   onJumpInpatient: () => void;
   onJumpFollowUp: () => void;
 }) {
+  const flow = useCaseFlow();
   return (
     <div className="space-y-3 p-3">
       <div
@@ -273,6 +274,17 @@ function HomeTab({
           </button>
         </div>
       </div>
+
+      {flow.created && (
+        <>
+          <CaseFlowBanner
+            hint="演示病例：每日录入指标与备注 → 自动汇总生成交班记录，异常指标同步多端"
+            actionLabel="护理交班"
+            onAction={() => onQuick("handover")}
+          />
+          <AbnormalPanel compact />
+        </>
+      )}
 
       <div className="grid grid-cols-4 gap-2 rounded-2xl border bg-card p-3">
         <QuickAction icon={Camera} label="住院录入" tone="bg-info/15 text-info" onClick={() => onQuick("ocr")} />
