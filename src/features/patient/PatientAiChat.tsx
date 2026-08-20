@@ -119,8 +119,10 @@ export function PatientAiChat({
   }, [initialQuestion]);
 
   useEffect(() => {
+    if (msgs.length === 0) return;
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [msgs]);
+
 
   const hour = new Date().getHours();
   const greet = hour < 6 ? "凌晨好呀" : hour < 12 ? "上午好呀" : hour < 18 ? "下午好呀" : "晚上好呀";
