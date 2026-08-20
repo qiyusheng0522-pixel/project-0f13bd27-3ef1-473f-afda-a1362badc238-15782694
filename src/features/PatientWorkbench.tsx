@@ -284,7 +284,7 @@ export function PatientWorkbench() {
       title="骨安 · 患者端"
       subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
       overlay={
-        archiveOpen || scaleOpen ? null : guideStep ? (
+        archiveOpen || scaleOpen || aiOpen ? null : guideStep ? (
           <GuideSheet
             step={guideStep}
             onSkip={() => setGuideStep(null)}
@@ -326,7 +326,21 @@ export function PatientWorkbench() {
       }
     >
 
-      <div className="relative pb-24 text-[17px] leading-relaxed">
+      {/* 骨灵会话（全屏占满内容区） */}
+      {aiOpen && (
+        <div className="h-full">
+          <PatientAiChat
+            initialQuestion={aiQuestion}
+            onClose={() => {
+              setAiOpen(false);
+              setAiQuestion(undefined);
+            }}
+          />
+        </div>
+      )}
+
+      <div className={cn("relative pb-24 text-[17px] leading-relaxed", aiOpen && "hidden")}>
+
         {/* 自动识别版本提示（不再让老人手动切换） */}
         <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
           <div className="flex items-center gap-3">
@@ -435,20 +449,7 @@ export function PatientWorkbench() {
           />
         )}
 
-        {/* 骨灵会话 */}
-        {aiOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="h-[792px] w-[355px] overflow-hidden rounded-[32px] bg-background shadow-2xl">
-              <PatientAiChat
-                initialQuestion={aiQuestion}
-                onClose={() => {
-                  setAiOpen(false);
-                  setAiQuestion(undefined);
-                }}
-              />
-            </div>
-          </div>
-        )}
+
 
 
 
