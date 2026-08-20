@@ -341,11 +341,31 @@ export function PatientWorkbench() {
           </div>
         </div>
 
-        {tab === "home" && (
+        {tab === "home" && mode === "inpatient" && (
+          <InpatientHomeTab
+            patient={PATIENT}
+            stages={stages as unknown as { key: string; label: string }[]}
+            currentStageIdx={currentStageIdx}
+            admissionUploaded={admissionUploaded}
+            onUpload={() => {
+              setAdmissionUploaded(true);
+              showToast("入院单上传成功");
+            }}
+            todos={currentTodos}
+            onToggle={toggleTodo}
+            onAskAI={() => {
+              setAiQuestion(undefined);
+              setAiOpen(true);
+            }}
+            onOpenPath={() => setPathOpen(true)}
+          />
+        )}
+
+        {tab === "home" && mode === "home" && (
           <PatientHomeScreen
             mode={mode}
             patientName={PATIENT.name}
-            bedInfo={`${PATIENT.hospital} · ${mode === "inpatient" ? "关节外科 12 床" : "门诊随访"}`}
+            bedInfo={`${PATIENT.hospital} · 门诊随访`}
             stageLabel={stages[currentStageIdx].label}
             stageIdx={currentStageIdx}
             stageTotal={stages.length}
@@ -366,6 +386,7 @@ export function PatientWorkbench() {
             eduSlot={<EduSection />}
           />
         )}
+
 
         {tab === "plan" && (
           <PatientCareScreen
