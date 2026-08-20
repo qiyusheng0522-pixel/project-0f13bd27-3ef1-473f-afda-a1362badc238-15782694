@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Mic } from "lucide-react";
+import { CaseFlowBanner } from "@/components/CaseFlowBanner";
+import { useCaseFlow } from "@/lib/case-flow";
 import { cn } from "@/lib/utils";
 
 /**
@@ -8,7 +10,8 @@ import { cn } from "@/lib/utils";
 
 const handoverDate = "2024-04-22";
 
-export function HandoverSheet({ onClose }: { onClose: () => void }) {
+export function HandoverSheet({ onClose, onGenerate }: { onClose: () => void; onGenerate?: () => void }) {
+  const flow = useCaseFlow();
   const [special, setSpecial] = useState(
     "05床 杨成轩 沟通障碍，家属陪护；02床 吴翠花 HBV 标准预防 + 接触隔离。",
   );
@@ -35,6 +38,30 @@ export function HandoverSheet({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 text-[11px] leading-relaxed">
+        {flow.created && (
+          <div className="mb-3 space-y-2">
+            <CaseFlowBanner
+              hint={`演示病例每日护理记录 ${flow.nurseRecords.length} 条 · 异常指标 ${flow.abnormal.length} 项`}
+              actionLabel="生成今日交班记录"
+              onAction={onGenerate}
+            />
+            {flow.handovers.map((h) => (
+              <div key={h.id} className="rounded-2xl border bg-card p-3">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <b className="text-[11px]">{h.date} 自动交班记录</b>
+                  <span className="text-[10px] text-muted-foreground">{h.createdAt.slice(11)}</span>
+                </div>
+                <ul className="space-y-1 text-[11px]">
+                  {h.items.map((it, i) => (
+                    <li key={i} className={cn(it.startsWith("⚠") && "font-medium text-destructive")}>
+                      · {it}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="overflow-hidden rounded-2xl border bg-card">
           <Row>
             <span>
