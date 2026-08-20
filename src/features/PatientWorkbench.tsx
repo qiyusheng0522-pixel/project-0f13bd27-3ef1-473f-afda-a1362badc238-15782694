@@ -278,6 +278,22 @@ export function PatientWorkbench() {
     <PhoneShell
       title="骨安 · 患者端"
       subtitle={`${mode === "inpatient" ? "住院版" : "门诊版"} · 自动识别 · 大字适老`}
+      overlay={
+        guideStep && !archiveOpen && !scaleOpen ? (
+          <GuideSheet
+            step={guideStep}
+            onSkip={() => setGuideStep(null)}
+            onAction={() => {
+              if (guideStep === 1) setArchiveOpen(true);
+              else if (guideStep === 2) setScaleOpen(true);
+              else {
+                setGuideStep(null);
+                setTab("plan");
+              }
+            }}
+          />
+        ) : null
+      }
       bottom={
         <TabBar
           items={tabItems}
@@ -292,6 +308,7 @@ export function PatientWorkbench() {
         />
       }
     >
+
       <div className="relative pb-24 text-[17px] leading-relaxed">
         {/* 自动识别版本提示（不再让老人手动切换） */}
         <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
