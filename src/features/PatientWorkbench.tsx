@@ -346,7 +346,16 @@ export function PatientWorkbench() {
           />
         )}
 
-        {tab === "me" && <MeTab mode={mode} doneCount={doneCount} total={currentTodos.length} />}
+        {tab === "me" && (
+          <MeTab
+            mode={mode}
+            doneCount={doneCount}
+            total={currentTodos.length}
+            patient={PATIENT}
+            todos={currentTodos}
+            onToggle={toggleTodo}
+          />
+        )}
 
         {/* 换菜弹层 */}
         {swapDish && (
@@ -355,6 +364,48 @@ export function PatientWorkbench() {
 
         {/* AI 弹层 */}
         {aiOpen && <BoneAISheet onClose={() => setAiOpen(false)} />}
+
+        {/* 第 1 步：健康档案上传 */}
+        {archiveOpen && (
+          <ArchiveUploadSheet
+            onClose={() => {
+              setArchiveOpen(false);
+              setGuideStep(2);
+            }}
+          />
+        )}
+
+        {/* 第 2 步：专病量表 */}
+        {scaleOpen && (
+          <ScaleSheet
+            onClose={() => {
+              setScaleOpen(false);
+              setGuideStep(3);
+            }}
+            onSubmit={() => {
+              setScaleOpen(false);
+              setGuideStep(3);
+              showToast("量表已提交，AI 正在生成风险报告");
+            }}
+          />
+        )}
+
+        {/* 新用户使用引导 */}
+        {guideStep && !archiveOpen && !scaleOpen && (
+          <GuideSheet
+            step={guideStep}
+            onSkip={() => setGuideStep(null)}
+            onAction={() => {
+              if (guideStep === 1) setArchiveOpen(true);
+              else if (guideStep === 2) setScaleOpen(true);
+              else {
+                setGuideStep(null);
+                setTab("plan");
+              }
+            }}
+          />
+        )}
+
 
         {/* Toast */}
         {toast && (
