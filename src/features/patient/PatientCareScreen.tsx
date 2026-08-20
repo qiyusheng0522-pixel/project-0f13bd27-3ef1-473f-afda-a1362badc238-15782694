@@ -20,6 +20,15 @@ import {
   FileText,
   Lock,
   Sparkles,
+  User,
+  Phone,
+  MapPin,
+  Pencil,
+  Pill,
+  Ruler,
+  Scale,
+  Droplet,
+  Stethoscope,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
