@@ -336,26 +336,27 @@ function ScalesTab({
   pushed,
   onEdit,
   onPush,
-  onOcr,
+  onAdmit,
 }: {
   list: typeof patients;
   pushed: Set<string>;
   onEdit: (p: Patient) => void;
   onPush: (p: Patient) => void;
-  onOcr: () => void;
+  onAdmit: () => void;
 }) {
   return (
     <div className="space-y-3 p-3">
       <SearchBar placeholder="搜索患者 / 床号" />
 
       <button
-        onClick={onOcr}
+        onClick={onAdmit}
         className="flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-sm font-medium text-primary-foreground active:opacity-90"
         style={{ background: "var(--gradient-primary)" }}
       >
         <Camera className="h-4 w-4" />
-        OCR 录入 / 拍照识别
+        住院录入 / 拍照识别
       </button>
+
 
       <div className="text-xs font-semibold">明日手术 · {list.length} 例</div>
 
