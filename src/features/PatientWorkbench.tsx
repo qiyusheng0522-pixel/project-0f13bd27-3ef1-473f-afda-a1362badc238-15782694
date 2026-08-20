@@ -393,7 +393,7 @@ function HomeTab({
       {/* 患者信息卡（两版共用） */}
       <div
         className="rounded-2xl p-4 text-white"
-        style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.72))" }}
+        style={{ background: "var(--gradient-primary)" }}
       >
         <div className="flex items-center gap-3">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-[24px] font-bold backdrop-blur">
