@@ -577,42 +577,347 @@ function TagHistoryContent() {
   );
 }
 
+// ---------- 我的健康档案 ----------
+const ARCHIVE_TABS = [
+  "基础信息",
+  "生活方式纠偏",
+  "近期体征",
+  "既往病史",
+  "用药记录",
+  "过敏 / 家族史",
+  "检查报告",
+  "就诊记录",
+  "监测数据",
+] as const;
+
+type ArchiveTab = (typeof ARCHIVE_TABS)[number];
+
 function ArchiveContent({ rehab }: { rehab: CareRehabPlan }) {
+  const [tab, setTab] = useState<ArchiveTab>("基础信息");
+
   return (
-    <div className="p-5">
-      <h3 className="text-[18px] font-bold">我的健康档案</h3>
-      <p className="mt-1 text-[17px] text-muted-foreground">{rehab.title}</p>
-      <div className="mt-4 space-y-3">
-        <div className="rounded-2xl bg-card p-4 ring-1 ring-black/5">
-          <div className="text-[17px] font-bold">康复目标</div>
-          <p className="mt-1 text-[17px] text-foreground/75">{rehab.goal}</p>
+    <div className="pb-6">
+      {/* 头部：档案完成度 */}
+      <div
+        className="flex items-center gap-3 px-5 pb-5 pt-6"
+        style={{ background: "linear-gradient(160deg, oklch(0.93 0.05 220) 0%, oklch(0.97 0.02 200) 100%)" }}
+      >
+        <div className="grid size-[62px] shrink-0 place-items-center rounded-full bg-primary/20">
+          <User className="size-9 text-primary" />
         </div>
-        <div className="rounded-2xl bg-card p-4 ring-1 ring-black/5">
-          <div className="text-[17px] font-bold">饮食注意事项</div>
-          <ul className="mt-2 space-y-1.5">
-            {rehab.diet.map((d) => (
-              <li key={d} className="flex items-start gap-2 text-[17px]">
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
-                {d}
-              </li>
-            ))}
-          </ul>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="truncate text-[24px] font-bold">杨阳</span>
+            <span className="shrink-0 rounded-full bg-primary/15 px-2.5 py-0.5 text-[16px] font-bold text-primary">
+              银卡会员
+            </span>
+          </div>
+          <div className="mt-0.5 text-[18px] text-foreground/70">档案完成度 92%</div>
         </div>
+      </div>
+
+      {/* 分类标签（横向滚动，不换行） */}
+      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+        <div className="flex gap-2 overflow-x-auto px-4 py-3">
+          {ARCHIVE_TABS.map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={cn(
+                "shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-[18px] font-bold ring-1 transition-colors",
+                tab === t
+                  ? "bg-primary text-primary-foreground ring-primary"
+                  : "bg-card text-foreground/70 ring-black/10",
+              )}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-4">
+        {tab === "基础信息" && <ArchiveBasic />}
+        {tab === "生活方式纠偏" && <ArchiveLifestyle />}
+        {tab === "近期体征" && <ArchiveVitals />}
+        {tab === "既往病史" && (
+          <ArchiveTextList
+            icon={<History className="size-5 text-primary" />}
+            title="既往病史"
+            items={[
+              "右膝重度骨关节炎（K-L III 级）· 2026-02 确诊",
+              "高血压 2 级 · 2019 年确诊，长期服药控制",
+              "轻度贫血（血红蛋白 92 g/L）· 术前发现",
+              "无糖尿病、无冠心病史",
+            ]}
+          />
+        )}
+        {tab === "用药记录" && (
+          <ArchiveTextList
+            icon={<Pill className="size-5 text-primary" />}
+            title="用药记录"
+            items={[
+              "苯磺酸氨氯地平 5mg · 每日 1 次 · 早餐后（降压）",
+              "碳酸钙 D3 600mg · 每日 1 次 · 晚餐后（补钙）",
+              "塞来昔布 200mg · 疼痛时服 · 每日不超过 2 次",
+              "利伐沙班 10mg · 每日 1 次 · 术后抗凝 14 天",
+            ]}
+          />
+        )}
+        {tab === "过敏 / 家族史" && (
+          <ArchiveTextList
+            icon={<AlertTriangle className="size-5 text-warning" />}
+            title="过敏 / 家族史"
+            items={[
+              "青霉素过敏（皮试阳性）· 用药前务必告知医护",
+              "无食物过敏史",
+              "母亲：骨质疏松、髋部骨折史",
+              "父亲：高血压",
+            ]}
+          />
+        )}
+        {tab === "检查报告" && (
+          <ArchiveRecords
+            icon={<FileText className="size-5 text-primary" />}
+            title="检查报告"
+            rows={[
+              { date: "2026-08-14", name: "右膝正侧位 X 光", note: "假体位置良好，力线正常" },
+              { date: "2026-08-12", name: "血常规", note: "血红蛋白 92 g/L（偏低）" },
+              { date: "2026-08-12", name: "凝血功能", note: "INR 1.1 正常" },
+              { date: "2026-08-10", name: "下肢血管超声", note: "未见深静脉血栓" },
+            ]}
+          />
+        )}
+        {tab === "就诊记录" && (
+          <ArchiveRecords
+            icon={<Stethoscope className="size-5 text-primary" />}
+            title="就诊记录"
+            rows={[
+              { date: "2026-08-15", name: "关节外科 · 王主任", note: "术后第 1 天查房，切口干燥" },
+              { date: "2026-08-14", name: "手术 · 右膝 TKA", note: "手术顺利，术中出血 320ml" },
+              { date: "2026-08-10", name: "关节外科门诊", note: "收入院，完善术前检查" },
+            ]}
+          />
+        )}
+        {tab === "监测数据" && (
+          <ArchiveRecords
+            icon={<Activity className="size-5 text-primary" />}
+            title="监测数据"
+            rows={[
+              { date: "今日 08:00", name: "血压", note: "138/86 mmHg" },
+              { date: "今日 08:00", name: "体温", note: "36.8 ℃" },
+              { date: "今日 09:30", name: "屈膝角度", note: "0-75°（较昨日 +10°）" },
+              { date: "今日 20:00", name: "疼痛 VAS", note: "3 / 10" },
+            ]}
+          />
+        )}
+      </div>
+
+      {/* 康复方案摘要 */}
+      <div className="px-4">
         <div className="rounded-2xl bg-card p-4 ring-1 ring-black/5">
-          <div className="text-[17px] font-bold">康复注意事项</div>
-          <ul className="mt-2 space-y-1.5">
-            {rehab.cautions.map((d) => (
-              <li key={d} className="flex items-start gap-2 text-[17px]">
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-warning" />
-                {d}
-              </li>
-            ))}
-          </ul>
+          <div className="text-[18px] font-bold">当前康复方案</div>
+          <p className="mt-1 text-[17px] text-foreground/75">{rehab.title}</p>
+          <p className="mt-1 text-[17px] text-foreground/60">{rehab.goal}</p>
         </div>
       </div>
     </div>
   );
 }
+
+function ArchiveCard({
+  icon,
+  title,
+  action,
+  children,
+  hint,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  action?: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        {icon}
+        <span className="text-[20px] font-bold">{title}</span>
+        {action && (
+          <span className="ml-auto inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-[18px] font-bold text-primary">
+            <Pencil className="size-4" />
+            {action}
+          </span>
+        )}
+      </div>
+      {hint && <div className="mt-1 text-[17px] text-muted-foreground">{hint}</div>}
+      <div className="mt-3">{children}</div>
+    </div>
+  );
+}
+
+function ArchiveBasic() {
+  const rows = [
+    { icon: <User className="size-5" />, label: "姓名", value: "杨阳" },
+    { icon: <CheckCircle2 className="size-5" />, label: "性别 / 年龄", value: "男 · 63 岁" },
+    { icon: <Phone className="size-5" />, label: "联系电话", value: "137****6620" },
+    { icon: <MapPin className="size-5" />, label: "居住地", value: "南京市鼓楼区 · 安家小区" },
+  ];
+  const team = [
+    { name: "王渭君", role: "签约医生", desc: "关节外科 主任医师 · 方案审核", tint: "bg-primary/10 text-primary", icon: <Stethoscope className="size-5" /> },
+    { name: "张敏", role: "责任护士", desc: "护士长 · 日常随访 · 用药提醒", tint: "bg-rose-100 text-rose-600", icon: <HeartPulse className="size-5" /> },
+    { name: "朱年鑫", role: "康复治疗师", desc: "运动处方 · 每日康复评估", tint: "bg-emerald-100 text-emerald-600", icon: <Footprints className="size-5" /> },
+  ];
+  return (
+    <div className="space-y-5">
+      <ArchiveCard icon={<IdCard className="size-5 text-primary" />} title="基础信息" action="编辑">
+        <div className="divide-y rounded-2xl bg-card ring-1 ring-black/5">
+          {rows.map((r) => (
+            <div key={r.label} className="flex items-center gap-3 px-4 py-3.5">
+              <span className="shrink-0 text-muted-foreground">{r.icon}</span>
+              <span className="shrink-0 whitespace-nowrap text-[18px] text-muted-foreground">{r.label}</span>
+              <span className="ml-auto truncate text-right text-[19px] font-bold">{r.value}</span>
+            </div>
+          ))}
+        </div>
+      </ArchiveCard>
+
+      <ArchiveCard icon={<User className="size-5 text-primary" />} title="我的服务团队" hint="可直接联系">
+        <div className="space-y-2.5">
+          {team.map((m) => (
+            <div key={m.name} className="flex items-center gap-3 rounded-2xl bg-card p-3.5 ring-1 ring-black/5">
+              <span className={cn("grid size-11 shrink-0 place-items-center rounded-full", m.tint)}>{m.icon}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-[19px] font-bold">{m.name}</span>
+                  <span className="shrink-0 whitespace-nowrap rounded-full bg-primary/10 px-2 py-0.5 text-[16px] font-bold text-primary">
+                    {m.role}
+                  </span>
+                </div>
+                <div className="mt-0.5 text-[17px] leading-snug text-muted-foreground">{m.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ArchiveCard>
+    </div>
+  );
+}
+
+function ArchiveLifestyle() {
+  const items = [
+    { title: "久坐少动", advice: "每小时起身活动 5 分钟，避免膝关节僵硬", status: "改善中" },
+    { title: "钙摄入不足", advice: "每日 300ml 牛奶 + 深绿色蔬菜", status: "已纠正" },
+    { title: "体重偏高（BMI 26.5）", advice: "每周减重 0.3kg，减轻膝关节负荷", status: "进行中" },
+    { title: "吸烟史 20 年", advice: "术后已戒烟，继续保持有助切口愈合", status: "已纠正" },
+  ];
+  return (
+    <ArchiveCard icon={<Sparkles className="size-5 text-primary" />} title="生活方式纠偏" hint="医护根据档案给出的调整建议">
+      <div className="space-y-2.5">
+        {items.map((i) => (
+          <div key={i.title} className="rounded-2xl bg-card p-4 ring-1 ring-black/5">
+            <div className="flex items-center gap-2">
+              <span className="min-w-0 flex-1 text-[19px] font-bold leading-snug">{i.title}</span>
+              <span
+                className={cn(
+                  "shrink-0 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[16px] font-bold",
+                  i.status === "已纠正" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700",
+                )}
+              >
+                {i.status}
+              </span>
+            </div>
+            <div className="mt-1.5 text-[17px] leading-relaxed text-muted-foreground">{i.advice}</div>
+          </div>
+        ))}
+      </div>
+    </ArchiveCard>
+  );
+}
+
+function ArchiveVitals() {
+  const cards = [
+    { icon: <Ruler className="size-5 text-primary" />, label: "身高", value: "170", unit: "cm" },
+    { icon: <Scale className="size-5 text-primary" />, label: "体重", value: "76.4", unit: "kg" },
+    { icon: <Droplet className="size-5 text-rose-500" />, label: "空腹血糖", value: "5.8", unit: "mmol/L" },
+    { icon: <HeartPulse className="size-5 text-rose-500" />, label: "血压", value: "138/86", unit: "mmHg" },
+    { icon: <Activity className="size-5 text-primary" />, label: "体温", value: "36.8", unit: "℃" },
+    { icon: <Footprints className="size-5 text-primary" />, label: "屈膝角度", value: "0-75", unit: "°" },
+  ];
+  return (
+    <ArchiveCard
+      icon={<Activity className="size-5 text-primary" />}
+      title="近期体征"
+      action="录入"
+      hint="2026-08-15 更新 · 点击右上录入最新数据"
+    >
+      <div className="grid grid-cols-2 gap-2.5">
+        {cards.map((c) => (
+          <div key={c.label} className="rounded-2xl bg-card p-3.5 ring-1 ring-black/5">
+            <div className="flex items-center gap-1.5">
+              <span className="shrink-0">{c.icon}</span>
+              <span className="truncate text-[18px] font-bold text-foreground/80">{c.label}</span>
+            </div>
+            <div className="mt-1.5 flex items-baseline gap-1">
+              <span className="text-[26px] font-bold leading-none">{c.value}</span>
+              <span className="text-[17px] text-muted-foreground">{c.unit}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </ArchiveCard>
+  );
+}
+
+function ArchiveTextList({
+  icon,
+  title,
+  items,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  items: string[];
+}) {
+  return (
+    <ArchiveCard icon={icon} title={title}>
+      <div className="space-y-2">
+        {items.map((t) => (
+          <div key={t} className="flex items-start gap-2.5 rounded-2xl bg-card p-3.5 text-[18px] leading-relaxed ring-1 ring-black/5">
+            <span className="mt-2 size-2 shrink-0 rounded-full bg-primary" />
+            {t}
+          </div>
+        ))}
+      </div>
+    </ArchiveCard>
+  );
+}
+
+function ArchiveRecords({
+  icon,
+  title,
+  rows,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  rows: { date: string; name: string; note: string }[];
+}) {
+  return (
+    <ArchiveCard icon={icon} title={title}>
+      <div className="divide-y rounded-2xl bg-card ring-1 ring-black/5">
+        {rows.map((r) => (
+          <div key={`${r.date}-${r.name}`} className="px-4 py-3.5">
+            <div className="flex items-center gap-2">
+              <span className="min-w-0 flex-1 truncate text-[19px] font-bold">{r.name}</span>
+              <span className="shrink-0 whitespace-nowrap text-[17px] text-muted-foreground">{r.date}</span>
+            </div>
+            <div className="mt-1 text-[17px] leading-relaxed text-foreground/75">{r.note}</div>
+          </div>
+        ))}
+      </div>
+    </ArchiveCard>
+  );
+}
+
 
 function TimelineList({ events, compact = false }: { events: TagEvent[]; compact?: boolean }) {
   return (
