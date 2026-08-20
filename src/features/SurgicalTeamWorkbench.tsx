@@ -29,7 +29,6 @@ import { CaseFlowBanner, AbnormalPanel } from "@/components/CaseFlowBanner";
 import {
   DEMO_PATIENT_ID,
   addSurgeryImages,
-  getCaseFlow,
   pushToTherapist,
   removeSurgeryImage,
   saveIntraOp,
