@@ -1069,49 +1069,88 @@ function PathSheet({
         <div className="text-[19px] font-bold">我的完整住院路径</div>
         <div className="w-5" />
       </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="relative space-y-6 pl-1">
+      <div className="flex-1 overflow-y-auto px-4 pb-6">
+        {/* 进度概览 */}
+        <div
+          className="mt-3 rounded-2xl border bg-card p-4"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
+          <div className="flex items-baseline justify-between">
+            <div className="text-[17px] font-bold text-foreground">
+              当前：{stages[currentStageIdx]?.label}
+            </div>
+            <div className="text-[15px] font-bold text-primary">
+              第 {currentStageIdx + 1} / {stages.length} 步
+            </div>
+          </div>
+          <div className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all"
+              style={{ width: `${((currentStageIdx + 1) / stages.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* 步骤列表 */}
+        <div className="mt-4 overflow-hidden rounded-2xl border bg-card">
           {stages.map((s, idx) => {
             const done = idx < currentStageIdx;
             const active = idx === currentStageIdx;
             const last = idx === stages.length - 1;
             return (
-              <div key={s.key} className="relative flex items-start gap-4">
-                {!last && (
-                  <div className="absolute left-5 top-10 h-[calc(100%+1.5rem)] w-0 border-l-2 border-dashed border-muted-foreground/30" />
+              <div
+                key={s.key}
+                className={cn(
+                  "relative flex items-center gap-3 px-4 py-3",
+                  !last && "border-b",
+                  active && "bg-primary/5",
                 )}
+              >
+                {/* 竖向连线 */}
+                {!last && (
+                  <div className="absolute left-[31px] top-[38px] bottom-0 w-0.5 bg-border" />
+                )}
+                {idx > 0 && <div className="absolute left-[31px] top-0 h-[14px] w-0.5 bg-border" />}
                 <div
                   className={cn(
-                    "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[16px] font-bold",
-                    done && "bg-success text-white",
-                    active && "bg-primary text-white ring-4 ring-primary/20",
+                    "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[15px] font-bold",
+                    done && "bg-success text-success-foreground",
+                    active && "bg-primary text-primary-foreground ring-4 ring-primary/15",
+                    !done && !active && "border bg-background text-muted-foreground",
+                  )}
+                >
+                  {done ? <CheckCircle2 className="h-4.5 w-4.5" /> : idx + 1}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div
+                    className={cn(
+                      "text-[18px] font-bold leading-snug",
+                      active ? "text-primary" : done ? "text-foreground" : "text-muted-foreground",
+                    )}
+                  >
+                    {s.label}
+                  </div>
+                </div>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2.5 py-1 text-[13px] font-bold",
+                    active && "bg-primary text-primary-foreground",
+                    done && "bg-success/12 text-success",
                     !done && !active && "bg-muted text-muted-foreground",
                   )}
                 >
-                  {done ? <CheckCircle2 className="h-5 w-5" /> : idx + 1}
-                </div>
-                <div
-                  className={cn(
-                    "flex-1 rounded-2xl border p-3.5",
-                    active ? "border-primary bg-primary/5" : "bg-card",
-                  )}
-                >
-                  <div className={cn("text-[18px] font-bold", active && "text-primary")}>
-                    {s.label}
-                  </div>
-                  {active && (
-                    <div className="mt-1 text-[15px] font-bold text-primary">当前所处阶段</div>
-                  )}
-                  {done && <div className="mt-1 text-[14px] text-muted-foreground">已完成</div>}
-                  {!done && !active && (
-                    <div className="mt-1 text-[14px] text-muted-foreground">待进行</div>
-                  )}
-                </div>
+                  {active ? "进行中" : done ? "已完成" : "待进行"}
+                </span>
               </div>
             );
           })}
         </div>
+
+        <p className="mt-3 px-1 text-[14px] leading-relaxed text-muted-foreground">
+          路径由医护团队根据您的手术与恢复情况自动更新，无需手动填写。
+        </p>
       </div>
+
     </div>
   );
 }
