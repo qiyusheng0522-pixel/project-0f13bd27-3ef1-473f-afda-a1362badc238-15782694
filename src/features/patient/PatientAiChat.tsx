@@ -8,7 +8,12 @@ import {
   Pill,
   FileSearch,
   HeartPulse,
+  PersonStanding,
+  Target,
+  ClipboardList,
+  UtensilsCrossed,
 } from "lucide-react";
+
 import aiDoctor from "@/assets/ai-doctor.jpg";
 import { cn } from "@/lib/utils";
 
@@ -127,15 +132,37 @@ export function PatientAiChat({
   const hour = new Date().getHours();
   const greet = hour < 6 ? "凌晨好呀" : hour < 12 ? "上午好呀" : hour < 18 ? "下午好呀" : "晚上好呀";
   const SUGGESTS = [
-    "膝关节术后多久可以下地走路？",
-    "今天的康复动作怎么做才标准？",
-    "钙片和止痛药能一起吃吗？",
+    {
+      q: "膝关节术后多久可以下地走路？",
+      sub: "根据患者情况给出康复建议",
+      icon: <PersonStanding className="size-6 text-primary" />,
+      tint: "bg-primary/10",
+    },
+    {
+      q: "今天的康复动作怎么做才标准？",
+      sub: "获取动作要点与注意事项",
+      icon: <Target className="size-6 text-emerald-600" />,
+      tint: "bg-emerald-500/10",
+    },
+    {
+      q: "钙片和止痛药能一起吃吗？",
+      sub: "用药搭配与禁忌快速查询",
+      icon: <Pill className="size-6 text-amber-600" />,
+      tint: "bg-amber-500/10",
+    },
+  ];
+
+  const QUICK = [
+    { label: "快速问医", sub: "联系医生", icon: <Stethoscope className="size-6 text-emerald-600" />, tint: "bg-emerald-500/10", prompt: "帮我推荐一位关节外科主治医生" },
+    { label: "用药提醒", sub: "按时吃药", icon: <Pill className="size-6 text-violet-600" />, tint: "bg-violet-500/10", prompt: "塞来昔布应该怎么服用？有哪些副作用？" },
+    { label: "报告管理", sub: "查看报告", icon: <ClipboardList className="size-6 text-primary" />, tint: "bg-primary/10", prompt: "请帮我解读最近的膝关节 X 光报告" },
+    { label: "饮食建议", sub: "科学营养", icon: <UtensilsCrossed className="size-6 text-amber-600" />, tint: "bg-amber-500/10", prompt: "术后这一周我该怎么吃？给我一份药食同源食谱" },
   ];
 
   return (
     <div className="flex h-full flex-col bg-muted/30">
       {/* 顶栏（单行，不与外层标题重复） */}
-      <header className="flex shrink-0 items-center gap-2 border-b bg-card px-2 py-2.5">
+      <header className="flex shrink-0 items-center gap-2 border-b bg-card px-2 py-2">
         <button
           onClick={onClose}
           aria-label="返回"
@@ -143,35 +170,97 @@ export function PatientAiChat({
         >
           <ChevronLeft className="size-6" />
         </button>
-        <div className="size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-primary/20">
-          <img src={aiDoctor} alt="骨灵" className="h-full w-full object-cover" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-[17px] font-bold leading-tight">骨灵</div>
-          <div className="text-[12.5px] text-muted-foreground">AI 主治医生 · 在线</div>
-        </div>
+        <div className="min-w-0 flex-1 text-[17px] font-bold leading-tight">骨灵</div>
       </header>
 
       {/* 消息区 */}
       <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3">
         {msgs.length === 0 && (
-          <div className="pt-1">
-            <div className="text-[22px] font-bold leading-snug text-foreground">
-              {greet}
+          <div className="space-y-3">
+            {/* AI 主治医生卡 */}
+            <div
+              className="flex items-center gap-3 rounded-3xl px-4 py-4"
+              style={{ background: "linear-gradient(135deg, hsl(214 90% 62%), hsl(206 92% 72%))" }}
+            >
+              <div className="size-14 shrink-0 overflow-hidden rounded-full ring-2 ring-white/70">
+                <img src={aiDoctor} alt="骨灵" className="h-full w-full object-cover" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[19px] font-bold text-primary-foreground">AI 主治医生 · 骨灵</div>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-emerald-300" />
+                  <span className="text-[14px] text-primary-foreground/90">在线为您服务</span>
+                </div>
+              </div>
             </div>
-            <div className="mt-1 text-[16px] text-muted-foreground">
-              我可以帮您解答康复动作、用药、饮食与报告解读
+
+            {/* 问候 */}
+            <div className="flex items-center gap-3 px-1 pt-1">
+              <div className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/10">
+                <HeartPulse className="size-6 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[21px] font-bold leading-tight">{greet}</div>
+                <div className="mt-0.5 text-[14.5px] text-muted-foreground">
+                  我可以帮您解答康复动作、用药、饮食与报告解读
+                </div>
+              </div>
             </div>
-            <div className="mt-3 space-y-2.5">
-              {SUGGESTS.map((s) => (
+
+            {/* 推荐提问 */}
+            <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-black/[0.05]" style={{ boxShadow: "var(--shadow-card)" }}>
+              {SUGGESTS.map((s, i) => (
                 <button
-                  key={s}
-                  onClick={() => send(s)}
-                  className="flex w-full items-center gap-3 rounded-2xl bg-card px-3.5 py-3.5 text-left ring-1 ring-black/[0.05] active:scale-[0.99]"
+                  key={s.q}
+                  onClick={() => send(s.q)}
+                  className={cn(
+                    "flex w-full items-center gap-3 px-3.5 py-3.5 text-left active:bg-muted/50",
+                    i > 0 && "border-t",
+                  )}
+                >
+                  <span className={cn("grid size-12 shrink-0 place-items-center rounded-2xl", s.tint)}>
+                    {s.icon}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[16.5px] font-bold leading-snug">{s.q}</span>
+                    <span className="mt-0.5 block text-[13.5px] text-muted-foreground">{s.sub}</span>
+                  </span>
+                  <ChevronLeft className="size-5 shrink-0 rotate-180 text-primary" />
+                </button>
+              ))}
+            </div>
+
+            {/* 报告解读服务 */}
+            <div className="flex items-center gap-3 rounded-3xl bg-primary/10 px-3.5 py-3.5">
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-card">
+                <FileSearch className="size-6 text-primary" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-[16.5px] font-bold">报告解读服务</div>
+                <div className="mt-0.5 text-[13.5px] text-muted-foreground">上传检查报告，AI 帮您快速解读</div>
+              </div>
+              <button
+                onClick={() => send("请帮我解读最近的膝关节 X 光报告")}
+                className="shrink-0 rounded-full bg-primary px-4 py-2.5 text-[15px] font-bold text-primary-foreground active:scale-95"
+              >
+                去上传
+              </button>
+            </div>
+
+            {/* 快捷服务 */}
+            <div className="grid grid-cols-4 gap-2">
+              {QUICK.map((q) => (
+                <button
+                  key={q.label}
+                  onClick={() => send(q.prompt)}
+                  className="rounded-2xl bg-card px-1 py-3 ring-1 ring-black/[0.05] active:scale-95"
                   style={{ boxShadow: "var(--shadow-card)" }}
                 >
-                  <span className="min-w-0 flex-1 text-[17px] font-semibold leading-snug">{s}</span>
-                  <ChevronLeft className="size-5 shrink-0 rotate-180 text-muted-foreground" />
+                  <span className={cn("mx-auto grid size-11 place-items-center rounded-full", q.tint)}>
+                    {q.icon}
+                  </span>
+                  <span className="mt-1.5 block text-[13.5px] font-bold">{q.label}</span>
+                  <span className="block text-[12px] text-muted-foreground">{q.sub}</span>
                 </button>
               ))}
             </div>
@@ -194,22 +283,22 @@ export function PatientAiChat({
         ))}
       </div>
 
-
-
-      {/* 分类 + 输入 */}
+      {/* 输入区 */}
       <div className="shrink-0 border-t bg-card/95 px-3 pb-3 pt-2 backdrop-blur">
-        <div className="scrollbar-hide mb-2 flex gap-1.5 overflow-x-auto">
-          {CATS.map((c) => (
-            <button
-              key={c.key}
-              onClick={() => send(c.prompt)}
-              className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-primary/10 px-3 text-[14px] font-semibold text-primary ring-1 ring-primary/15 active:scale-95"
-            >
-              {c.icon}
-              {c.label}
-            </button>
-          ))}
-        </div>
+        {msgs.length > 0 && (
+          <div className="scrollbar-hide mb-2 flex gap-1.5 overflow-x-auto">
+            {CATS.map((c) => (
+              <button
+                key={c.key}
+                onClick={() => send(c.prompt)}
+                className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-primary/10 px-3 text-[14px] font-semibold text-primary ring-1 ring-primary/15 active:scale-95"
+              >
+                {c.icon}
+                {c.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="flex items-center gap-2 rounded-full bg-muted/60 py-1 pl-3 pr-1 ring-1 ring-black/[0.05]">
           <Sparkles className="size-4 shrink-0 text-primary" />
@@ -217,8 +306,8 @@ export function PatientAiChat({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send(input)}
-            placeholder="向骨灵提问…"
-            className="min-w-0 flex-1 bg-transparent py-2 text-[16px] outline-none placeholder:text-muted-foreground/70"
+            placeholder="向骨灵提问，例如：术后腿肿怎么办？"
+            className="min-w-0 flex-1 bg-transparent py-2 text-[15px] outline-none placeholder:text-muted-foreground/70"
           />
           <button
             aria-label="语音输入"
@@ -238,3 +327,4 @@ export function PatientAiChat({
     </div>
   );
 }
+
