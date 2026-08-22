@@ -363,6 +363,42 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
         </div>
       </section>
 
+      <section className="overflow-hidden rounded-3xl border bg-card">
+        <header className="flex items-center justify-between border-b px-4 py-3">
+          <h2 className="text-[20px] font-bold">今日时间安排</h2>
+          <span className="text-[16px] font-semibold text-muted-foreground">按时间顺序</span>
+        </header>
+        <ul className="divide-y">
+          {[...todos]
+            .sort((a, b) => (a.time ?? "99:99").localeCompare(b.time ?? "99:99"))
+            .map((t) => {
+              const d = isDone(t);
+              const Icon = CAT_META[t.cat].icon;
+              return (
+                <li key={t.id} className="flex items-center gap-3 px-4 py-3.5">
+                  <span className="w-[62px] shrink-0 text-[17px] font-bold text-primary">{t.time ?? "全天"}</span>
+                  <span className={cn("grid size-10 shrink-0 place-items-center rounded-xl", CAT_META[t.cat].tint)}>
+                    <Icon className="size-5" />
+                  </span>
+                  <p className={cn("min-w-0 flex-1 text-[18px] font-semibold leading-snug", d && "text-muted-foreground line-through")}>
+                    {t.title}
+                  </p>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full px-2.5 py-1 text-[15px] font-bold",
+                      d ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {d ? "已完成" : "待完成"}
+                  </span>
+                </li>
+              );
+            })}
+        </ul>
+      </section>
+
+
+
       <section className="rounded-3xl border bg-card p-5">
         <h2 className="text-[20px] font-bold">本周打卡趋势</h2>
         <div className="mt-4 flex h-40 items-end justify-between gap-2">
