@@ -541,6 +541,7 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
   const scope: "院内" | "居家" = inpatient ? "院内" : "居家";
   const list = EDU_LIB.filter((e) => e.scope === scope);
   const other = EDU_LIB.filter((e) => e.scope !== scope);
+  const [open, setOpen] = useState<{ title: string; desc: string; tag: string } | null>(null);
 
   return (
     <div className="space-y-4 p-3 pb-6">
@@ -560,7 +561,10 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
               desc={e.desc}
               tag={e.tag}
               unread={!e.read}
-              onOpen={() => markEduRead(e.id)}
+              onOpen={() => {
+                markEduRead(e.id);
+                setOpen(e);
+              }}
             />
           ))}
         </EduGroup>
@@ -568,16 +572,39 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
 
       <EduGroup title={`${scope}必读宣教`}>
         {list.map((e) => (
-          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} />
+          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} onOpen={() => setOpen(e)} />
         ))}
       </EduGroup>
 
       <EduGroup title={scope === "院内" ? "出院后可提前了解" : "住院期间回顾"}>
         {other.map((e) => (
-          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} />
+          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} onOpen={() => setOpen(e)} />
         ))}
       </EduGroup>
+
+      {open && (
+        <Sheet title={open.title} onClose={() => setOpen(null)}>
+          <span className="inline-block rounded-md bg-primary/10 px-2.5 py-1 text-[16px] font-bold text-primary">
+            {open.tag}
+          </span>
+          <p className="mt-3 text-[18px] font-semibold leading-relaxed">{open.desc}</p>
+          <ul className="mt-4 space-y-3 text-[17px] leading-relaxed text-muted-foreground">
+            <li>1. 训练前先热身，动作缓慢，不追求角度和次数。</li>
+            <li>2. 每次训练后如疼痛评分超过 4 分，请减少组数并告知治疗师。</li>
+            <li>3. 出现伤口红肿热痛、发热、小腿肿胀，请立即联系医护。</li>
+            <li>4. 如有疑问可在【骨灵】中随时提问，或联系病区护士站。</li>
+          </ul>
+          <button
+            onClick={() => setOpen(null)}
+            className="mt-5 w-full rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            我已阅读
+          </button>
+        </Sheet>
+      )}
     </div>
+
   );
 }
 
