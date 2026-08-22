@@ -17,7 +17,13 @@ import {
   ShieldCheck,
   FileSignature,
   Phone,
+  MessageSquare,
+  FileText,
+  Bell,
+  Type,
+  HeartPulse,
   X,
+
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { cn } from "@/lib/utils";
@@ -28,8 +34,10 @@ import {
   stageIndex,
   toggleTodo,
   markEduRead,
+  markMessageRead,
   DEMO_PATIENT_NAME,
 } from "@/lib/case-flow";
+
 
 /* ============ 分类定义 ============ */
 
@@ -355,6 +363,42 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
         </div>
       </section>
 
+      <section className="overflow-hidden rounded-3xl border bg-card">
+        <header className="flex items-center justify-between border-b px-4 py-3">
+          <h2 className="text-[20px] font-bold">今日时间安排</h2>
+          <span className="text-[16px] font-semibold text-muted-foreground">按时间顺序</span>
+        </header>
+        <ul className="divide-y">
+          {[...todos]
+            .sort((a, b) => (a.time ?? "99:99").localeCompare(b.time ?? "99:99"))
+            .map((t) => {
+              const d = isDone(t);
+              const Icon = CAT_META[t.cat].icon;
+              return (
+                <li key={t.id} className="flex items-center gap-3 px-4 py-3.5">
+                  <span className="w-[62px] shrink-0 text-[17px] font-bold text-primary">{t.time ?? "全天"}</span>
+                  <span className={cn("grid size-10 shrink-0 place-items-center rounded-xl", CAT_META[t.cat].tint)}>
+                    <Icon className="size-5" />
+                  </span>
+                  <p className={cn("min-w-0 flex-1 text-[18px] font-semibold leading-snug", d && "text-muted-foreground line-through")}>
+                    {t.title}
+                  </p>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full px-2.5 py-1 text-[15px] font-bold",
+                      d ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {d ? "已完成" : "待完成"}
+                  </span>
+                </li>
+              );
+            })}
+        </ul>
+      </section>
+
+
+
       <section className="rounded-3xl border bg-card p-5">
         <h2 className="text-[20px] font-bold">本周打卡趋势</h2>
         <div className="mt-4 flex h-40 items-end justify-between gap-2">
@@ -497,6 +541,7 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
   const scope: "院内" | "居家" = inpatient ? "院内" : "居家";
   const list = EDU_LIB.filter((e) => e.scope === scope);
   const other = EDU_LIB.filter((e) => e.scope !== scope);
+  const [open, setOpen] = useState<{ title: string; desc: string; tag: string } | null>(null);
 
   return (
     <div className="space-y-4 p-3 pb-6">
@@ -516,7 +561,10 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
               desc={e.desc}
               tag={e.tag}
               unread={!e.read}
-              onOpen={() => markEduRead(e.id)}
+              onOpen={() => {
+                markEduRead(e.id);
+                setOpen(e);
+              }}
             />
           ))}
         </EduGroup>
@@ -524,16 +572,39 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
 
       <EduGroup title={`${scope}必读宣教`}>
         {list.map((e) => (
-          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} />
+          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} onOpen={() => setOpen(e)} />
         ))}
       </EduGroup>
 
       <EduGroup title={scope === "院内" ? "出院后可提前了解" : "住院期间回顾"}>
         {other.map((e) => (
-          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} />
+          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} onOpen={() => setOpen(e)} />
         ))}
       </EduGroup>
+
+      {open && (
+        <Sheet title={open.title} onClose={() => setOpen(null)}>
+          <span className="inline-block rounded-md bg-primary/10 px-2.5 py-1 text-[16px] font-bold text-primary">
+            {open.tag}
+          </span>
+          <p className="mt-3 text-[18px] font-semibold leading-relaxed">{open.desc}</p>
+          <ul className="mt-4 space-y-3 text-[17px] leading-relaxed text-muted-foreground">
+            <li>1. 训练前先热身，动作缓慢，不追求角度和次数。</li>
+            <li>2. 每次训练后如疼痛评分超过 4 分，请减少组数并告知治疗师。</li>
+            <li>3. 出现伤口红肿热痛、发热、小腿肿胀，请立即联系医护。</li>
+            <li>4. 如有疑问可在【骨灵】中随时提问，或联系病区护士站。</li>
+          </ul>
+          <button
+            onClick={() => setOpen(null)}
+            className="mt-5 w-full rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            我已阅读
+          </button>
+        </Sheet>
+      )}
     </div>
+
   );
 }
 
@@ -592,7 +663,13 @@ const CONSENTS = [
 
 function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpatient: boolean; days: number }) {
   const patient = getDemoPatient();
+  const flow = useCaseFlow();
   const [openConsent, setOpenConsent] = useState<string | null>(null);
+  const [panel, setPanel] = useState<"messages" | "record" | "settings" | null>(null);
+  const [bigFont, setBigFont] = useState(true);
+  const [remind, setRemind] = useState(true);
+  const unread = flow.messages.filter((m) => !m.read).length;
+
 
   const rows = [
     { k: "姓名", v: name },
@@ -640,6 +717,20 @@ function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpa
 
       <section className="overflow-hidden rounded-2xl border bg-card">
         <header className="flex items-center gap-2 border-b px-4 py-3">
+          <HeartPulse className="size-5 text-primary" />
+          <h3 className="text-[19px] font-bold">更多服务</h3>
+        </header>
+        <ul className="divide-y">
+          <MeRow icon={MessageSquare} label="消息中心" badge={unread ? `${unread} 条未读` : undefined} onClick={() => setPanel("messages")} />
+          <MeRow icon={FileText} label={inpatient ? "住院记录" : "出院小结"} onClick={() => setPanel("record")} />
+          <MeRow icon={Bell} label="提醒与字体设置" onClick={() => setPanel("settings")} />
+        </ul>
+      </section>
+
+
+
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <header className="flex items-center gap-2 border-b px-4 py-3">
           <FileSignature className="size-5 text-primary" />
           <h3 className="text-[19px] font-bold">知情同意</h3>
         </header>
@@ -681,9 +772,129 @@ function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpa
           </div>
         </Sheet>
       )}
+
+      {panel === "messages" && (
+        <Sheet title="消息中心" onClose={() => setPanel(null)}>
+          {flow.messages.length === 0 ? (
+            <p className="py-6 text-center text-[18px] text-muted-foreground">暂无新消息</p>
+          ) : (
+            <ul className="space-y-3">
+              {flow.messages.map((m) => (
+                <li key={m.id}>
+                  <button
+                    onClick={() => markMessageRead(m.id)}
+                    className={cn(
+                      "w-full rounded-2xl border p-4 text-left",
+                      !m.read && "border-primary bg-primary/5",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="min-w-0 flex-1 text-[18px] font-bold leading-snug">{m.title}</p>
+                      {!m.read && <span className="size-3 shrink-0 rounded-full bg-rose-500" />}
+                    </div>
+                    <p className="mt-1.5 text-[17px] leading-snug text-muted-foreground">{m.body}</p>
+                    <p className="mt-1.5 text-[15px] text-muted-foreground">{m.at}</p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Sheet>
+      )}
+
+      {panel === "record" && (
+        <Sheet title={inpatient ? "住院记录" : "出院小结"} onClose={() => setPanel(null)}>
+          <div className="space-y-3 text-[17px]">
+            <div className="rounded-2xl bg-muted/50 p-4">
+              <p className="text-[18px] font-bold">
+                {name} · {bed} · {inpatient ? `入院第 ${days} 天` : `出院后第 ${days} 天`}
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                入院日期：{patient?.admissionDate ?? "—"} · 手术日期：{patient?.surgeryDate ?? "—"}
+              </p>
+            </div>
+            <ul className="space-y-2.5 text-muted-foreground">
+              <li>诊断：{patient?.diagnosis ?? "右膝骨关节炎（重度）"}</li>
+              <li>手术：{patient?.surgeryName ?? "右膝人工关节置换术"}</li>
+              <li>康复方案：{flow.planApproved ? flow.planName : "待治疗师审核"}</li>
+              <li>康复评估记录：{flow.dailyRehab.length} 次</li>
+              <li>护理记录：{flow.nurseRecords.length} 条</li>
+              {flow.dischargeNote && <li>出院意见：{flow.dischargeNote}</li>}
+            </ul>
+          </div>
+        </Sheet>
+      )}
+
+      {panel === "settings" && (
+        <Sheet title="提醒与字体设置" onClose={() => setPanel(null)}>
+          <ul className="space-y-3">
+            <SettingRow icon={Bell} label="每日待办提醒" desc="按任务时间语音＋弹窗提醒" on={remind} onToggle={() => setRemind((v) => !v)} />
+            <SettingRow icon={Type} label="大字模式" desc="全局字体放大，适合老年人阅读" on={bigFont} onToggle={() => setBigFont((v) => !v)} />
+          </ul>
+        </Sheet>
+      )}
     </div>
   );
 }
+
+function MeRow({
+  icon: Icon,
+  label,
+  badge,
+  onClick,
+}: {
+  icon: React.ElementType;
+  label: string;
+  badge?: string;
+  onClick: () => void;
+}) {
+  return (
+    <li>
+      <button onClick={onClick} className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50">
+        <Icon className="size-5 shrink-0 text-primary" />
+        <span className="min-w-0 flex-1 text-[18px] font-semibold">{label}</span>
+        {badge && (
+          <span className="shrink-0 rounded-full bg-rose-500/10 px-2.5 py-1 text-[15px] font-bold text-rose-600">
+            {badge}
+          </span>
+        )}
+        <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+      </button>
+    </li>
+  );
+}
+
+function SettingRow({
+  icon: Icon,
+  label,
+  desc,
+  on,
+  onToggle,
+}: {
+  icon: React.ElementType;
+  label: string;
+  desc: string;
+  on: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <li className="flex items-center gap-3 rounded-2xl border p-4">
+      <Icon className="size-5 shrink-0 text-primary" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[18px] font-bold">{label}</p>
+        <p className="mt-0.5 text-[16px] text-muted-foreground">{desc}</p>
+      </div>
+      <button
+        onClick={onToggle}
+        aria-label={label}
+        className={cn("h-8 w-14 shrink-0 rounded-full p-1 transition-colors", on ? "bg-primary" : "bg-muted")}
+      >
+        <span className={cn("block size-6 rounded-full bg-card transition-transform", on && "translate-x-6")} />
+      </button>
+    </li>
+  );
+}
+
 
 /* ============ 通用弹层 ============ */
 
