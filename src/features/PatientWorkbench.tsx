@@ -717,6 +717,20 @@ function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpa
 
       <section className="overflow-hidden rounded-2xl border bg-card">
         <header className="flex items-center gap-2 border-b px-4 py-3">
+          <HeartPulse className="size-5 text-primary" />
+          <h3 className="text-[19px] font-bold">更多服务</h3>
+        </header>
+        <ul className="divide-y">
+          <MeRow icon={MessageSquare} label="消息中心" badge={unread ? `${unread} 条未读` : undefined} onClick={() => setPanel("messages")} />
+          <MeRow icon={FileText} label={inpatient ? "住院记录" : "出院小结"} onClick={() => setPanel("record")} />
+          <MeRow icon={Bell} label="提醒与字体设置" onClick={() => setPanel("settings")} />
+        </ul>
+      </section>
+
+
+
+      <section className="overflow-hidden rounded-2xl border bg-card">
+        <header className="flex items-center gap-2 border-b px-4 py-3">
           <FileSignature className="size-5 text-primary" />
           <h3 className="text-[19px] font-bold">知情同意</h3>
         </header>
