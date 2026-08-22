@@ -772,9 +772,129 @@ function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpa
           </div>
         </Sheet>
       )}
+
+      {panel === "messages" && (
+        <Sheet title="消息中心" onClose={() => setPanel(null)}>
+          {flow.messages.length === 0 ? (
+            <p className="py-6 text-center text-[18px] text-muted-foreground">暂无新消息</p>
+          ) : (
+            <ul className="space-y-3">
+              {flow.messages.map((m) => (
+                <li key={m.id}>
+                  <button
+                    onClick={() => markMessageRead(m.id)}
+                    className={cn(
+                      "w-full rounded-2xl border p-4 text-left",
+                      !m.read && "border-primary bg-primary/5",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="min-w-0 flex-1 text-[18px] font-bold leading-snug">{m.title}</p>
+                      {!m.read && <span className="size-3 shrink-0 rounded-full bg-rose-500" />}
+                    </div>
+                    <p className="mt-1.5 text-[17px] leading-snug text-muted-foreground">{m.body}</p>
+                    <p className="mt-1.5 text-[15px] text-muted-foreground">{m.at}</p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Sheet>
+      )}
+
+      {panel === "record" && (
+        <Sheet title={inpatient ? "住院记录" : "出院小结"} onClose={() => setPanel(null)}>
+          <div className="space-y-3 text-[17px]">
+            <div className="rounded-2xl bg-muted/50 p-4">
+              <p className="text-[18px] font-bold">
+                {name} · {bed} · {inpatient ? `入院第 ${days} 天` : `出院后第 ${days} 天`}
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                入院日期：{patient?.admissionDate ?? "—"} · 手术日期：{patient?.surgeryDate ?? "—"}
+              </p>
+            </div>
+            <ul className="space-y-2.5 text-muted-foreground">
+              <li>诊断：{patient?.diagnosis ?? "右膝骨关节炎（重度）"}</li>
+              <li>手术：{patient?.surgeryName ?? "右膝人工关节置换术"}</li>
+              <li>康复方案：{flow.planApproved ? flow.planName : "待治疗师审核"}</li>
+              <li>康复评估记录：{flow.dailyRehab.length} 次</li>
+              <li>护理记录：{flow.nurseRecords.length} 条</li>
+              {flow.dischargeNote && <li>出院意见：{flow.dischargeNote}</li>}
+            </ul>
+          </div>
+        </Sheet>
+      )}
+
+      {panel === "settings" && (
+        <Sheet title="提醒与字体设置" onClose={() => setPanel(null)}>
+          <ul className="space-y-3">
+            <SettingRow icon={Bell} label="每日待办提醒" desc="按任务时间语音＋弹窗提醒" on={remind} onToggle={() => setRemind((v) => !v)} />
+            <SettingRow icon={Type} label="大字模式" desc="全局字体放大，适合老年人阅读" on={bigFont} onToggle={() => setBigFont((v) => !v)} />
+          </ul>
+        </Sheet>
+      )}
     </div>
   );
 }
+
+function MeRow({
+  icon: Icon,
+  label,
+  badge,
+  onClick,
+}: {
+  icon: React.ElementType;
+  label: string;
+  badge?: string;
+  onClick: () => void;
+}) {
+  return (
+    <li>
+      <button onClick={onClick} className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50">
+        <Icon className="size-5 shrink-0 text-primary" />
+        <span className="min-w-0 flex-1 text-[18px] font-semibold">{label}</span>
+        {badge && (
+          <span className="shrink-0 rounded-full bg-rose-500/10 px-2.5 py-1 text-[15px] font-bold text-rose-600">
+            {badge}
+          </span>
+        )}
+        <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+      </button>
+    </li>
+  );
+}
+
+function SettingRow({
+  icon: Icon,
+  label,
+  desc,
+  on,
+  onToggle,
+}: {
+  icon: React.ElementType;
+  label: string;
+  desc: string;
+  on: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <li className="flex items-center gap-3 rounded-2xl border p-4">
+      <Icon className="size-5 shrink-0 text-primary" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[18px] font-bold">{label}</p>
+        <p className="mt-0.5 text-[16px] text-muted-foreground">{desc}</p>
+      </div>
+      <button
+        onClick={onToggle}
+        aria-label={label}
+        className={cn("h-8 w-14 shrink-0 rounded-full p-1 transition-colors", on ? "bg-primary" : "bg-muted")}
+      >
+        <span className={cn("block size-6 rounded-full bg-card transition-transform", on && "translate-x-6")} />
+      </button>
+    </li>
+  );
+}
+
 
 /* ============ 通用弹层 ============ */
 
