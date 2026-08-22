@@ -17,7 +17,13 @@ import {
   ShieldCheck,
   FileSignature,
   Phone,
+  MessageSquare,
+  FileText,
+  Bell,
+  Type,
+  HeartPulse,
   X,
+
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { cn } from "@/lib/utils";
