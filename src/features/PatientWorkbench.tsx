@@ -34,8 +34,10 @@ import {
   stageIndex,
   toggleTodo,
   markEduRead,
+  markMessageRead,
   DEMO_PATIENT_NAME,
 } from "@/lib/case-flow";
+
 
 /* ============ 分类定义 ============ */
 
