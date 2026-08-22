@@ -663,7 +663,13 @@ const CONSENTS = [
 
 function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpatient: boolean; days: number }) {
   const patient = getDemoPatient();
+  const flow = useCaseFlow();
   const [openConsent, setOpenConsent] = useState<string | null>(null);
+  const [panel, setPanel] = useState<"messages" | "record" | "settings" | null>(null);
+  const [bigFont, setBigFont] = useState(true);
+  const [remind, setRemind] = useState(true);
+  const unread = flow.messages.filter((m) => !m.read).length;
+
 
   const rows = [
     { k: "姓名", v: name },
