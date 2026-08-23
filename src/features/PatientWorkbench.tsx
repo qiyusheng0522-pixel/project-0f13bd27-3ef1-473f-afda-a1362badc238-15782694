@@ -23,7 +23,12 @@ import {
   Type,
   HeartPulse,
   X,
-
+  Search,
+  Play,
+  Camera,
+  Utensils,
+  HeartHandshake,
+  ImagePlus,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { cn } from "@/lib/utils";
