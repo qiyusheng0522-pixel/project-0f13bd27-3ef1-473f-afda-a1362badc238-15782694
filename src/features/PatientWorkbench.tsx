@@ -240,32 +240,192 @@ export function PatientWorkbench() {
     { key: "me", label: "我的", icon: User },
   ];
 
+  const [view, setView] = useState<"guest" | "member">("guest");
+  const guest = view === "guest";
+
   return (
     <PhoneShell
       title="骨安 · 患者"
-      subtitle={inpatient ? "住院中" : "居家康复"}
+      subtitle={guest ? "新用户 · 未建档" : inpatient ? "住院中" : "居家康复"}
       bottom={<TabBar items={tabs} activeKey={tab} onChange={setTab} />}
     >
-      {tab === "home" && (
-        <HomeTab
-          name={name}
-          bed={bed}
-          days={days}
-          inpatient={inpatient}
-          stageLabel={stageLabel}
-          stageIdx={Math.max(stageIndex(flow.stage), 0)}
-          todos={todos}
-          isDone={isDone}
-          onToggle={onToggle}
-          hasArchive={flow.created}
-          onOpenEdu={() => setTab("edu")}
-        />
-      )}
-      {tab === "schedule" && <ScheduleTab todos={todos} isDone={isDone} />}
+      {/* 演示视角切换：新用户（未建档） / 已建档患者 */}
+      <div className="sticky top-0 z-20 border-b bg-card/95 p-2 backdrop-blur">
+        <div className="grid grid-cols-2 gap-2">
+          {([
+            { key: "guest", label: "新用户 · 未建档" },
+            { key: "member", label: "已建档患者" },
+          ] as const).map((v) => (
+            <button
+              key={v.key}
+              onClick={() => setView(v.key)}
+              className={cn(
+                "whitespace-nowrap rounded-xl py-2 text-[16px] font-bold active:scale-[0.99]",
+                view === v.key ? "bg-primary text-primary-foreground" : "border bg-background text-muted-foreground",
+              )}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {tab === "home" &&
+        (guest ? (
+          <GuestHomeTab onOpenEdu={() => setTab("edu")} onDone={() => setView("member")} />
+        ) : (
+          <HomeTab
+            name={name}
+            bed={bed}
+            days={days}
+            inpatient={inpatient}
+            stageLabel={stageLabel}
+            stageIdx={Math.max(stageIndex(flow.stage), 0)}
+            todos={todos}
+            isDone={isDone}
+            onToggle={onToggle}
+            hasArchive
+            onOpenEdu={() => setTab("edu")}
+          />
+        ))}
+      {tab === "schedule" &&
+        (guest ? <GuestLock title="暂无日程统计" desc="建档并生成康复方案后，这里会展示您的每日打卡完成情况与趋势。" onGo={() => setTab("home")} /> : <ScheduleTab todos={todos} isDone={isDone} />)}
       {tab === "ai" && <AiTab name={name} />}
-      {tab === "edu" && <EduTab inpatient={inpatient} stageLabel={stageLabel} />}
-      {tab === "me" && <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />}
+      {tab === "edu" && <EduTab inpatient={!guest && inpatient} stageLabel={guest ? "术前准备" : stageLabel} />}
+      {tab === "me" &&
+        (guest ? <GuestLock title="还未建立健康档案" desc="拍照上传入院单 / 诊断证明，医生确认后可查看个人信息、住院记录与知情同意。" onGo={() => setTab("home")} /> : <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />)}
     </PhoneShell>
+  );
+}
+
+/* ============ 新用户（未建档）视角 ============ */
+
+function GuestLock({ title, desc, onGo }: { title: string; desc: string; onGo: () => void }) {
+  return (
+    <div className="p-3 pb-6">
+      <section className="rounded-3xl border-2 border-dashed p-6 text-center">
+        <span className="mx-auto grid size-16 place-items-center rounded-3xl bg-muted text-muted-foreground">
+          <Camera className="size-8" />
+        </span>
+        <h2 className="mt-4 text-[20px] font-bold">{title}</h2>
+        <p className="mt-2 text-[17px] leading-relaxed text-muted-foreground">{desc}</p>
+        <button
+          onClick={onGo}
+          className="mt-5 w-full rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
+          style={{ background: "var(--gradient-primary)" }}
+        >
+          去建档
+        </button>
+      </section>
+    </div>
+  );
+}
+
+const GUEST_STEPS = [
+  { n: 1, title: "拍照上传档案", desc: "入院单 / 诊断证明 / 检查报告" },
+  { n: 2, title: "填写评估量表", desc: "疼痛、活动度等 8 项，约 3 分钟" },
+  { n: 3, title: "查看康复方案", desc: "医生确认后生成每日打卡待办" },
+];
+
+function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: () => void }) {
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  return (
+    <div className="space-y-4 p-3 pb-6">
+      <section className="rounded-3xl p-5 text-white" style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}>
+        <span className="rounded-full bg-white/20 px-3 py-1 text-[16px] font-bold ring-1 ring-white/30">新用户</span>
+        <p className="mt-3 text-[24px] font-bold leading-snug">欢迎使用骨安</p>
+        <p className="mt-1 text-[18px] leading-snug text-white/90">先建立健康档案，医生确认后即可查看康复方案与每日待办。</p>
+      </section>
+
+      {!photo ? (
+        <section className="rounded-3xl border-2 border-amber-400 bg-amber-50 p-4">
+          <div className="flex items-start gap-3">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-amber-500/15 text-amber-700">
+              <Camera className="size-6" />
+            </span>
+            <div className="min-w-0">
+              <p className="whitespace-nowrap text-[19px] font-bold text-amber-800">您还没有建立健康档案</p>
+              <p className="mt-1 text-[16px] leading-snug text-amber-700">请拍照上传「入院单 / 诊断证明」，医生确认后自动建档。</p>
+            </div>
+          </div>
+          <label className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3.5 text-[19px] font-bold text-white active:scale-[0.99]">
+            <Camera className="size-6" /> 立即拍照建档
+            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
+          </label>
+          <label className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-amber-400 py-3 text-[17px] font-bold text-amber-800">
+            <ImagePlus className="size-5" /> 从相册选择照片
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
+          </label>
+        </section>
+      ) : (
+        <section className="rounded-3xl border bg-card p-4">
+          <div className="flex items-center gap-3">
+            <img src={photo} alt="入院单照片" className="size-16 rounded-xl object-cover" />
+            <div className="min-w-0">
+              <p className="text-[18px] font-bold text-success">入院单已上传</p>
+              <p className="mt-0.5 text-[16px] text-muted-foreground">医护正在核对，建档完成后消息通知您</p>
+            </div>
+          </div>
+          <button
+            onClick={onDone}
+            className="mt-3 w-full rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            查看已建档患者视角
+          </button>
+        </section>
+      )}
+
+      <section className="overflow-hidden rounded-3xl border bg-card">
+        <header className="border-b bg-primary/5 px-4 py-3">
+          <h3 className="whitespace-nowrap text-[19px] font-bold">三步开始使用</h3>
+        </header>
+        <ul className="divide-y">
+          {GUEST_STEPS.map((s) => (
+            <li key={s.n} className="flex items-center gap-3 px-4 py-3.5">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-[17px] font-bold text-primary">{s.n}</span>
+              <div className="min-w-0">
+                <p className="text-[18px] font-bold leading-snug">{s.title}</p>
+                <p className="mt-0.5 text-[16px] text-muted-foreground">{s.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="rounded-3xl border-2 border-dashed p-5 text-center">
+        <p className="text-[18px] font-bold">今日待办暂未生成</p>
+        <p className="mt-1 text-[16px] leading-snug text-muted-foreground">建档并完成量表后，康复动作、用药、护理、问卷会自动出现在首页。</p>
+      </section>
+
+      <section className="overflow-hidden rounded-3xl border bg-card">
+        <header className="flex items-center justify-between border-b bg-primary/5 px-4 py-3">
+          <div className="min-w-0">
+            <h3 className="whitespace-nowrap text-[19px] font-bold">骨安健康服务包</h3>
+            <p className="mt-0.5 text-[16px] text-muted-foreground">建档后可预约使用</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[15px] font-bold text-muted-foreground">未开通</span>
+        </header>
+        <div className="grid grid-cols-3 gap-2 p-3">
+          {SERVICE_PACKS.map((s) => {
+            const Icon = s.icon;
+            return (
+              <button
+                key={s.title}
+                onClick={() => s.title === "宣教百科" && onOpenEdu()}
+                className="flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center active:bg-muted/50"
+              >
+                <span className={cn("grid size-12 place-items-center rounded-2xl", s.tint)}>
+                  <Icon className="size-6" />
+                </span>
+                <span className="whitespace-nowrap text-[16px] font-bold leading-tight">{s.title}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    </div>
   );
 }
 
