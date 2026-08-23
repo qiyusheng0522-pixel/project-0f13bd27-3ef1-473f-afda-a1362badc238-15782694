@@ -305,8 +305,60 @@ function HomeTab({
 
   return (
     <div className="space-y-4 p-3 pb-6">
+      {/* 未建档：顶部拍照建档提醒 */}
+      {!archived && (
+        <section className="rounded-3xl border-2 border-amber-400 bg-amber-50 p-4">
+          <div className="flex items-start gap-3">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-amber-500/15 text-amber-700">
+              <Camera className="size-6" />
+            </span>
+            <div className="min-w-0">
+              <p className="whitespace-nowrap text-[19px] font-bold text-amber-800">您还没有建立健康档案</p>
+              <p className="mt-1 text-[16px] leading-snug text-amber-700">
+                请拍照上传「入院单 / 诊断证明」，医生确认后即可查看您的康复方案与每日待办。
+              </p>
+            </div>
+          </div>
+          <label className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3.5 text-[19px] font-bold text-white active:scale-[0.99]">
+            <Camera className="size-6" /> 立即拍照建档
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) setArchivePhoto(URL.createObjectURL(f));
+              }}
+            />
+          </label>
+          <label className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-amber-400 py-3 text-[17px] font-bold text-amber-800">
+            <ImagePlus className="size-5" /> 从相册选择照片
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) setArchivePhoto(URL.createObjectURL(f));
+              }}
+            />
+          </label>
+        </section>
+      )}
+      {!hasArchive && archivePhoto && (
+        <section className="flex items-center gap-3 rounded-3xl border bg-card p-4">
+          <img src={archivePhoto} alt="入院单照片" className="size-16 rounded-xl object-cover" />
+          <div className="min-w-0">
+            <p className="text-[18px] font-bold text-success">入院单已上传</p>
+            <p className="mt-0.5 text-[16px] text-muted-foreground">医护正在核对，建档完成后将消息通知您</p>
+          </div>
+        </section>
+      )}
+
       {/* 状态卡 */}
       <section
+
         className="rounded-3xl p-5 text-white"
         style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
       >
