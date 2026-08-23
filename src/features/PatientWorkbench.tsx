@@ -441,7 +441,54 @@ function HomeTab({
         );
       })}
 
+      {/* 骨安健康服务包 */}
+      <section className="overflow-hidden rounded-3xl border bg-card">
+        <header className="flex items-center justify-between border-b bg-primary/5 px-4 py-3">
+          <div className="min-w-0">
+            <h3 className="whitespace-nowrap text-[19px] font-bold">骨安健康服务包</h3>
+            <p className="mt-0.5 text-[16px] text-muted-foreground">康复 · 营养 · 复诊 · 随访 一站服务</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-[15px] font-bold text-primary">已开通</span>
+        </header>
+        <div className="grid grid-cols-3 gap-2 p-3">
+          {SERVICE_PACKS.map((s) => {
+            const Icon = s.icon;
+            return (
+              <button
+                key={s.title}
+                onClick={() => (s.title === "宣教百科" ? onOpenEdu() : setPack(s))}
+                className="flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center active:bg-muted/50"
+              >
+                <span className={cn("grid size-12 place-items-center rounded-2xl", s.tint)}>
+                  <Icon className="size-6" />
+                </span>
+                <span className="whitespace-nowrap text-[16px] font-bold leading-tight">{s.title}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {pack && (
+        <Sheet title={pack.title} onClose={() => setPack(null)}>
+          <p className="text-[18px] font-semibold leading-relaxed">{pack.desc}</p>
+          <ul className="mt-4 space-y-3 text-[17px] leading-relaxed text-muted-foreground">
+            <li>· 服务由您的主管治疗师与病区护士团队提供。</li>
+            <li>· 预约或调整请在【骨灵】中留言，或联系护士站。</li>
+            <li>· 服务完成后会自动生成您的打卡待办与记录。</li>
+          </ul>
+          <button
+            onClick={() => setPack(null)}
+            className="mt-5 w-full rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            我知道了
+          </button>
+        </Sheet>
+      )}
+
       {pathOpen && (
+
         <Sheet title="我的住院路径" onClose={() => setPathOpen(false)}>
           <ol className="space-y-2">
             {STAGE_STEPS.map((s, i) => {
