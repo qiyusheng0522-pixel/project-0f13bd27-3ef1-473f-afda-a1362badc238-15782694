@@ -440,7 +440,7 @@ export function PatientWorkbench() {
       {tab === "schedule" &&
         (guest ? <GuestLock title="暂无日程统计" desc="建档并生成康复方案后，这里会展示您的每日打卡完成情况与趋势。" onGo={() => setTab("home")} /> : <ScheduleTab todos={todos} isDone={isDone} />)}
       {tab === "ai" && <AiTab name={name} />}
-      {tab === "edu" && <EduTab inpatient={!guest && inpatient} stageLabel={guest ? "术前准备" : stageLabel} />}
+      {tab === "edu" && <EduTab inpatient={!guest && inpatient} />}
       {tab === "me" &&
         (guest ? <GuestLock title="还未建立健康档案" desc="拍照上传入院单 / 诊断证明，医生确认后可查看个人信息、住院记录与知情同意。" onGo={() => setTab("home")} /> : <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />)}
     </PhoneShell>
@@ -1104,12 +1104,11 @@ function AiTab({ name }: { name: string }) {
 
 type EduOpen = (EduItem & { unread?: boolean }) | null;
 
-function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: string }) {
+function EduTab({ inpatient }: { inpatient: boolean }) {
   const flow = useCaseFlow();
   const scope: "院内" | "居家" = inpatient ? "院内" : "居家";
   const [kw, setKw] = useState("");
   const [topic, setTopic] = useState("全部");
-  const [media, setMedia] = useState<"全部" | "图文" | "视频">("全部");
   const [open, setOpen] = useState<EduOpen>(null);
 
   const filtered = useMemo(() => {
@@ -1117,12 +1116,11 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
     return EDU_LIB.filter((e) => {
       const okKw = !q || e.title.includes(q) || e.desc.includes(q) || e.tag.includes(q) || e.topics.some((t) => t.includes(q));
       const okTopic = topic === "全部" || e.topics.includes(topic);
-      const okMedia = media === "全部" || e.media === media;
-      return okKw && okTopic && okMedia;
+      return okKw && okTopic;
     });
-  }, [kw, topic, media]);
+  }, [kw, topic]);
 
-  const searching = kw.trim() !== "" || topic !== "全部" || media !== "全部";
+  const searching = kw.trim() !== "" || topic !== "全部";
   const list = filtered.filter((e) => e.scope === scope);
   const other = filtered.filter((e) => e.scope !== scope);
 
@@ -1161,30 +1159,7 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
             </button>
           ))}
         </div>
-        <div className="flex gap-2">
-          {(["全部", "图文", "视频"] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMedia(m)}
-              className={cn(
-                "flex-1 whitespace-nowrap rounded-2xl border-2 py-2 text-[16px] font-bold",
-                media === m ? "border-primary bg-primary/10 text-primary" : "bg-card text-muted-foreground",
-              )}
-            >
-              {m === "视频" ? "只看视频" : m === "图文" ? "只看图文" : "全部形式"}
-            </button>
-          ))}
-        </div>
       </div>
-
-      {!searching && (
-        <div className="rounded-2xl bg-primary/10 p-4">
-          <p className="text-[18px] font-bold text-primary">
-            当前状态：{scope} · {stageLabel}
-          </p>
-          <p className="mt-1 text-[16px] text-muted-foreground">以下宣教按您当前状态推荐，建议逐条阅读</p>
-        </div>
-      )}
 
       {!searching && flow.eduPushes.length > 0 && (
         <EduGroup title="医护为您推送">
