@@ -531,15 +531,71 @@ function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: ()
           <h3 className="whitespace-nowrap text-[19px] font-bold">三步开始使用</h3>
         </header>
         <ul className="divide-y">
-          {GUEST_STEPS.map((s) => (
-            <li key={s.n} className="flex items-center gap-3 px-4 py-3.5">
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-[17px] font-bold text-primary">{s.n}</span>
-              <div className="min-w-0">
-                <p className="text-[18px] font-bold leading-snug">{s.title}</p>
-                <p className="mt-0.5 text-[16px] text-muted-foreground">{s.desc}</p>
-              </div>
-            </li>
-          ))}
+          {GUEST_STEPS.map((s) => {
+            const done = s.n === 1 ? !!photo : s.n === 2 ? scaleDone : false;
+            return (
+              <li key={s.n} className="px-4 py-3.5">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={cn(
+                      "grid size-10 shrink-0 place-items-center rounded-full text-[17px] font-bold",
+                      done ? "bg-success/15 text-success" : "bg-primary/10 text-primary",
+                    )}
+                  >
+                    {done ? <Check className="size-5" /> : s.n}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[18px] font-bold leading-snug">{s.title}</p>
+                    <p className="mt-0.5 text-[16px] text-muted-foreground">{s.desc}</p>
+                  </div>
+                  {done && (
+                    <span className="ml-auto shrink-0 whitespace-nowrap rounded-full bg-success/10 px-2.5 py-1 text-[15px] font-bold text-success">
+                      已完成
+                    </span>
+                  )}
+                </div>
+
+                {s.n === 1 &&
+                  (photo ? (
+                    <label className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border-2 py-3 text-[17px] font-bold">
+                      <Camera className="size-5" /> 重新拍照上传
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
+                    </label>
+                  ) : (
+                    <label
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
+                      style={{ background: "var(--gradient-primary)" }}
+                    >
+                      <Camera className="size-5" /> 拍照上传入院单
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
+                    </label>
+                  ))}
+
+                {s.n === 2 && (
+                  <button
+                    onClick={() => setScaleOpen(true)}
+                    className={cn(
+                      "mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold",
+                      scaleDone ? "border-2 text-foreground" : "text-primary-foreground",
+                    )}
+                    style={scaleDone ? undefined : { background: "var(--gradient-primary)" }}
+                  >
+                    <ClipboardList className="size-5" /> {scaleDone ? "查看/修改量表" : "填写专科量表"}
+                  </button>
+                )}
+
+                {s.n === 3 && (
+                  <button
+                    onClick={onDone}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
+                    style={{ background: "var(--gradient-primary)" }}
+                  >
+                    <CalendarCheck className="size-5" /> 查看今日待办清单
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
 
@@ -548,32 +604,29 @@ function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: ()
         <p className="mt-1 text-[16px] leading-snug text-muted-foreground">建档并完成量表后，康复动作、用药、护理、问卷会自动出现在首页。</p>
       </section>
 
-      <section className="overflow-hidden rounded-3xl border bg-card">
-        <header className="flex items-center justify-between border-b bg-primary/5 px-4 py-3">
-          <div className="min-w-0">
-            <h3 className="whitespace-nowrap text-[19px] font-bold">骨安健康服务包</h3>
-            <p className="mt-0.5 text-[16px] text-muted-foreground">建档后可预约使用</p>
-          </div>
-          <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[15px] font-bold text-muted-foreground">未开通</span>
-        </header>
-        <div className="grid grid-cols-3 gap-2 p-3">
-          {SERVICE_PACKS.map((s) => {
-            const Icon = s.icon;
-            return (
-              <button
-                key={s.title}
-                onClick={() => s.title === "宣教百科" && onOpenEdu()}
-                className="flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center active:bg-muted/50"
-              >
-                <span className={cn("grid size-12 place-items-center rounded-2xl", s.tint)}>
-                  <Icon className="size-6" />
-                </span>
-                <span className="whitespace-nowrap text-[16px] font-bold leading-tight">{s.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      <ServicePackBanner activated={false} onOpenAll={() => setAllOpen(true)} onPick={(s) => (s.title === "宣教百科" ? onOpenEdu() : setAllOpen(true))} />
+
+      {allOpen && (
+        <ServicePackAllSheet
+          activated={false}
+          onClose={() => setAllOpen(false)}
+          onPick={(s) => {
+            setAllOpen(false);
+            if (s.title === "宣教百科") onOpenEdu();
+          }}
+        />
+      )}
+
+      {scaleOpen && (
+        <ScaleSheet
+          onClose={() => setScaleOpen(false)}
+          onSubmit={() => {
+            setScaleDone(true);
+            setScaleOpen(false);
+          }}
+        />
+      )}
+
     </div>
   );
 }
