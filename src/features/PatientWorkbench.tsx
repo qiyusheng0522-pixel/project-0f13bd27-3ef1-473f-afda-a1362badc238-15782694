@@ -807,33 +807,25 @@ function HomeTab({
         );
       })}
 
-      {/* 骨安健康服务包 */}
-      <section className="overflow-hidden rounded-3xl border bg-card">
-        <header className="flex items-center justify-between border-b bg-primary/5 px-4 py-3">
-          <div className="min-w-0">
-            <h3 className="whitespace-nowrap text-[19px] font-bold">骨安健康服务包</h3>
-            <p className="mt-0.5 text-[16px] text-muted-foreground">康复 · 营养 · 复诊 · 随访 一站服务</p>
-          </div>
-          <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-[15px] font-bold text-primary">已开通</span>
-        </header>
-        <div className="grid grid-cols-3 gap-2 p-3">
-          {SERVICE_PACKS.map((s) => {
-            const Icon = s.icon;
-            return (
-              <button
-                key={s.title}
-                onClick={() => (s.title === "宣教百科" ? onOpenEdu() : setPack(s))}
-                className="flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center active:bg-muted/50"
-              >
-                <span className={cn("grid size-12 place-items-center rounded-2xl", s.tint)}>
-                  <Icon className="size-6" />
-                </span>
-                <span className="whitespace-nowrap text-[16px] font-bold leading-tight">{s.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      {/* 骨关节服务包 */}
+      <ServicePackBanner
+        activated
+        onOpenAll={() => setAllOpen(true)}
+        onPick={(s) => (s.title === "宣教百科" ? onOpenEdu() : setPack(s))}
+      />
+
+      {allOpen && (
+        <ServicePackAllSheet
+          activated
+          onClose={() => setAllOpen(false)}
+          onPick={(s) => {
+            setAllOpen(false);
+            if (s.title === "宣教百科") onOpenEdu();
+            else setPack(s);
+          }}
+        />
+      )}
+
 
       {pack && (
         <Sheet title={pack.title} onClose={() => setPack(null)}>
