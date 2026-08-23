@@ -223,7 +223,7 @@ function ServicePackBanner({
         className="relative w-full overflow-hidden rounded-3xl p-4 text-left text-white"
         style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
       >
-        <HeartPulse className="pointer-events-none absolute -right-4 bottom--2 size-28 text-white/10" />
+        <HeartPulse className="pointer-events-none absolute -right-4 -bottom-2 size-28 text-white/10" />
         <p className="flex items-center gap-1.5 whitespace-nowrap text-[16px] font-semibold text-white/90">
           <Sparkles className="size-4" /> 骨科医生 &amp; 康复治疗师联合甄选
         </p>
