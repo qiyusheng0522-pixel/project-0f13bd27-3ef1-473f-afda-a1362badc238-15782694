@@ -742,57 +742,166 @@ function AiTab({ name }: { name: string }) {
 
 /* ============ 科普 ============ */
 
+type EduOpen = (EduItem & { unread?: boolean }) | null;
+
 function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: string }) {
   const flow = useCaseFlow();
   const scope: "院内" | "居家" = inpatient ? "院内" : "居家";
-  const list = EDU_LIB.filter((e) => e.scope === scope);
-  const other = EDU_LIB.filter((e) => e.scope !== scope);
-  const [open, setOpen] = useState<{ title: string; desc: string; tag: string } | null>(null);
+  const [kw, setKw] = useState("");
+  const [topic, setTopic] = useState("全部");
+  const [media, setMedia] = useState<"全部" | "图文" | "视频">("全部");
+  const [open, setOpen] = useState<EduOpen>(null);
+
+  const filtered = useMemo(() => {
+    const q = kw.trim();
+    return EDU_LIB.filter((e) => {
+      const okKw = !q || e.title.includes(q) || e.desc.includes(q) || e.tag.includes(q) || e.topics.some((t) => t.includes(q));
+      const okTopic = topic === "全部" || e.topics.includes(topic);
+      const okMedia = media === "全部" || e.media === media;
+      return okKw && okTopic && okMedia;
+    });
+  }, [kw, topic, media]);
+
+  const searching = kw.trim() !== "" || topic !== "全部" || media !== "全部";
+  const list = filtered.filter((e) => e.scope === scope);
+  const other = filtered.filter((e) => e.scope !== scope);
 
   return (
     <div className="space-y-4 p-3 pb-6">
-      <div className="rounded-2xl bg-primary/10 p-4">
-        <p className="text-[18px] font-bold text-primary">
-          当前状态：{scope} · {stageLabel}
-        </p>
-        <p className="mt-1 text-[16px] text-muted-foreground">以下宣教按您当前状态推荐，建议逐条阅读</p>
+      {/* 搜索 */}
+      <div className="flex items-center gap-2 rounded-2xl border-2 bg-card px-4 py-3">
+        <Search className="size-6 shrink-0 text-muted-foreground" />
+        <input
+          value={kw}
+          onChange={(e) => setKw(e.target.value)}
+          placeholder="搜索：屈膝、消肿、抗凝药…"
+          className="min-w-0 flex-1 bg-transparent text-[18px] font-semibold outline-none placeholder:text-muted-foreground/70"
+        />
+        {kw && (
+          <button onClick={() => setKw("")} aria-label="清空" className="shrink-0 text-muted-foreground">
+            <X className="size-5" />
+          </button>
+        )}
       </div>
 
-      {flow.eduPushes.length > 0 && (
-        <EduGroup title="医护为您推送">
-          {flow.eduPushes.map((e) => (
-            <EduRow
-              key={e.id}
-              title={e.title}
-              desc={e.desc}
-              tag={e.tag}
-              unread={!e.read}
-              onOpen={() => {
-                markEduRead(e.id);
-                setOpen(e);
-              }}
-            />
+      {/* 骨关节问题筛选 */}
+      <div className="space-y-2">
+        <p className="text-[17px] font-bold">按骨关节问题查看</p>
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {EDU_TOPICS.map((t) => (
+            <button
+              key={t}
+              onClick={() => setTopic(t)}
+              className={cn(
+                "shrink-0 whitespace-nowrap rounded-full border-2 px-3.5 py-2 text-[16px] font-bold",
+                topic === t ? "border-primary bg-primary text-primary-foreground" : "bg-card text-muted-foreground",
+              )}
+            >
+              {t}
+            </button>
           ))}
+        </div>
+        <div className="flex gap-2">
+          {(["全部", "图文", "视频"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMedia(m)}
+              className={cn(
+                "flex-1 whitespace-nowrap rounded-2xl border-2 py-2 text-[16px] font-bold",
+                media === m ? "border-primary bg-primary/10 text-primary" : "bg-card text-muted-foreground",
+              )}
+            >
+              {m === "视频" ? "只看视频" : m === "图文" ? "只看图文" : "全部形式"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {!searching && (
+        <div className="rounded-2xl bg-primary/10 p-4">
+          <p className="text-[18px] font-bold text-primary">
+            当前状态：{scope} · {stageLabel}
+          </p>
+          <p className="mt-1 text-[16px] text-muted-foreground">以下宣教按您当前状态推荐，建议逐条阅读</p>
+        </div>
+      )}
+
+      {!searching && flow.eduPushes.length > 0 && (
+        <EduGroup title="医护为您推送">
+          {flow.eduPushes.map((e) => {
+            const item: EduItem = {
+              title: e.title, desc: e.desc, tag: e.tag, scope, media: "图文", meta: "图文 2分钟",
+              topics: [], cover: "linear-gradient(135deg,#2563eb,#22d3ee)",
+            };
+            return (
+              <EduCard
+                key={e.id}
+                item={item}
+                unread={!e.read}
+                onOpen={() => {
+                  markEduRead(e.id);
+                  setOpen(item);
+                }}
+              />
+            );
+          })}
         </EduGroup>
       )}
 
-      <EduGroup title={`${scope}必读宣教`}>
-        {list.map((e) => (
-          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} onOpen={() => setOpen(e)} />
-        ))}
-      </EduGroup>
+      {searching ? (
+        filtered.length ? (
+          <EduGroup title={`搜索结果 ${filtered.length} 条`}>
+            {filtered.map((e) => (
+              <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
+            ))}
+          </EduGroup>
+        ) : (
+          <div className="rounded-2xl border bg-card p-8 text-center">
+            <p className="text-[18px] font-bold">没有找到相关科普</p>
+            <p className="mt-1.5 text-[16px] text-muted-foreground">换个关键字，或到【骨灵】里直接提问</p>
+          </div>
+        )
+      ) : (
+        <>
+          <EduGroup title={`${scope}必读宣教`}>
+            {list.map((e) => (
+              <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
+            ))}
+          </EduGroup>
 
-      <EduGroup title={scope === "院内" ? "出院后可提前了解" : "住院期间回顾"}>
-        {other.map((e) => (
-          <EduRow key={e.title} title={e.title} desc={e.desc} tag={e.tag} onOpen={() => setOpen(e)} />
-        ))}
-      </EduGroup>
+          <EduGroup title={scope === "院内" ? "出院后可提前了解" : "住院期间回顾"}>
+            {other.map((e) => (
+              <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
+            ))}
+          </EduGroup>
+        </>
+      )}
 
       {open && (
         <Sheet title={open.title} onClose={() => setOpen(null)}>
-          <span className="inline-block rounded-md bg-primary/10 px-2.5 py-1 text-[16px] font-bold text-primary">
-            {open.tag}
-          </span>
+          <div
+            className="relative grid h-44 w-full place-items-center rounded-2xl text-white"
+            style={{ background: open.cover }}
+          >
+            {open.media === "视频" ? (
+              <button className="grid size-16 place-items-center rounded-full bg-white/25 ring-2 ring-white/60 active:scale-95">
+                <Play className="size-8" />
+              </button>
+            ) : (
+              <BookOpen className="size-12 opacity-80" />
+            )}
+            <span className="absolute bottom-2 right-3 rounded-full bg-black/35 px-2.5 py-1 text-[15px] font-bold">
+              {open.meta}
+            </span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="rounded-md bg-primary/10 px-2.5 py-1 text-[16px] font-bold text-primary">{open.tag}</span>
+            {open.topics.map((t) => (
+              <span key={t} className="rounded-md bg-muted px-2.5 py-1 text-[16px] font-semibold text-muted-foreground">
+                {t}
+              </span>
+            ))}
+          </div>
           <p className="mt-3 text-[18px] font-semibold leading-relaxed">{open.desc}</p>
           <ul className="mt-4 space-y-3 text-[17px] leading-relaxed text-muted-foreground">
             <li>1. 训练前先热身，动作缓慢，不追求角度和次数。</li>
@@ -810,7 +919,6 @@ function EduTab({ inpatient, stageLabel }: { inpatient: boolean; stageLabel: str
         </Sheet>
       )}
     </div>
-
   );
 }
 
@@ -825,31 +933,28 @@ function EduGroup({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
-function EduRow({
-  title,
-  desc,
-  tag,
-  unread,
-  onOpen,
-}: {
-  title: string;
-  desc: string;
-  tag: string;
-  unread?: boolean;
-  onOpen?: () => void;
-}) {
+function EduCard({ item, unread, onOpen }: { item: EduItem; unread?: boolean; onOpen?: () => void }) {
   return (
     <li>
-      <button onClick={onOpen} className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50">
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-sky-500/10 text-sky-600">
-          <BookOpen className="size-5" />
+      <button onClick={onOpen} className="flex w-full items-center gap-3 px-3 py-3.5 text-left active:bg-muted/50">
+        <span
+          className="relative grid size-24 shrink-0 place-items-center rounded-2xl text-white"
+          style={{ background: item.cover }}
+        >
+          {item.media === "视频" ? <Play className="size-8" /> : <BookOpen className="size-7 opacity-85" />}
+          <span className="absolute bottom-1 right-1 rounded-md bg-black/35 px-1.5 py-0.5 text-[13px] font-bold">
+            {item.media}
+          </span>
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[18px] font-bold leading-snug">{title}</p>
-          <p className="mt-1 text-[16px] leading-snug text-muted-foreground">{desc}</p>
-          <span className="mt-1.5 inline-block rounded-md bg-muted px-2 py-0.5 text-[15px] font-semibold text-muted-foreground">
-            {tag}
-          </span>
+          <p className="text-[18px] font-bold leading-snug">{item.title}</p>
+          <p className="mt-1 text-[16px] leading-snug text-muted-foreground">{item.desc}</p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <span className="whitespace-nowrap rounded-md bg-muted px-2 py-0.5 text-[15px] font-semibold text-muted-foreground">
+              {item.tag}
+            </span>
+            <span className="whitespace-nowrap text-[15px] font-semibold text-muted-foreground">{item.meta}</span>
+          </div>
         </div>
         {unread && <span className="size-3 shrink-0 rounded-full bg-rose-500" />}
         <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
@@ -857,6 +962,7 @@ function EduRow({
     </li>
   );
 }
+
 
 /* ============ 我的 ============ */
 
