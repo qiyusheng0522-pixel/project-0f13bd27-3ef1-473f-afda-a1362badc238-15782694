@@ -257,6 +257,8 @@ export function PatientWorkbench() {
           todos={todos}
           isDone={isDone}
           onToggle={onToggle}
+          hasArchive={flow.created}
+          onOpenEdu={() => setTab("edu")}
         />
       )}
       {tab === "schedule" && <ScheduleTab todos={todos} isDone={isDone} />}
@@ -279,6 +281,8 @@ function HomeTab({
   todos,
   isDone,
   onToggle,
+  hasArchive,
+  onOpenEdu,
 }: {
   name: string;
   bed: string;
@@ -289,9 +293,15 @@ function HomeTab({
   todos: SimpleTodo[];
   isDone: (t: SimpleTodo) => boolean;
   onToggle: (t: SimpleTodo) => void;
+  hasArchive: boolean;
+  onOpenEdu: () => void;
 }) {
   const [pathOpen, setPathOpen] = useState(false);
+  const [archivePhoto, setArchivePhoto] = useState<string | null>(null);
+  const [pack, setPack] = useState<(typeof SERVICE_PACKS)[number] | null>(null);
   const remaining = todos.filter((t) => !isDone(t)).length;
+  const archived = hasArchive || !!archivePhoto;
+
 
   return (
     <div className="space-y-4 p-3 pb-6">
