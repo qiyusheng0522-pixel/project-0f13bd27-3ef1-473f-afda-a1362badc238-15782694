@@ -191,6 +191,155 @@ const SERVICE_PACKS: { title: string; desc: string; icon: React.ElementType; tin
   { title: "宣教百科", desc: "图文视频科普库", icon: BookOpen, tint: "text-violet-600 bg-violet-500/10" },
 ];
 
+/* 骨关节服务包 —— 横幅样式入口 */
+function ServicePackBanner({
+  activated,
+  onOpenAll,
+  onPick,
+}: {
+  activated: boolean;
+  onOpenAll: () => void;
+  onPick: (s: (typeof SERVICE_PACKS)[number]) => void;
+}) {
+  return (
+    <section className="space-y-2.5">
+      <div className="flex items-center gap-2">
+        <h3 className="whitespace-nowrap text-[20px] font-bold">骨关节服务包</h3>
+        <span
+          className={cn(
+            "shrink-0 whitespace-nowrap rounded-md px-2 py-0.5 text-[15px] font-bold",
+            activated ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
+          )}
+        >
+          {activated ? "医生甄选" : "未开通"}
+        </span>
+        <button onClick={onOpenAll} className="ml-auto flex shrink-0 items-center whitespace-nowrap text-[16px] font-bold text-primary">
+          全部服务 <ChevronRight className="size-4" />
+        </button>
+      </div>
+
+      <button
+        onClick={onOpenAll}
+        className="relative w-full overflow-hidden rounded-3xl p-4 text-left text-white"
+        style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
+      >
+        <HeartPulse className="pointer-events-none absolute -right-4 bottom--2 size-28 text-white/10" />
+        <p className="flex items-center gap-1.5 whitespace-nowrap text-[16px] font-semibold text-white/90">
+          <Sparkles className="size-4" /> 骨科医生 &amp; 康复治疗师联合甄选
+        </p>
+        <p className="mt-2 text-[24px] font-bold leading-snug">骨关节服务包</p>
+        <p className="mt-1 whitespace-nowrap text-[16px] text-white/85">康复方案 · 营养药膳 · 院内可对接</p>
+        <div className="mt-3 flex items-center gap-3">
+          <span className="whitespace-nowrap rounded-full bg-white/20 px-3 py-1.5 text-[16px] font-bold ring-1 ring-white/25">
+            已为 12,488 位骨友服务
+          </span>
+          <span className="ml-auto flex shrink-0 items-center whitespace-nowrap text-[17px] font-bold">
+            {activated ? "查看服务" : "了解服务"} <ChevronRight className="size-5" />
+          </span>
+        </div>
+      </button>
+
+      <div className="grid grid-cols-3 gap-2">
+        {SERVICE_PACKS.slice(0, 3).map((s) => {
+          const Icon = s.icon;
+          return (
+            <button
+              key={s.title}
+              onClick={() => onPick(s)}
+              className="flex flex-col items-center gap-1.5 rounded-2xl border bg-card p-3 text-center active:bg-muted/50"
+            >
+              <span className={cn("grid size-11 place-items-center rounded-2xl", s.tint)}>
+                <Icon className="size-6" />
+              </span>
+              <span className="whitespace-nowrap text-[16px] font-bold leading-tight">{s.title}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function ServicePackAllSheet({
+  activated,
+  onClose,
+  onPick,
+}: {
+  activated: boolean;
+  onClose: () => void;
+  onPick: (s: (typeof SERVICE_PACKS)[number]) => void;
+}) {
+  return (
+    <Sheet title="骨关节服务包 · 全部服务" onClose={onClose}>
+      <p className="text-[17px] leading-relaxed text-muted-foreground">
+        {activated ? "以下服务已为您开通，可直接预约使用。" : "建档后即可预约以下服务。"}
+      </p>
+      <div className="mt-4 space-y-2.5">
+        {SERVICE_PACKS.map((s) => {
+          const Icon = s.icon;
+          return (
+            <button
+              key={s.title}
+              onClick={() => onPick(s)}
+              className="flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left active:bg-muted/50"
+            >
+              <span className={cn("grid size-12 shrink-0 place-items-center rounded-2xl", s.tint)}>
+                <Icon className="size-6" />
+              </span>
+              <span className="min-w-0">
+                <span className="block whitespace-nowrap text-[18px] font-bold">{s.title}</span>
+                <span className="mt-0.5 block text-[16px] text-muted-foreground">{s.desc}</span>
+              </span>
+              <ChevronRight className="ml-auto size-5 shrink-0 text-muted-foreground" />
+            </button>
+          );
+        })}
+      </div>
+    </Sheet>
+  );
+}
+
+const SCALE_ITEMS = [
+  "静息疼痛评分（0-10）",
+  "活动时疼痛评分（0-10）",
+  "膝关节主动屈曲角度",
+  "膝关节伸直受限角度",
+  "夜间睡眠受影响程度",
+  "步行距离（米）",
+  "上下楼梯是否需要扶手",
+  "日常生活自理程度",
+];
+
+function ScaleSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: () => void }) {
+  return (
+    <Sheet title="专科评估量表" onClose={onClose}>
+      <p className="text-[17px] leading-relaxed text-muted-foreground">共 8 项，约 3 分钟，提交后由治疗师生成康复方案。</p>
+      <ol className="mt-4 space-y-2.5">
+        {SCALE_ITEMS.map((q, i) => (
+          <li key={q} className="rounded-2xl border p-3.5">
+            <p className="text-[18px] font-bold leading-snug">
+              {i + 1}. {q}
+            </p>
+            <input
+              className="mt-2 w-full rounded-xl border bg-background px-3 py-2.5 text-[17px]"
+              placeholder="请填写"
+            />
+          </li>
+        ))}
+      </ol>
+      <button
+        onClick={onSubmit}
+        className="mt-5 w-full rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
+        style={{ background: "var(--gradient-primary)" }}
+      >
+        提交量表
+      </button>
+    </Sheet>
+  );
+}
+
+
+
 
 /* ============ 主组件 ============ */
 
