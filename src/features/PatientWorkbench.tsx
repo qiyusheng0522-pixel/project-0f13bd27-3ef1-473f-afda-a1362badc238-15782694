@@ -84,16 +84,108 @@ function mapCat(c: string): TodoCat {
 
 /* ============ 科普内容 ============ */
 
-const EDU_LIB: { title: string; desc: string; tag: string; scope: "院内" | "居家" }[] = [
-  { title: "术后第 1 天：为什么要马上活动脚踝", desc: "踝泵运动可降低血栓风险 60%", tag: "术后康复", scope: "院内" },
-  { title: "膝关节置换术后正确翻身与坐起", desc: "避免患肢内旋，护士示范 3 步法", tag: "护理", scope: "院内" },
-  { title: "抗凝药怎么吃才安全", desc: "漏服、牙龈出血、瘀斑处理方法", tag: "用药", scope: "院内" },
-  { title: "冰敷与消肿：时间和次数怎么定", desc: "每次 15-20 分钟，间隔 2 小时", tag: "护理", scope: "院内" },
-  { title: "居家康复训练怎么循序渐进", desc: "从被动屈膝到负重行走的 4 周计划", tag: "术后康复", scope: "居家" },
-  { title: "回家后怎么防跌倒", desc: "浴室防滑、夜灯、拐杖使用要点", tag: "安全", scope: "居家" },
-  { title: "骨关节营养：钙与蛋白怎么补", desc: "每日 1200mg 钙 + 优质蛋白配餐示例", tag: "饮食", scope: "居家" },
-  { title: "复查节点与预警信号", desc: "出现红肿热痛、发热要立即联系医生", tag: "复查", scope: "居家" },
+interface EduItem {
+  title: string;
+  desc: string;
+  tag: string;
+  scope: "院内" | "居家";
+  /** 内容形式 */
+  media: "图文" | "视频";
+  /** 时长 / 阅读时间 */
+  meta: string;
+  /** 关联骨关节问题 */
+  topics: string[];
+  /** 封面渐变 */
+  cover: string;
+}
+
+/** 骨关节相关问题筛选 */
+export const EDU_TOPICS = ["全部", "关节置换术后", "疼痛与消肿", "屈膝角度", "血栓预防", "用药安全", "行走与防跌倒", "饮食营养", "复查随访"];
+
+const EDU_LIB: EduItem[] = [
+  {
+    title: "术后第 1 天：为什么要马上活动脚踝",
+    desc: "踝泵运动可降低下肢血栓风险，护士示范标准动作",
+    tag: "术后康复", scope: "院内", media: "视频", meta: "视频 2分18秒",
+    topics: ["关节置换术后", "血栓预防"],
+    cover: "linear-gradient(135deg,#2563eb,#38bdf8)",
+  },
+  {
+    title: "膝关节置换术后正确翻身与坐起",
+    desc: "避免患肢内旋，三步法图解演示",
+    tag: "护理", scope: "院内", media: "视频", meta: "视频 3分05秒",
+    topics: ["关节置换术后", "行走与防跌倒"],
+    cover: "linear-gradient(135deg,#0ea5e9,#22d3ee)",
+  },
+  {
+    title: "抗凝药怎么吃才安全",
+    desc: "漏服、牙龈出血、瘀斑的处理方法",
+    tag: "用药", scope: "院内", media: "图文", meta: "图文 3分钟",
+    topics: ["用药安全", "血栓预防"],
+    cover: "linear-gradient(135deg,#f43f5e,#fb923c)",
+  },
+  {
+    title: "冰敷与消肿：时间和次数怎么定",
+    desc: "每次 15-20 分钟，间隔 2 小时，配图说明",
+    tag: "护理", scope: "院内", media: "图文", meta: "图文 2分钟",
+    topics: ["疼痛与消肿"],
+    cover: "linear-gradient(135deg,#06b6d4,#818cf8)",
+  },
+  {
+    title: "屈膝角度怎么一步步练到 120°",
+    desc: "0-60°、60-90°、90-120° 三阶段动作视频",
+    tag: "术后康复", scope: "院内", media: "视频", meta: "视频 4分40秒",
+    topics: ["屈膝角度", "关节置换术后"],
+    cover: "linear-gradient(135deg,#4f46e5,#a855f7)",
+  },
+  {
+    title: "居家康复训练怎么循序渐进",
+    desc: "从被动屈膝到负重行走的 4 周计划",
+    tag: "术后康复", scope: "居家", media: "视频", meta: "视频 5分12秒",
+    topics: ["关节置换术后", "屈膝角度"],
+    cover: "linear-gradient(135deg,#059669,#34d399)",
+  },
+  {
+    title: "回家后怎么防跌倒",
+    desc: "浴室防滑、夜灯、拐杖使用要点",
+    tag: "安全", scope: "居家", media: "图文", meta: "图文 3分钟",
+    topics: ["行走与防跌倒"],
+    cover: "linear-gradient(135deg,#f59e0b,#fbbf24)",
+  },
+  {
+    title: "骨关节营养：钙与蛋白怎么补",
+    desc: "每日 1200mg 钙 + 优质蛋白配餐示例",
+    tag: "饮食", scope: "居家", media: "图文", meta: "图文 4分钟",
+    topics: ["饮食营养"],
+    cover: "linear-gradient(135deg,#16a34a,#84cc16)",
+  },
+  {
+    title: "药食同源：适合骨关节的 6 道家常菜",
+    desc: "牛骨汤、黑豆排骨、三色时蔬等做法视频",
+    tag: "饮食", scope: "居家", media: "视频", meta: "视频 6分30秒",
+    topics: ["饮食营养"],
+    cover: "linear-gradient(135deg,#ea580c,#fcd34d)",
+  },
+  {
+    title: "复查节点与预警信号",
+    desc: "出现红肿热痛、发热要立即联系医生",
+    tag: "复查", scope: "居家", media: "图文", meta: "图文 2分钟",
+    topics: ["复查随访", "疼痛与消肿"],
+    cover: "linear-gradient(135deg,#7c3aed,#f472b6)",
+  },
 ];
+
+/* ============ 骨安健康服务包 ============ */
+
+const SERVICE_PACKS: { title: string; desc: string; icon: React.ElementType; tint: string }[] = [
+  { title: "康复方案", desc: "治疗师定制动作与角度", icon: Dumbbell, tint: "text-primary bg-primary/10" },
+  { title: "营养 · 药食同源", desc: "配餐与菜品可更换", icon: Utensils, tint: "text-emerald-600 bg-emerald-500/10" },
+  { title: "上门康复", desc: "居家一对一指导预约", icon: HeartHandshake, tint: "text-rose-600 bg-rose-500/10" },
+  { title: "专家复诊", desc: "主任号源优先预约", icon: Stethoscope, tint: "text-sky-600 bg-sky-500/10" },
+  { title: "随访关怀", desc: "术后 1/3/6 月随访", icon: Phone, tint: "text-amber-600 bg-amber-500/10" },
+  { title: "宣教百科", desc: "图文视频科普库", icon: BookOpen, tint: "text-violet-600 bg-violet-500/10" },
+];
+
 
 /* ============ 主组件 ============ */
 
