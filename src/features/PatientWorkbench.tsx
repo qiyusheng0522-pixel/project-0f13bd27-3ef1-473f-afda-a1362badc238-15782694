@@ -478,6 +478,10 @@ const GUEST_STEPS = [
 
 function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: () => void }) {
   const [photo, setPhoto] = useState<string | null>(null);
+  const [scaleOpen, setScaleOpen] = useState(false);
+  const [scaleDone, setScaleDone] = useState(false);
+  const [allOpen, setAllOpen] = useState(false);
+
 
   return (
     <div className="space-y-4 p-3 pb-6">
