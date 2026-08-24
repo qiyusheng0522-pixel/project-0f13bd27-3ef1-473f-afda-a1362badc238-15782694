@@ -391,14 +391,10 @@ export function PatientWorkbench() {
   const guest = view === "guest";
 
   return (
-    <PhoneShell
-      title="骨安 · 患者"
-      subtitle={guest ? "新用户 · 未建档" : inpatient ? "住院中" : "居家康复"}
-      bottom={<TabBar items={tabs} activeKey={tab} onChange={setTab} />}
-    >
-      {/* 演示视角切换：新用户（未建档） / 已建档患者 */}
-      <div className="sticky top-0 z-20 bg-card/85 px-3 py-2.5 backdrop-blur-xl">
-        <div className="grid grid-cols-2 gap-1 rounded-2xl bg-muted p-1">
+    <div className="flex flex-col items-center gap-3">
+      {/* 演示视角切换（预览框外，全局切换） */}
+      <div className="w-[375px]">
+        <div className="grid grid-cols-2 gap-1 rounded-2xl border bg-card p-1" style={{ boxShadow: "var(--shadow-card)" }}>
           {([
             { key: "guest", label: "新用户 · 未建档" },
             { key: "member", label: "已建档患者" },
@@ -407,8 +403,8 @@ export function PatientWorkbench() {
               key={v.key}
               onClick={() => setView(v.key)}
               className={cn(
-                "whitespace-nowrap rounded-xl py-2 text-[15px] font-bold transition-all active:scale-[0.98]",
-                view === v.key ? "bg-card text-primary shadow-sm" : "text-muted-foreground",
+                "whitespace-nowrap rounded-xl py-2 text-[14px] font-bold transition-all active:scale-[0.98]",
+                view === v.key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground",
               )}
             >
               {v.label}
@@ -417,38 +413,48 @@ export function PatientWorkbench() {
         </div>
       </div>
 
-
-      {tab === "home" &&
-        (guest ? (
-          <GuestHomeTab onOpenEdu={() => setTab("edu")} onDone={() => setView("member")} />
-        ) : (
-          <HomeTab
-            name={name}
-            bed={bed}
-            days={days}
-            inpatient={inpatient}
+      <PhoneShell
+        title="骨安 · 患者"
+        subtitle={guest ? "新用户 · 未建档" : inpatient ? "住院中" : "居家康复"}
+        bottom={<TabBar items={tabs} activeKey={tab} onChange={setTab} />}
+      >
+        {tab === "home" &&
+          (guest ? (
+            <GuestHomeTab
+              onOpenEdu={() => setTab("edu")}
+              onDone={() => setView("member")}
+              onOpenAi={() => setTab("ai")}
+            />
+          ) : (
+            <HomeTab
+              name={name}
+              bed={bed}
+              days={days}
+              inpatient={inpatient}
+              stageLabel={stageLabel}
+              stageIdx={Math.max(stageIndex(flow.stage), 0)}
+              todos={todos}
+              isDone={isDone}
+              onToggle={onToggle}
+              hasArchive
+              onOpenEdu={() => setTab("edu")}
+              onOpenAi={() => setTab("ai")}
+            />
+          ))}
+        {tab === "schedule" &&
+          (guest ? <GuestLock title="暂无日程统计" desc="建档并生成康复方案后，这里会展示您的每日打卡完成情况与趋势。" onGo={() => setTab("home")} /> : <ScheduleTab todos={todos} isDone={isDone} />)}
+        {tab === "ai" && <AiTab name={name} />}
+        {tab === "edu" && (
+          <EduTab
+            inpatient={!guest && inpatient}
+            diagnosis={patient?.diagnosis ?? "膝关节置换术后"}
             stageLabel={stageLabel}
-            stageIdx={Math.max(stageIndex(flow.stage), 0)}
-            todos={todos}
-            isDone={isDone}
-            onToggle={onToggle}
-            hasArchive
-            onOpenEdu={() => setTab("edu")}
           />
-        ))}
-      {tab === "schedule" &&
-        (guest ? <GuestLock title="暂无日程统计" desc="建档并生成康复方案后，这里会展示您的每日打卡完成情况与趋势。" onGo={() => setTab("home")} /> : <ScheduleTab todos={todos} isDone={isDone} />)}
-      {tab === "ai" && <AiTab name={name} />}
-      {tab === "edu" && (
-        <EduTab
-          inpatient={!guest && inpatient}
-          diagnosis={patient?.diagnosis ?? "膝关节置换术后"}
-          stageLabel={stageLabel}
-        />
-      )}
-      {tab === "me" &&
-        (guest ? <GuestLock title="还未建立健康档案" desc="拍照上传入院单 / 诊断证明，医生确认后可查看个人信息、住院记录与知情同意。" onGo={() => setTab("home")} /> : <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />)}
-    </PhoneShell>
+        )}
+        {tab === "me" &&
+          (guest ? <GuestLock title="还未建立健康档案" desc="拍照上传入院单 / 诊断证明，医生确认后可查看个人信息、住院记录与知情同意。" onGo={() => setTab("home")} /> : <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />)}
+      </PhoneShell>
+    </div>
   );
 }
 
