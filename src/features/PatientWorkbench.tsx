@@ -1584,8 +1584,6 @@ function EduCard({ item, unread, onOpen }: { item: EduItem; unread?: boolean; on
 /* ============ 我的 ============ */
 
 const CONSENTS = [
-  { title: "住院知情同意书", status: "已签署" },
-  { title: "手术及麻醉知情同意书", status: "已签署" },
   { title: "康复训练风险告知书", status: "已签署" },
   { title: "个人健康信息使用授权", status: "待确认" },
 ];
@@ -1594,7 +1592,7 @@ function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpa
   const patient = getDemoPatient();
   const flow = useCaseFlow();
   const [openConsent, setOpenConsent] = useState<string | null>(null);
-  const [panel, setPanel] = useState<"messages" | "record" | "settings" | null>(null);
+  const [panel, setPanel] = useState<"messages" | "settings" | null>(null);
   const [bigFont, setBigFont] = useState(true);
   const [remind, setRemind] = useState(true);
   const unread = flow.messages.filter((m) => !m.read).length;
