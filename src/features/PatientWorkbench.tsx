@@ -796,61 +796,76 @@ function HomeTab({
         </button>
 
 
-      {/* 分类待办 */}
-      {CAT_ORDER.map((cat) => {
-        const list = todos.filter((t) => t.cat === cat);
-        if (!list.length) return null;
-        const meta = CAT_META[cat];
-        const Icon = meta.icon;
-        const doneCount = list.filter(isDone).length;
-        return (
-          <section key={cat} className="overflow-hidden rounded-2xl border bg-card">
-            <header className="flex items-center justify-between border-b px-4 py-3">
-              <div className="flex items-center gap-2.5">
-                <span className={cn("grid size-10 place-items-center rounded-xl", meta.tint)}>
-                  <Icon className="size-5" />
+        {/* 分类待办 */}
+        {CAT_ORDER.map((cat) => {
+          const list = todos.filter((t) => t.cat === cat);
+          if (!list.length) return null;
+          const meta = CAT_META[cat];
+          const Icon = meta.icon;
+          const doneCount = list.filter(isDone).length;
+          const all = doneCount === list.length;
+          return (
+            <section
+              key={cat}
+              className="overflow-hidden rounded-[26px] border bg-card"
+              style={{ boxShadow: "var(--shadow-card)" }}
+            >
+              <header className="flex items-center justify-between px-5 pb-2 pt-4">
+                <div className="flex items-center gap-2.5">
+                  <span className={cn("grid size-10 place-items-center rounded-2xl", meta.tint)}>
+                    <Icon className="size-5" />
+                  </span>
+                  <h3 className="font-display text-[19px] font-bold">{cat}</h3>
+                </div>
+                <span
+                  className={cn(
+                    "whitespace-nowrap rounded-full px-2.5 py-1 text-[14px] font-bold",
+                    all ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {doneCount}/{list.length}
                 </span>
-                <h3 className="text-[19px] font-bold">{cat}</h3>
-              </div>
-              <span className="text-[16px] font-semibold text-muted-foreground">
-                {doneCount}/{list.length}
-              </span>
-            </header>
-            <ul className="divide-y">
-              {list.map((t) => {
-                const done = isDone(t);
-                return (
-                  <li key={t.id} className="flex items-start gap-3 px-4 py-3.5">
-                    <button
-                      onClick={() => onToggle(t)}
-                      aria-label={done ? "取消打卡" : "打卡"}
+              </header>
+              <ul className="space-y-2 p-3">
+                {list.map((t) => {
+                  const done = isDone(t);
+                  return (
+                    <li
+                      key={t.id}
                       className={cn(
-                        "mt-0.5 grid size-9 shrink-0 place-items-center rounded-full ring-2 active:scale-95",
-                        done
-                          ? "bg-success text-white ring-success"
-                          : "bg-background text-transparent ring-border",
+                        "flex items-start gap-3 rounded-2xl p-3 transition-colors",
+                        done ? "bg-muted/40" : "bg-secondary/40",
                       )}
                     >
-                      <Check className="size-5" />
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <p className={cn("text-[18px] font-bold leading-snug", done && "text-muted-foreground line-through")}>
-                        {t.title}
-                      </p>
-                      <p className="mt-1 text-[16px] leading-snug text-muted-foreground">{t.detail}</p>
-                      {t.time && (
-                        <span className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-[15px] font-semibold text-primary">
-                          <Clock className="size-4" /> {t.time}
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
+                      <button
+                        onClick={() => onToggle(t)}
+                        aria-label={done ? "取消打卡" : "打卡"}
+                        className={cn(
+                          "mt-0.5 grid size-9 shrink-0 place-items-center rounded-full border-2 active:scale-95",
+                          done ? "border-success bg-success text-primary-foreground" : "border-border bg-card text-transparent",
+                        )}
+                      >
+                        <Check className="size-5" />
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <p className={cn("text-[18px] font-bold leading-snug", done && "text-muted-foreground line-through")}>
+                          {t.title}
+                        </p>
+                        <p className="mt-1 text-[15px] leading-snug text-muted-foreground">{t.detail}</p>
+                        {t.time && (
+                          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-[14px] font-bold text-primary ring-1 ring-primary/15">
+                            <Clock className="size-4" /> {t.time}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          );
+        })}
+
 
       {/* 骨关节服务包 */}
       <ServicePackBanner
