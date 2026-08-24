@@ -1671,6 +1671,7 @@ function EduTab({
   const [kw, setKw] = useState("");
   const [topic, setTopic] = useState("全部");
   const [open, setOpen] = useState<EduOpen>(null);
+  const [playing, setPlaying] = useState<string | null>(null);
   const [showRest, setShowRest] = useState(false);
 
   const filtered = useMemo(() => {
@@ -1846,6 +1847,9 @@ function EduTab({
             我已阅读
           </button>
         </Sheet>
+      )}
+      {playing && (
+        <VideoSheet title={playing} subtitle="骨安宣教视频 · 康复师讲解" onClose={() => setPlaying(null)} />
       )}
     </div>
   );
