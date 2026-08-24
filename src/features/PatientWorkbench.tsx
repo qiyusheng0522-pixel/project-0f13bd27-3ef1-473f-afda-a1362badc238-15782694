@@ -508,11 +508,8 @@ function GuestLock({ title, desc, onGo }: { title: string; desc: string; onGo: (
   );
 }
 
-const GUEST_STEPS = [
-  { n: 1, title: "拍照上传档案", desc: "入院单 / 诊断证明 / 检查报告" },
-  { n: 2, title: "填写评估量表", desc: "疼痛、活动度等 8 项，约 3 分钟" },
-  { n: 3, title: "查看康复方案", desc: "医生确认后生成每日打卡待办" },
-];
+
+
 
 function GuestHomeTab({
   onOpenEdu,
