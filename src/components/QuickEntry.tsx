@@ -1010,7 +1010,266 @@ function ConsultView({ mode, onOpenAi }: { mode: "message" | "consult"; onOpenAi
   );
 }
 
+/* ============ 今日任务中心（复用代码包任务页交互，内容改为骨关节） ============ */
+
+type QTask = { id: string; title: string; desc: string; time: string; done: boolean };
+type QGroupKey = "rehab" | "med" | "diet";
+
+const TASK_GROUPS: { key: QGroupKey; label: string; icon: React.ElementType; tone: string; tasks: QTask[] }[] = [
+  {
+    key: "rehab",
+    label: "康复运动",
+    icon: Dumbbell,
+    tone: "bg-rose-100 text-rose-600",
+    tasks: [
+      { id: "r1", title: "踝泵运动 3 组", desc: "每组 20 次 · 预防下肢血栓", time: "08:30", done: true },
+      { id: "r2", title: "直腿抬高 3 组", desc: "每组 10 次 · 强化股四头肌", time: "14:00", done: false },
+      { id: "r3", title: "屈膝训练 0-100°", desc: "床边垂膝 · 每次 10 分钟", time: "19:30", done: false },
+    ],
+  },
+  {
+    key: "med",
+    label: "用药",
+    icon: Pill,
+    tone: "bg-teal-100 text-teal-600",
+    tasks: [
+      { id: "m1", title: "塞来昔布胶囊", desc: "200mg · 餐后服用（镇痛）", time: "08:00", done: true },
+      { id: "m2", title: "利伐沙班片", desc: "10mg · 每日一次（抗凝）", time: "12:30", done: false },
+      { id: "m3", title: "钙尔奇 D", desc: "600mg · 睡前（补钙）", time: "21:00", done: false },
+    ],
+  },
+  {
+    key: "diet",
+    label: "饮食营养",
+    icon: Utensils,
+    tone: "bg-emerald-100 text-emerald-600",
+    tasks: [
+      { id: "d1", title: "早餐打卡", desc: "高蛋白 · 鸡蛋 / 牛奶", time: "已完成", done: true },
+      { id: "d2", title: "午餐打卡", desc: "拍照识别 · 蛋白质与补钙达标", time: "12:00", done: false },
+      { id: "d3", title: "药食同源汤品", desc: "杜仲牛骨汤 · 强筋壮骨", time: "18:30", done: false },
+    ],
+  },
+];
+
+function TaskCenterView({ onGoTodos }: { onGoTodos: () => void }) {
+  const all = useMemo(() => TASK_GROUPS.flatMap((g) => g.tasks), []);
+  const [doneMap, setDoneMap] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(all.map((t) => [t.id, t.done])),
+  );
+  const [sheet, setSheet] = useState<{ kind: "rehab" | "diet"; task: QTask } | null>(null);
+  const done = all.filter((t) => doneMap[t.id]).length;
+  const pct = Math.round((done / all.length) * 100);
+  const markDone = (id: string) => setDoneMap((m) => ({ ...m, [id]: true }));
+
+  return (
+    <div>
+      <section className="rounded-3xl bg-primary p-5 text-primary-foreground" style={{ boxShadow: "var(--shadow-elevated)" }}>
+        <p className="text-[16px] font-semibold text-primary-foreground/85">今日打卡进度</p>
+        <p className="mt-1 font-display text-[30px] font-bold leading-none">
+          {done}/{all.length}
+          <span className="ml-2 text-[16px] font-semibold opacity-85">完成 {pct}%</span>
+        </p>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/25">
+          <div className="h-full rounded-full bg-white transition-all" style={{ width: `${pct}%` }} />
+        </div>
+      </section>
+
+      {TASK_GROUPS.map((g) => {
+        const Icon = g.icon;
+        const gDone = g.tasks.filter((t) => doneMap[t.id]).length;
+        return (
+          <div key={g.key}>
+            <SectionTitle icon={g.icon} title={`${g.label}打卡`} right={`${gDone}/${g.tasks.length}`} />
+            <div className="mt-3 space-y-2.5">
+              {g.tasks.map((t) => {
+                const isDone = !!doneMap[t.id];
+                return (
+                  <div key={t.id} className="flex items-center gap-3 rounded-2xl border bg-card p-3.5">
+                    <span
+                      className={cn(
+                        "grid size-11 shrink-0 place-items-center rounded-2xl",
+                        isDone ? "bg-success text-primary-foreground" : g.tone,
+                      )}
+                    >
+                      {isDone ? <CheckCircle2 className="size-6" /> : <Icon className="size-6" />}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className={cn("truncate text-[17px] font-bold", isDone && "text-muted-foreground line-through")}>
+                        {t.title}
+                      </p>
+                      <p className="mt-0.5 truncate text-[15px] text-muted-foreground">{t.desc}</p>
+                      <p className="mt-0.5 flex items-center gap-1 whitespace-nowrap text-[14px] text-muted-foreground">
+                        <Clock className="size-3.5" /> {t.time}
+                      </p>
+                    </div>
+                    {isDone ? (
+                      <span className="shrink-0 whitespace-nowrap rounded-full bg-muted px-3 py-2 text-[14px] font-bold text-muted-foreground">
+                        已打卡
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          g.key === "med" ? markDone(t.id) : setSheet({ kind: g.key === "diet" ? "diet" : "rehab", task: t })
+                        }
+                        className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-primary px-3.5 py-2 text-[14px] font-bold text-primary-foreground active:scale-95"
+                      >
+                        {g.key === "med" ? <Check className="size-4" /> : g.key === "diet" ? <Camera className="size-4" /> : <Smartphone className="size-4" />}
+                        {g.key === "med" ? "确认服药" : "打卡"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      <BigButton onClick={onGoTodos}>回到首页待办</BigButton>
+
+      {sheet && (
+        <CheckInSheet
+          kind={sheet.kind}
+          task={sheet.task}
+          onClose={() => setSheet(null)}
+          onConfirm={() => {
+            markDone(sheet.task.id);
+            setSheet(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+export function CheckInSheet({
+  kind,
+  task,
+  onClose,
+  onConfirm,
+}: {
+  kind: "rehab" | "diet";
+  task: QTask;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const [mode, setMode] = useState<"photo" | "voice" | "manual">(kind === "diet" ? "photo" : "voice");
+  const [recording, setRecording] = useState(false);
+  const [note, setNote] = useState("");
+  const [project, setProject] = useState(kind === "rehab" ? task.title.replace(/\s*\d+.*$/, "") : "");
+  const [duration, setDuration] = useState("10");
+
+  return (
+    <div className="absolute inset-0 z-[60] flex flex-col justify-end">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative max-h-[88%] overflow-y-auto rounded-t-3xl bg-background p-4 pb-6">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h4 className="font-display text-[20px] font-bold">{kind === "diet" ? "饮食打卡" : "康复运动打卡"}</h4>
+            <p className="mt-0.5 truncate text-[15px] text-muted-foreground">{task.title}</p>
+          </div>
+          <button onClick={onClose} aria-label="关闭" className="grid size-9 shrink-0 place-items-center rounded-full bg-muted">
+            <X className="size-5" />
+          </button>
+        </div>
+
+        <div className="mb-3 grid grid-cols-2 gap-2">
+          {kind === "diet" ? (
+            <>
+              <ModeBtn active={mode === "photo"} onClick={() => setMode("photo")} icon={<Camera className="size-5" />} label="拍照识别" />
+              <ModeBtn active={mode === "voice"} onClick={() => setMode("voice")} icon={<Mic className="size-5" />} label="语音描述" />
+            </>
+          ) : (
+            <>
+              <ModeBtn active={mode === "voice"} onClick={() => setMode("voice")} icon={<Mic className="size-5" />} label="语音录入" />
+              <ModeBtn active={mode === "manual"} onClick={() => setMode("manual")} icon={<Smartphone className="size-5" />} label="手动填写" />
+            </>
+          )}
+        </div>
+
+        {mode === "photo" && (
+          <label className="block rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-6 text-center">
+            <ImageIcon className="mx-auto size-9 text-primary" />
+            <span className="mt-2 block text-[17px] font-bold">上传本餐照片</span>
+            <span className="mt-1 block text-[15px] text-muted-foreground">AI 自动识别菜品与蛋白质、补钙是否达标</span>
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-[16px] font-bold text-primary-foreground">
+              <Camera className="size-4" /> 拍照 / 相册
+            </span>
+            <input type="file" accept="image/*" className="hidden" />
+          </label>
+        )}
+
+        {mode === "voice" && (
+          <div className="rounded-2xl bg-muted/50 p-6 text-center">
+            <button
+              onClick={() => setRecording((r) => !r)}
+              className={cn(
+                "mx-auto grid size-20 place-items-center rounded-full",
+                recording ? "animate-pulse bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground",
+              )}
+            >
+              <Mic className="size-9" />
+            </button>
+            <p className="mt-3 text-[16px] text-muted-foreground">
+              {recording ? "正在录音，点击结束" : kind === "diet" ? "说出这一餐吃了什么" : "说出完成的动作与组数"}
+            </p>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={kind === "diet" ? "示例：一碗牛骨汤、一个鸡蛋、半份西兰花" : "示例：踝泵 3 组，每组 20 次，无明显疼痛"}
+              className="mt-3 h-24 w-full resize-none rounded-xl border bg-card p-3 text-[16px]"
+            />
+          </div>
+        )}
+
+        {mode === "manual" && kind === "rehab" && (
+          <div className="space-y-3 rounded-2xl bg-muted/50 p-3.5">
+            <label className="block">
+              <span className="text-[15px] text-muted-foreground">运动项目</span>
+              <input
+                value={project}
+                onChange={(e) => setProject(e.target.value)}
+                placeholder="踝泵 / 直腿抬高 / 屈膝"
+                className="mt-1 h-12 w-full rounded-xl border bg-card px-3 text-[17px]"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[15px] text-muted-foreground">时长（分钟）</span>
+              <span className="mt-1 flex items-center gap-2">
+                <Timer className="size-5 text-muted-foreground" />
+                <input
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value.replace(/\D/g, ""))}
+                  inputMode="numeric"
+                  className="h-12 min-w-0 flex-1 rounded-xl border bg-card px-3 text-[17px]"
+                />
+              </span>
+            </label>
+          </div>
+        )}
+
+        <BigButton onClick={onConfirm}>完成打卡</BigButton>
+      </div>
+    </div>
+  );
+}
+
+function ModeBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex h-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl text-[16px] font-bold active:scale-[0.98]",
+        active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+      )}
+    >
+      {icon} {label}
+    </button>
+  );
+}
+
 /* ============ 其它简单页 ============ */
+
 
 export function QuickEntrySheet({
   entry,
