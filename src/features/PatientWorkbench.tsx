@@ -722,9 +722,13 @@ function HomeTab({
             <span className="size-2 animate-pulse rounded-full bg-success" />
             {inpatient ? "住院中" : "居家康复"}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-4 py-2 text-[15px] font-bold text-muted-foreground">
-            今日待办 {remaining} 项
-          </span>
+          <button
+            onClick={() => todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/15 active:scale-[0.98]"
+          >
+            今日待办 {remaining} 项 <ChevronRight className="size-4" />
+          </button>
+
         </div>
       </header>
 
