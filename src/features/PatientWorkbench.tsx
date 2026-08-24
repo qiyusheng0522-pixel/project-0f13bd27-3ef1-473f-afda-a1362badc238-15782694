@@ -755,9 +755,7 @@ function GuestHomeTab({
         )}
 
 
-        {/* 三步开始康复 */}
         <section className="space-y-3">
-          <h2 className="font-display text-[21px] font-bold">三步开始康复</h2>
           <div className="space-y-3">
             <StepCard
               no="01"
