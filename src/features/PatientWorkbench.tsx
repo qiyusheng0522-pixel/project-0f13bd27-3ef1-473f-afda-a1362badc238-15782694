@@ -927,41 +927,63 @@ function HomeTab({
       )}
 
       {pathOpen && (
+        <Sheet title="住院流程" onClose={() => setPathOpen(false)}>
+          <PathRail current={toPathIdx(stageIdx)} />
+          <div className="mt-4 flex items-center gap-4 text-[15px] font-semibold text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full bg-success" /> 已完成
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full bg-primary" /> 进行中
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full bg-muted-foreground/30" /> 待进行
+            </span>
+          </div>
 
-        <Sheet title="我的住院路径" onClose={() => setPathOpen(false)}>
-          <ol className="space-y-2">
-            {STAGE_STEPS.map((s, i) => {
-              const state = i < stageIdx ? "done" : i === stageIdx ? "current" : "todo";
+          <ol className="mt-4 space-y-2">
+            {PATH_STEPS.map((s, i) => {
+              const pi = toPathIdx(stageIdx);
+              const state = i < pi ? "done" : i === pi ? "current" : "todo";
               return (
                 <li
-                  key={s.key}
+                  key={s.no}
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl border p-3.5",
+                    "flex items-start gap-3 rounded-2xl border p-3.5",
                     state === "current" && "border-primary bg-primary/5",
                   )}
                 >
                   <span
                     className={cn(
-                      "grid size-9 shrink-0 place-items-center rounded-full text-[16px] font-bold",
+                      "grid size-9 shrink-0 place-items-center rounded-full text-[15px] font-bold",
                       state === "done" && "bg-success/15 text-success",
                       state === "current" && "bg-primary text-primary-foreground",
                       state === "todo" && "bg-muted text-muted-foreground",
                     )}
                   >
-                    {state === "done" ? <Check className="size-5" /> : i + 1}
+                    {state === "done" ? <Check className="size-5" /> : s.no}
                   </span>
-                  <span className="text-[18px] font-bold">{s.label}</span>
-                  {state === "current" && (
-                    <span className="ml-auto rounded-full bg-primary/10 px-2.5 py-1 text-[15px] font-bold text-primary">
-                      当前
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2">
+                      <span className="text-[18px] font-bold">
+                        {s.line1}
+                        {s.line2}
+                      </span>
+                      {state === "current" && (
+                        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[14px] font-bold text-primary">
+                          当前
+                        </span>
+                      )}
                     </span>
-                  )}
+                    <span className="mt-0.5 block text-[15px] leading-snug text-muted-foreground">{s.desc}</span>
+                  </span>
                 </li>
               );
             })}
           </ol>
         </Sheet>
       )}
+
       </div>
     </div>
 
