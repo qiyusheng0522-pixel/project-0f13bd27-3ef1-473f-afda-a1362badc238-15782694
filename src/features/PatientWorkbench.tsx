@@ -553,7 +553,7 @@ function StepCard({
   );
 }
 
-/* ============ 康复关怀群入群引导 ============ */
+/* ============ 专属服务群入群引导 ============ */
 
 function CareGroupBanner({ onOpen }: { onOpen: () => void }) {
   return (
@@ -566,7 +566,7 @@ function CareGroupBanner({ onOpen }: { onOpen: () => void }) {
           <Users className="size-6" />
         </div>
         <div className="min-w-0">
-          <div className="text-[18px] font-bold text-white">加入康复关怀群</div>
+          <div className="text-[18px] font-bold text-white">加入专属服务群</div>
           <div className="text-[14px] text-white/85">康复提醒 · 病友交流 · 智能助手</div>
         </div>
       </div>
@@ -578,7 +578,7 @@ function CareGroupBanner({ onOpen }: { onOpen: () => void }) {
 }
 
 function CareGroupSheet({ onClose }: { onClose: () => void }) {
-  const GROUP_NAME = "骨安膝关节康复关怀群 ⑤";
+  const GROUP_NAME = "骨安膝关节专属服务群 ⑤";
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [joined, setJoined] = useState(false);
@@ -590,14 +590,14 @@ function CareGroupSheet({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Sheet title="加入企微康复关怀群" onClose={onClose}>
+    <Sheet title="加入企微专属服务群" onClose={onClose}>
       <div className="space-y-5">
         {/* 群信息卡 */}
         <div className="rounded-3xl bg-emerald-600 p-4 text-white shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="whitespace-nowrap rounded-full bg-white/20 px-2.5 py-1 text-[13px] font-bold">
-                企业微信 · 康复关怀群
+                企业微信 · 专属服务群
               </div>
               <div className="mt-2 truncate text-[19px] font-bold">{GROUP_NAME}</div>
               <div className="mt-0.5 text-[14px] text-white/85">已有 128 位病友加入交流</div>
