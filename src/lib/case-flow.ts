@@ -530,6 +530,38 @@ export function useCaseFlow(): CaseFlowState {
   return state;
 }
 
+/** 依据术中量表内容提炼术中评估项，并判定异常（多端共用，异常需高亮） */
+export function intraOpAssessment(
+  rec: Pick<IntraOpRecord, "anesthesia" | "bleeding" | "implant" | "duration" | "complication">,
+): { label: string; value: string; abnormal: boolean; note: string }[] {
+  const num = (v: string) => Number((v.match(/[\d.]+/) ?? ["0"])[0]);
+  const complication = rec.complication.trim();
+  const hasComplication = complication !== "" && !/^(无|否|未见|正常)/.test(complication);
+  return [
+    { label: "麻醉方式", value: rec.anesthesia, abnormal: false, note: "" },
+    {
+      label: "术中出血",
+      value: rec.bleeding,
+      abnormal: num(rec.bleeding) >= 400,
+      note: "出血量偏多，警惕术后血红蛋白下降",
+    },
+    {
+      label: "手术时长",
+      value: rec.duration,
+      abnormal: num(rec.duration) >= 120,
+      note: "手术时间偏长，注意感染与深静脉血栓预防",
+    },
+    {
+      label: "术中并发症",
+      value: complication || "无",
+      abnormal: hasComplication,
+      note: "存在术中并发症，需调整康复强度",
+    },
+    { label: "假体型号", value: rec.implant, abnormal: false, note: "" },
+  ];
+}
+
 export function stageIndex(stage: CaseStage) {
+
   return STAGE_STEPS.findIndex((s) => s.key === stage);
 }
