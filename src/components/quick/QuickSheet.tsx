@@ -18,7 +18,7 @@ export function QuickSheet({
   onClose: () => void;
 }) {
   return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-muted/30">
+    <div className="absolute inset-0 z-50 flex flex-col bg-background">
       <div className="flex items-center gap-2 border-b bg-card px-3 py-2.5">
         <button onClick={onClose} aria-label="返回" className="grid size-9 shrink-0 place-items-center rounded-full bg-muted">
           <ArrowLeft className="size-5" />
