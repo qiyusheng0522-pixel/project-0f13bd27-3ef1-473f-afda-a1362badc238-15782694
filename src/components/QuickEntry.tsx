@@ -42,6 +42,7 @@ import { CarePlanView } from "@/components/quick/CarePlanView";
 import { DietView } from "@/components/quick/DietView";
 import { MessagesView } from "@/components/quick/MessagesView";
 import { ConsultRefView } from "@/components/quick/ConsultRefView";
+import { MiniToastProvider, useMiniToast } from "@/components/quick/MiniToast";
 
 
 
@@ -210,7 +211,7 @@ function Panel({
             <X className="size-5" />
           </button>
         </div>
-        {children}
+        <MiniToastProvider>{children}</MiniToastProvider>
       </div>
     </div>
   );
@@ -471,7 +472,7 @@ function ReportView({ onGoPlan }: { onGoPlan: () => void }) {
           ))}
         </Table>
       </div>
-      <button className="mt-3 w-full rounded-2xl border-2 border-primary/30 bg-card py-3.5 text-[18px] font-bold text-primary active:scale-[0.98]">
+      <button onClick={() => toast("已提交预约申请，助手将电话与您确认时间")} className="mt-3 w-full rounded-2xl border-2 border-primary/30 bg-card py-3.5 text-[18px] font-bold text-primary active:scale-[0.98]">
         去预约关节外科医生 ›
       </button>
       <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
@@ -679,7 +680,7 @@ function MedView({ onOpenAi }: { onOpenAi: () => void }) {
           <span className="mt-1 block text-[14px] leading-snug text-muted-foreground">AI 识别自动生成用药计划</span>
           <input type="file" accept="image/*" capture="environment" className="hidden" />
         </label>
-        <button className="rounded-2xl border bg-card p-3.5 text-left active:scale-[0.98]">
+        <button onClick={() => toast("已打开手动录入表单")} className="rounded-2xl border bg-card p-3.5 text-left active:scale-[0.98]">
           <span className="grid size-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-600">
             <Plus className="size-5" />
           </span>
@@ -720,7 +721,7 @@ function MedView({ onOpenAi }: { onOpenAi: () => void }) {
 
               <div className="mt-3 grid grid-cols-3 gap-2">
                 {["服用记录", "周期计划", "用药禁忌"].map((x) => (
-                  <button key={x} className="whitespace-nowrap rounded-xl bg-muted py-2 text-[15px] font-bold active:scale-[0.98]">
+                  <button key={x} onClick={() => toast(`${m.name} · ${x}`)} className="whitespace-nowrap rounded-xl bg-muted py-2 text-[15px] font-bold active:scale-[0.98]">
                     {x}
                   </button>
                 ))}
@@ -996,13 +997,13 @@ function ConsultView({ mode, onOpenAi }: { mode: "message" | "consult"; onOpenAi
               </div>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <button className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-primary py-2.5 text-[16px] font-bold text-primary-foreground active:scale-[0.98]">
+              <button onClick={() => toast(`已向 ${p.name} 发起图文问诊`)} className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-primary py-2.5 text-[16px] font-bold text-primary-foreground active:scale-[0.98]">
                 <MessageSquare className="size-5" /> 图文
               </button>
-              <button className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-muted py-2.5 text-[16px] font-bold active:scale-[0.98]">
+              <button onClick={() => toast(`正在为您呼叫 ${p.name}…`)} className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-muted py-2.5 text-[16px] font-bold active:scale-[0.98]">
                 <Phone className="size-5" /> 电话
               </button>
-              <button className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-muted py-2.5 text-[16px] font-bold active:scale-[0.98]">
+              <button onClick={() => toast(`视频问诊预约成功 · ${p.name}`)} className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-muted py-2.5 text-[16px] font-bold active:scale-[0.98]">
                 <Video className="size-5" /> 视频
               </button>
             </div>
