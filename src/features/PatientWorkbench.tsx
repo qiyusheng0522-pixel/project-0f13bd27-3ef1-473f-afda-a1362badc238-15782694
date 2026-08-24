@@ -5,6 +5,7 @@ import {
   Sparkles,
   BookOpen,
   User,
+  Users,
   Dumbbell,
   Pill,
   Stethoscope,
@@ -551,6 +552,72 @@ function StepCard({
   );
 }
 
+/* ============ 康复关怀群入群引导 ============ */
+
+function CareGroupBanner({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button
+      onClick={onOpen}
+      className="mt-5 flex w-full items-center justify-between rounded-2xl border border-warning/20 bg-warning/10 p-4 text-left active:scale-[0.99]"
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-warning/20 text-warning">
+          <Users className="size-6" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-[18px] font-bold text-warning-foreground">加入康复关怀群</div>
+          <div className="text-[14px] text-warning-foreground/80">专业医生团队在线答疑</div>
+        </div>
+      </div>
+      <span className="shrink-0 rounded-xl bg-warning px-3.5 py-2 text-[15px] font-bold text-warning-foreground shadow-sm active:scale-95">
+        立即加入
+      </span>
+    </button>
+  );
+}
+
+function CareGroupSheet({ onClose }: { onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <Sheet title="加入康复关怀群" onClose={onClose}>
+      <div className="space-y-5">
+        <p className="text-[17px] leading-relaxed text-muted-foreground">
+          扫码加入「骨安康复关怀群」，专业医生、康复师和病友一起陪伴您的康复旅程。
+        </p>
+        <div className="mx-auto w-fit rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="grid size-44 grid-cols-6 gap-1">
+            {Array.from({ length: 36 }).map((_, i) => {
+              const filled = [0, 1, 2, 4, 5, 6, 7, 8, 10, 12, 14, 15, 16, 17, 19, 20, 22, 23, 24, 26, 28, 29, 30, 31, 32, 33, 34, 35].includes(i);
+              return (
+                <div
+                  key={i}
+                  className={cn("size-full rounded-sm", filled ? "bg-foreground" : "bg-card")}
+                />
+              );
+            })}
+          </div>
+          <p className="mt-3 text-center text-[15px] font-bold text-foreground">长按识别二维码</p>
+        </div>
+        <div className="rounded-2xl bg-muted/50 p-4">
+          <p className="text-[16px] font-bold text-foreground">群名称</p>
+          <p className="mt-1 text-[15px] text-muted-foreground">骨安膝关节康复关怀群 ⑤</p>
+        </div>
+        <button
+          onClick={() => {
+            navigator.clipboard?.writeText("骨安膝关节康复关怀群 ⑤").then(() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            });
+          }}
+          className="w-full rounded-2xl bg-primary py-4 text-[18px] font-bold text-primary-foreground active:scale-[0.98]"
+        >
+          {copied ? "已复制群名称" : "复制群名称"}
+        </button>
+      </div>
+    </Sheet>
+  );
+}
+
 function GuestHomeTab({
   onOpenEdu,
   onDone,
@@ -564,17 +631,30 @@ function GuestHomeTab({
   const [scaleOpen, setScaleOpen] = useState(false);
   const [scaleDone, setScaleDone] = useState(false);
   const [allOpen, setAllOpen] = useState(false);
+  const [groupOpen, setGroupOpen] = useState(false);
 
 
   return (
     <div className="pb-8">
-      {/* Hero：白底 + 大字标题 */}
-      <header className="bg-card px-6 pb-7 pt-7">
-        <h1 className="font-display text-[34px] font-bold leading-none tracking-tight text-primary">你好，</h1>
-        <p className="mt-2 text-[19px] font-medium text-muted-foreground">欢迎开始康复旅程</p>
-        <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/10">
-          <span className="size-2 animate-pulse rounded-full bg-warning" />
-          康复状态：{photo ? "资料核对中" : "待建档"}
+      {/* Hero：温暖卡片 + 入群引导 */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-primary to-primary/85 px-6 pb-8 pt-8 text-primary-foreground">
+        <div className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full bg-white/10" />
+        <div className="pointer-events-none absolute bottom-0 left-10 size-24 rounded-full bg-white/10" />
+        <div className="relative">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="font-display text-[34px] font-bold leading-none tracking-tight">你好，</h1>
+              <p className="mt-2 text-[19px] font-medium text-primary-foreground/85">欢迎开启康复旅程</p>
+            </div>
+            <div className="grid size-12 shrink-0 place-items-center rounded-full bg-white/20 text-primary-foreground">
+              <User className="size-6" />
+            </div>
+          </div>
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-[15px] font-bold text-primary-foreground backdrop-blur-sm">
+            <span className="size-2 animate-pulse rounded-full bg-warning" />
+            康复状态：{photo ? "资料核对中" : "待建档"}
+          </div>
+          <CareGroupBanner onOpen={() => setGroupOpen(true)} />
         </div>
       </header>
 
@@ -692,6 +772,8 @@ function GuestHomeTab({
           }}
         />
       )}
+
+      {groupOpen && <CareGroupSheet onClose={() => setGroupOpen(false)} />}
       </div>
     </div>
 
@@ -732,6 +814,7 @@ function HomeTab({
   const [pack, setPack] = useState<(typeof SERVICE_PACKS)[number] | null>(null);
   const [allOpen, setAllOpen] = useState(false);
   const [scaleOpen, setScaleOpen] = useState(false);
+  const [groupOpen, setGroupOpen] = useState(false);
   const todoRef = useRef<HTMLDivElement>(null);
 
 
@@ -742,24 +825,35 @@ function HomeTab({
 
   return (
     <div className="pb-8">
-      {/* Hero：白底 + 大字状态 */}
-      <header className="bg-card px-6 pb-7 pt-7">
-        <h1 className="font-display text-[34px] font-bold leading-none tracking-tight text-primary">{name}，您好</h1>
-        <p className="mt-2 text-[19px] font-medium text-muted-foreground">
-          {inpatient ? `入院第 ${days} 天 · ${bed}` : `出院后第 ${days} 天 · 居家康复`}
-        </p>
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/10">
-            <span className="size-2 animate-pulse rounded-full bg-success" />
-            {inpatient ? "住院中" : "居家康复"}
-          </span>
-          <button
-            onClick={() => todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/15 active:scale-[0.98]"
-          >
-            今日待办 {remaining} 项 <ChevronRight className="size-4" />
-          </button>
-
+      {/* Hero：温暖卡片 + 入群引导 */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-primary to-primary/85 px-6 pb-8 pt-8 text-primary-foreground">
+        <div className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full bg-white/10" />
+        <div className="pointer-events-none absolute bottom-0 left-10 size-24 rounded-full bg-white/10" />
+        <div className="relative">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="font-display text-[34px] font-bold leading-none tracking-tight">{name}，您好</h1>
+              <p className="mt-2 text-[19px] font-medium text-primary-foreground/85">
+                {inpatient ? `入院第 ${days} 天 · ${bed}` : `出院后第 ${days} 天 · 居家康复`}
+              </p>
+            </div>
+            <div className="grid size-12 shrink-0 place-items-center rounded-full bg-white/20 text-primary-foreground">
+              <User className="size-6" />
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-[15px] font-bold text-primary-foreground backdrop-blur-sm">
+              <span className="size-2 animate-pulse rounded-full bg-success" />
+              {inpatient ? "住院中" : "居家康复"}
+            </span>
+            <button
+              onClick={() => todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/20 px-4 py-2 text-[15px] font-bold text-primary-foreground backdrop-blur-sm active:scale-[0.98]"
+            >
+              今日待办 {remaining} 项 <ChevronRight className="size-4" />
+            </button>
+          </div>
+          <CareGroupBanner onOpen={() => setGroupOpen(true)} />
         </div>
       </header>
 
@@ -1007,6 +1101,7 @@ function HomeTab({
         </Sheet>
       )}
 
+      {groupOpen && <CareGroupSheet onClose={() => setGroupOpen(false)} />}
       </div>
     </div>
 
