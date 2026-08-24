@@ -1313,12 +1313,10 @@ export function QuickEntrySheet({
   return (
     <Panel title={title} subtitle={entry === "risk" || entry === "report" ? undefined : meta.desc} onClose={onClose}>
 
-      {(entry === "archive" || entry === "diet") && (
+      {entry === "archive" && (
         <div>
           <p className="text-[17px] leading-relaxed text-muted-foreground">
-            {entry === "archive"
-              ? "拍照上传「入院单 / 诊断证明 / 检查报告」，系统自动识别姓名、诊断与手术信息。"
-              : "拍下这一餐，系统自动识别菜品并评估蛋白质与嘌呤是否达标。"}
+            拍照上传「入院单 / 诊断证明 / 检查报告」，系统自动识别姓名、诊断与手术信息。
           </p>
           {photo && <img src={photo} alt="上传的照片" className="mt-4 h-44 w-full rounded-2xl object-cover" />}
           <label className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-[18px] font-bold text-primary-foreground active:scale-[0.98]">
@@ -1348,7 +1346,7 @@ export function QuickEntrySheet({
           </label>
           {photo && (
             <p className="mt-3 rounded-2xl bg-success/10 px-4 py-3 text-[17px] font-bold text-success">
-              {entry === "archive" ? "识别成功：右膝骨关节炎 · 全膝关节置换术" : "识别成功：清蒸鱼 + 西兰花 · 蛋白质充足，嘌呤偏低"}
+              识别成功：右膝骨关节炎 · 全膝关节置换术
             </p>
           )}
         </div>
@@ -1357,34 +1355,8 @@ export function QuickEntrySheet({
       {entry === "risk" && <RiskView />}
       {entry === "report" && <ReportView onGoPlan={onGoTodos} />}
       {entry === "scale" && <ScaleCenterView onOpenScale={() => { onClose(); onOpenScale(); }} />}
-      {entry === "med" && <MedView onOpenAi={onOpenAi} />}
-      {entry === "data" && <DataView />}
-      {(entry === "message" || entry === "consult") && <ConsultView mode={entry} onOpenAi={onOpenAi} />}
-
       {entry === "today" && <TaskCenterView onGoTodos={() => { onClose(); onGoTodos(); }} />}
 
-
-      {entry === "plan" && (
-        <div className="space-y-2.5">
-          {[
-            { t: "康复运动", d: "踝泵 · 直腿抬高 · 屈膝训练", c: "bg-rose-100 text-rose-600" },
-            { t: "营养饮食", d: "高蛋白 · 补钙 · 药食同源汤品", c: "bg-emerald-100 text-emerald-600" },
-            { t: "注意事项", d: "助行器使用 · 伤口护理 · 防跌倒", c: "bg-amber-100 text-amber-600" },
-          ].map((x) => (
-            <div key={x.t} className="flex items-center gap-3 rounded-2xl border bg-card p-4">
-              <span className={cn("grid size-12 shrink-0 place-items-center rounded-2xl", x.c)}>
-                <HeartPulse className="size-6" />
-              </span>
-              <span className="min-w-0">
-                <span className="block whitespace-nowrap text-[18px] font-bold">{x.t}</span>
-                <span className="mt-0.5 block text-[16px] text-muted-foreground">{x.d}</span>
-              </span>
-              <ChevronRight className="ml-auto size-5 shrink-0 text-muted-foreground" />
-            </div>
-          ))}
-          <BigButton onClick={onGoTodos}>方案已转为今日待办</BigButton>
-        </div>
-      )}
 
     </Panel>
   );
