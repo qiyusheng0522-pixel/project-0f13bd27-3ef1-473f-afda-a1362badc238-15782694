@@ -712,86 +712,89 @@ function HomeTab({
 
 
   return (
-    <div className="space-y-4 p-3 pb-6">
-      {/* 未建档：顶部拍照建档提醒 */}
-      {!archived && (
-        <section className="rounded-3xl border-2 border-amber-400 bg-amber-50 p-4">
-          <div className="flex items-start gap-3">
-            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-amber-500/15 text-amber-700">
-              <Camera className="size-6" />
-            </span>
-            <div className="min-w-0">
-              <p className="whitespace-nowrap text-[19px] font-bold text-amber-800">您还没有建立健康档案</p>
-              <p className="mt-1 text-[16px] leading-snug text-amber-700">
-                请拍照上传「入院单 / 诊断证明」，医生确认后即可查看您的康复方案与每日待办。
-              </p>
-            </div>
-          </div>
-          <label className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3.5 text-[19px] font-bold text-white active:scale-[0.99]">
-            <Camera className="size-6" /> 立即拍照建档
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setArchivePhoto(URL.createObjectURL(f));
-              }}
-            />
-          </label>
-          <label className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-amber-400 py-3 text-[17px] font-bold text-amber-800">
-            <ImagePlus className="size-5" /> 从相册选择照片
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setArchivePhoto(URL.createObjectURL(f));
-              }}
-            />
-          </label>
-        </section>
-      )}
-      {!hasArchive && archivePhoto && (
-        <section className="flex items-center gap-3 rounded-3xl border bg-card p-4">
-          <img src={archivePhoto} alt="入院单照片" className="size-16 rounded-xl object-cover" />
-          <div className="min-w-0">
-            <p className="text-[18px] font-bold text-success">入院单已上传</p>
-            <p className="mt-0.5 text-[16px] text-muted-foreground">医护正在核对，建档完成后将消息通知您</p>
-          </div>
-        </section>
-      )}
-
-      {/* 状态卡 */}
-      <section
-
-        className="rounded-3xl p-5 text-white"
-        style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-white/20 px-3 py-1 text-[16px] font-bold ring-1 ring-white/30">
+    <div className="pb-8">
+      {/* Hero：白底 + 大字状态 */}
+      <header className="bg-card px-6 pb-7 pt-7">
+        <h1 className="font-display text-[34px] font-bold leading-none tracking-tight text-primary">{name}，您好</h1>
+        <p className="mt-2 text-[19px] font-medium text-muted-foreground">
+          {inpatient ? `入院第 ${days} 天 · ${bed}` : `出院后第 ${days} 天 · 居家康复`}
+        </p>
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/10">
+            <span className="size-2 animate-pulse rounded-full bg-success" />
             {inpatient ? "住院中" : "居家康复"}
           </span>
-          <span className="text-[16px] font-semibold text-white/90">{bed}</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-4 py-2 text-[15px] font-bold text-muted-foreground">
+            今日待办 {remaining} 项
+          </span>
         </div>
-        <p className="mt-3 text-[24px] font-bold leading-snug">{name}，您好</p>
-        <p className="mt-1 text-[18px] text-white/90">
-          {inpatient ? `入院第 ${days} 天` : `出院后第 ${days} 天`} · 今日待办 {remaining} 项
-        </p>
+      </header>
 
+      <div className="space-y-5 px-5 pt-5">
+        {/* 未建档：拍照建档提醒 */}
+        {!archived && (
+          <section className="rounded-3xl border-2 border-warning bg-warning/10 p-5">
+            <div className="flex items-start gap-3">
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-warning/25 text-warning-foreground">
+                <Camera className="size-6" />
+              </span>
+              <div className="min-w-0">
+                <p className="whitespace-nowrap text-[19px] font-bold text-warning-foreground">您还没有建立健康档案</p>
+                <p className="mt-1 text-[15px] leading-snug text-warning-foreground/80">
+                  请拍照上传「入院单 / 诊断证明」，医生确认后即可查看康复方案与每日待办。
+                </p>
+              </div>
+            </div>
+            <label className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-[18px] font-bold text-primary-foreground active:scale-[0.98]">
+              <Camera className="size-6" /> 立即拍照建档
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) setArchivePhoto(URL.createObjectURL(f));
+                }}
+              />
+            </label>
+            <label className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-warning py-3 text-[17px] font-bold text-warning-foreground">
+              <ImagePlus className="size-5" /> 从相册选择照片
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) setArchivePhoto(URL.createObjectURL(f));
+                }}
+              />
+            </label>
+          </section>
+        )}
+        {!hasArchive && archivePhoto && (
+          <section className="flex items-center gap-3 rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
+            <img src={archivePhoto} alt="入院单照片" className="size-16 rounded-2xl object-cover" />
+            <div className="min-w-0">
+              <p className="text-[18px] font-bold text-success">入院单已上传</p>
+              <p className="mt-0.5 text-[15px] text-muted-foreground">医护正在核对，建档完成后将消息通知您</p>
+            </div>
+          </section>
+        )}
+
+        {/* 当前阶段 */}
         <button
           onClick={() => setPathOpen(true)}
-          className="mt-4 flex w-full items-center justify-between rounded-2xl bg-white/15 px-4 py-3 text-left ring-1 ring-white/25 active:scale-[0.99]"
+          className="flex w-full items-center justify-between rounded-3xl bg-primary p-5 text-left active:scale-[0.99]"
+          style={{ boxShadow: "var(--shadow-elevated)" }}
         >
-          <div className="min-w-0">
-            <div className="text-[15px] font-semibold text-white/85">当前阶段</div>
-            <div className="mt-0.5 whitespace-nowrap text-[20px] font-bold">{stageLabel}</div>
-          </div>
-          <ChevronRight className="size-6 shrink-0" />
+          <span className="min-w-0">
+            <span className="block text-[15px] font-semibold text-primary-foreground/80">当前阶段</span>
+            <span className="mt-0.5 block whitespace-nowrap font-display text-[22px] font-bold text-primary-foreground">{stageLabel}</span>
+          </span>
+          <ChevronRight className="size-6 shrink-0 text-primary-foreground/70" />
         </button>
-      </section>
+
 
       {/* 分类待办 */}
       {CAT_ORDER.map((cat) => {
