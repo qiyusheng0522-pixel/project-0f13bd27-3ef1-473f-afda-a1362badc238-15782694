@@ -9,7 +9,6 @@ import {
   Droplet,
   HeartPulse,
   Soup,
-  MessageSquare,
   Stethoscope,
   X,
   Check,
@@ -30,9 +29,6 @@ import {
   Bluetooth,
   Keyboard,
   Ban,
-  Phone,
-  Video,
-  Lock,
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -40,8 +36,6 @@ import { MedsView } from "@/components/quick/MedsView";
 import { DataEntryView } from "@/components/quick/DataEntryView";
 import { CarePlanView } from "@/components/quick/CarePlanView";
 import { DietView } from "@/components/quick/DietView";
-import { MessagesView } from "@/components/quick/MessagesView";
-import { ConsultRefView } from "@/components/quick/ConsultRefView";
 import { MiniToastProvider, useMiniToast } from "@/components/quick/MiniToast";
 
 
@@ -54,9 +48,7 @@ export type QuickKey =
   | "med"
   | "data"
   | "plan"
-  | "diet"
-  | "message"
-  | "consult";
+  | "diet";
 
 type Entry = {
   key: QuickKey;
@@ -76,8 +68,6 @@ export const QUICK_ENTRIES: Entry[] = [
   { key: "med", title: "用药管理", desc: "打卡/停药", icon: Pill, tint: "bg-teal-100 text-teal-600" },
   { key: "data", title: "数据录入", desc: "血压体温", icon: Droplet, tint: "bg-cyan-100 text-cyan-600" },
   { key: "diet", title: "饮食打卡", desc: "拍照识别", icon: Soup, tint: "bg-emerald-100 text-emerald-600" },
-  { key: "message", title: "消息", desc: "医生回复", icon: MessageSquare, tint: "bg-amber-100 text-amber-600" },
-  { key: "consult", title: "在线问诊", desc: "骨科专科", icon: Stethoscope, tint: "bg-indigo-100 text-indigo-600" },
 ];
 
 /* ============ 右侧边缘「快捷入口」拉手（支持长按拖动） + 抽屉面板 ============ */
