@@ -1354,19 +1354,39 @@ function EduTab({ inpatient }: { inpatient: boolean }) {
         )
       ) : (
         <>
-          <EduGroup title={`${scope}必读宣教`}>
-            {list.map((e) => (
+          <div className="rounded-2xl bg-secondary/60 px-4 py-3">
+            <p className="text-[16px] font-bold text-primary">
+              按您的病症与当前阶段推荐：{diagnosis} · {stageLabel}
+            </p>
+          </div>
+
+          <EduGroup title={`${scope}必读（${recommended.length} 条）`}>
+            {recommended.map((e) => (
               <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
             ))}
           </EduGroup>
 
-          <EduGroup title={scope === "院内" ? "出院后可提前了解" : "住院期间回顾"}>
-            {other.map((e) => (
-              <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
-            ))}
-          </EduGroup>
+          {rest.length > 0 && (
+            <>
+              <button
+                onClick={() => setShowRest((v) => !v)}
+                className="flex w-full items-center justify-center gap-1 rounded-2xl border-2 py-3 text-[17px] font-bold text-primary"
+              >
+                {showRest ? "收起其他宣教" : `查看其他宣教 ${rest.length} 条`}
+                <ChevronRight className={cn("size-5", showRest && "rotate-90")} />
+              </button>
+              {showRest && (
+                <EduGroup title="其他宣教">
+                  {rest.map((e) => (
+                    <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
+                  ))}
+                </EduGroup>
+              )}
+            </>
+          )}
         </>
       )}
+
 
       {open && (
         <Sheet title={open.title} onClose={() => setOpen(null)}>
