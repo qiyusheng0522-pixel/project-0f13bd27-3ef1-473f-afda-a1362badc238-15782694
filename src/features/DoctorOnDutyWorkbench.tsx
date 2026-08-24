@@ -115,6 +115,8 @@ export function DoctorOnDutyWorkbench() {
       {tab === "scales" && (
         <ScalesTab
           list={todaySurgery}
+          pending={pendingData}
+
           pushed={pushed}
           onEdit={(p) => setEditor(p)}
           onPush={handlePush}
