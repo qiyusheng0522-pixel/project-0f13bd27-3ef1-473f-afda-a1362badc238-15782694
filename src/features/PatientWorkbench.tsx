@@ -1007,12 +1007,73 @@ function HomeTab({
           <h2 className="font-display text-[21px] font-bold">今日待办</h2>
         </div>
 
+        {/* 全天任务置顶 */}
+        {(() => {
+          const isAllDay = (t: { time?: string }) => !t.time || t.time.includes("全天");
+          const list = todos.filter(isAllDay);
+          if (!list.length) return null;
+          const doneCount = list.filter(isDone).length;
+          const all = doneCount === list.length;
+          return (
+            <section
+              key="全天任务"
+              className="overflow-hidden rounded-[26px] border-2 border-primary/20 bg-card"
+              style={{ boxShadow: "var(--shadow-card)" }}
+            >
+              <header className="flex items-center justify-between px-5 pb-2 pt-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="grid size-10 place-items-center rounded-2xl bg-primary/10 text-primary">
+                    <Clock className="size-5" />
+                  </span>
+                  <h3 className="font-display text-[19px] font-bold">全天任务</h3>
+                </div>
+                <span
+                  className={cn(
+                    "whitespace-nowrap rounded-full px-2.5 py-1 text-[14px] font-bold",
+                    all ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {doneCount}/{list.length}
+                </span>
+              </header>
+              <ul className="space-y-2 p-3">
+                {list.map((t) => {
+                  const done = isDone(t);
+                  return (
+                    <li
+                      key={t.id}
+                      className={cn(
+                        "flex items-start gap-3 rounded-2xl p-3 transition-colors",
+                        done ? "bg-muted/40" : "bg-secondary/40",
+                      )}
+                    >
+                      <button
+                        onClick={() => onToggle(t)}
+                        aria-label={done ? "取消打卡" : "打卡"}
+                        className={cn(
+                          "mt-0.5 grid size-9 shrink-0 place-items-center rounded-full border-2 active:scale-95",
+                          done ? "border-success bg-success text-primary-foreground" : "border-border bg-card text-transparent",
+                        )}
+                      >
+                        <Check className="size-5" />
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <p className={cn("text-[18px] font-bold leading-snug", done && "text-muted-foreground line-through")}>
+                          {t.title}
+                        </p>
+                        <p className="mt-1 text-[15px] leading-snug text-muted-foreground">{t.detail}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          );
+        })()}
+
         {CAT_ORDER.map((cat) => {
           const isAllDay = (t: { time?: string }) => !t.time || t.time.includes("全天");
-          const list = todos
-            .filter((t) => t.cat === cat)
-            .slice()
-            .sort((a, b) => Number(isAllDay(b)) - Number(isAllDay(a)));
+          const list = todos.filter((t) => t.cat === cat && !isAllDay(t));
           if (!list.length) return null;
           const meta = CAT_META[cat];
           const Icon = meta.icon;
