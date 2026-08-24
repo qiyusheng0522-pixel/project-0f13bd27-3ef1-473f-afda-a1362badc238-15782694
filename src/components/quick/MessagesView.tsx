@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   Inbox,
 } from "lucide-react";
+import { useMiniToast } from "@/components/quick/MiniToast";
 import { QuickSheet, QuickToast } from "@/components/quick/QuickSheet";
 
 type Msg = {
@@ -176,6 +177,7 @@ export function MessagesView({ onClose }: { onClose: () => void }) {
 }
 
 function InboxView({ onOpen, onNewConsult }: { onOpen: (id: string) => void; onNewConsult: () => void }) {
+  const [tab, setTab] = useState("全部");
   const totalUnread = THREADS.reduce((s, t) => s + t.unread, 0);
   return (
     <div className="flex-1 pb-6">
@@ -293,6 +295,7 @@ function ThreadView({
   setDraft: (v: string) => void;
   onSend: () => void;
 }) {
+  const toast = useMiniToast();
   return (
     <div className="flex flex-1 flex-col min-h-full">
       <section className="px-4 mt-3">
