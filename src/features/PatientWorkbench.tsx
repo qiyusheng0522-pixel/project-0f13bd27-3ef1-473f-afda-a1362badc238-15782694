@@ -822,6 +822,8 @@ function HomeTab({
           <PathRail current={toPathIdx(stageIdx)} onDark />
         </button>
 
+        {/* 快捷入口 */}
+        <QuickEntryCard onPick={(k) => setQuick(k)} />
 
 
         {/* 分类待办 */}
