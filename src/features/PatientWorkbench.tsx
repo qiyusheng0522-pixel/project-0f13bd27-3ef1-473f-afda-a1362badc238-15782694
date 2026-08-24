@@ -35,6 +35,7 @@ import {
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { QuickEntryRail, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
 import { cn } from "@/lib/utils";
+import { VideoSheet } from "@/components/quick/VideoSheet";
 import {
   useCaseFlow,
   getDemoPatient,
@@ -1808,7 +1809,11 @@ function EduTab({
             style={{ background: open.cover }}
           >
             {open.media === "视频" ? (
-              <button className="grid size-16 place-items-center rounded-full bg-white/25 ring-2 ring-white/60 active:scale-95">
+              <button
+                onClick={() => setPlaying(open.title)}
+                aria-label="播放视频"
+                className="grid size-16 place-items-center rounded-full bg-white/25 ring-2 ring-white/60 active:scale-95"
+              >
                 <Play className="size-8" />
               </button>
             ) : (
