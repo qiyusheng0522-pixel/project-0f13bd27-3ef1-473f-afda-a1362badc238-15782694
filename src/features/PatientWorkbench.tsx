@@ -238,24 +238,6 @@ function ServicePackBanner({
         </span>
       </button>
 
-      <div className="grid grid-cols-3 gap-2.5">
-        {SERVICE_PACKS.slice(0, 3).map((s) => {
-          const Icon = s.icon;
-          return (
-            <button
-              key={s.title}
-              onClick={() => onPick(s)}
-              className="flex flex-col items-center gap-2 rounded-[22px] border bg-card p-3.5 text-center active:scale-[0.98]"
-              style={{ boxShadow: "var(--shadow-card)" }}
-            >
-              <span className={cn("grid size-11 place-items-center rounded-2xl", s.tint)}>
-                <Icon className="size-6" />
-              </span>
-              <span className="whitespace-nowrap text-[15px] font-bold leading-tight">{s.title}</span>
-            </button>
-          );
-        })}
-      </div>
     </section>
   );
 }
@@ -1464,10 +1446,6 @@ function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpa
           ))}
         </ul>
       </section>
-
-      <button className="flex w-full items-center justify-center gap-2 rounded-2xl border bg-card py-4 text-[18px] font-bold text-primary active:bg-muted/50">
-        <Phone className="size-5" /> 联系病区护士站
-      </button>
 
       {openConsent && (
         <Sheet title={openConsent} onClose={() => setOpenConsent(null)}>
