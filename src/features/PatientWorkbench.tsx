@@ -792,18 +792,25 @@ function HomeTab({
           </section>
         )}
 
-        {/* 当前阶段 */}
+        {/* 当前阶段 + 住院流程轨道 */}
         <button
           onClick={() => setPathOpen(true)}
-          className="flex w-full items-center justify-between rounded-3xl bg-primary p-5 text-left active:scale-[0.99]"
+          className="w-full rounded-3xl bg-primary p-5 text-left active:scale-[0.99]"
           style={{ boxShadow: "var(--shadow-elevated)" }}
         >
-          <span className="min-w-0">
-            <span className="block text-[15px] font-semibold text-primary-foreground/80">当前阶段</span>
-            <span className="mt-0.5 block whitespace-nowrap font-display text-[22px] font-bold text-primary-foreground">{stageLabel}</span>
-          </span>
-          <ChevronRight className="size-6 shrink-0 text-primary-foreground/70" />
+          <div className="flex items-center justify-between gap-2">
+            <span className="min-w-0">
+              <span className="block text-[15px] font-semibold text-primary-foreground/80">当前阶段</span>
+              <span className="mt-0.5 block whitespace-nowrap font-display text-[22px] font-bold text-primary-foreground">
+                {PATH_STEPS[toPathIdx(stageIdx)]!.no} {PATH_STEPS[toPathIdx(stageIdx)]!.line1}
+                {PATH_STEPS[toPathIdx(stageIdx)]!.line2}
+              </span>
+            </span>
+            <ChevronRight className="size-6 shrink-0 text-primary-foreground/70" />
+          </div>
+          <PathRail current={toPathIdx(stageIdx)} onDark />
         </button>
+
 
 
         {/* 分类待办 */}
