@@ -631,17 +631,30 @@ function GuestHomeTab({
   const [scaleOpen, setScaleOpen] = useState(false);
   const [scaleDone, setScaleDone] = useState(false);
   const [allOpen, setAllOpen] = useState(false);
+  const [groupOpen, setGroupOpen] = useState(false);
 
 
   return (
     <div className="pb-8">
-      {/* Hero：白底 + 大字标题 */}
-      <header className="bg-card px-6 pb-7 pt-7">
-        <h1 className="font-display text-[34px] font-bold leading-none tracking-tight text-primary">你好，</h1>
-        <p className="mt-2 text-[19px] font-medium text-muted-foreground">欢迎开始康复旅程</p>
-        <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/10">
-          <span className="size-2 animate-pulse rounded-full bg-warning" />
-          康复状态：{photo ? "资料核对中" : "待建档"}
+      {/* Hero：温暖卡片 + 入群引导 */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-primary to-primary/85 px-6 pb-8 pt-8 text-primary-foreground">
+        <div className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full bg-white/10" />
+        <div className="pointer-events-none absolute bottom-0 left-10 size-24 rounded-full bg-white/10" />
+        <div className="relative">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="font-display text-[34px] font-bold leading-none tracking-tight">你好，</h1>
+              <p className="mt-2 text-[19px] font-medium text-primary-foreground/85">欢迎开启康复旅程</p>
+            </div>
+            <div className="grid size-12 shrink-0 place-items-center rounded-full bg-white/20 text-primary-foreground">
+              <User className="size-6" />
+            </div>
+          </div>
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-[15px] font-bold text-primary-foreground backdrop-blur-sm">
+            <span className="size-2 animate-pulse rounded-full bg-warning" />
+            康复状态：{photo ? "资料核对中" : "待建档"}
+          </div>
+          <CareGroupBanner onOpen={() => setGroupOpen(true)} />
         </div>
       </header>
 
@@ -759,6 +772,8 @@ function GuestHomeTab({
           }}
         />
       )}
+
+      {groupOpen && <CareGroupSheet onClose={() => setGroupOpen(false)} />}
       </div>
     </div>
 
@@ -799,6 +814,7 @@ function HomeTab({
   const [pack, setPack] = useState<(typeof SERVICE_PACKS)[number] | null>(null);
   const [allOpen, setAllOpen] = useState(false);
   const [scaleOpen, setScaleOpen] = useState(false);
+  const [groupOpen, setGroupOpen] = useState(false);
   const todoRef = useRef<HTMLDivElement>(null);
 
 
@@ -809,24 +825,35 @@ function HomeTab({
 
   return (
     <div className="pb-8">
-      {/* Hero：白底 + 大字状态 */}
-      <header className="bg-card px-6 pb-7 pt-7">
-        <h1 className="font-display text-[34px] font-bold leading-none tracking-tight text-primary">{name}，您好</h1>
-        <p className="mt-2 text-[19px] font-medium text-muted-foreground">
-          {inpatient ? `入院第 ${days} 天 · ${bed}` : `出院后第 ${days} 天 · 居家康复`}
-        </p>
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/10">
-            <span className="size-2 animate-pulse rounded-full bg-success" />
-            {inpatient ? "住院中" : "居家康复"}
-          </span>
-          <button
-            onClick={() => todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/15 active:scale-[0.98]"
-          >
-            今日待办 {remaining} 项 <ChevronRight className="size-4" />
-          </button>
-
+      {/* Hero：温暖卡片 + 入群引导 */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-primary to-primary/85 px-6 pb-8 pt-8 text-primary-foreground">
+        <div className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full bg-white/10" />
+        <div className="pointer-events-none absolute bottom-0 left-10 size-24 rounded-full bg-white/10" />
+        <div className="relative">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="font-display text-[34px] font-bold leading-none tracking-tight">{name}，您好</h1>
+              <p className="mt-2 text-[19px] font-medium text-primary-foreground/85">
+                {inpatient ? `入院第 ${days} 天 · ${bed}` : `出院后第 ${days} 天 · 居家康复`}
+              </p>
+            </div>
+            <div className="grid size-12 shrink-0 place-items-center rounded-full bg-white/20 text-primary-foreground">
+              <User className="size-6" />
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-[15px] font-bold text-primary-foreground backdrop-blur-sm">
+              <span className="size-2 animate-pulse rounded-full bg-success" />
+              {inpatient ? "住院中" : "居家康复"}
+            </span>
+            <button
+              onClick={() => todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/20 px-4 py-2 text-[15px] font-bold text-primary-foreground backdrop-blur-sm active:scale-[0.98]"
+            >
+              今日待办 {remaining} 项 <ChevronRight className="size-4" />
+            </button>
+          </div>
+          <CareGroupBanner onOpen={() => setGroupOpen(true)} />
         </div>
       </header>
 
@@ -1074,6 +1101,7 @@ function HomeTab({
         </Sheet>
       )}
 
+      {groupOpen && <CareGroupSheet onClose={() => setGroupOpen(false)} />}
       </div>
     </div>
 
