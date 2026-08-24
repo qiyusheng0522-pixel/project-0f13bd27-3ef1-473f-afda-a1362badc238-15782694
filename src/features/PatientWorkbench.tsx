@@ -202,56 +202,56 @@ function ServicePackBanner({
   onPick: (s: (typeof SERVICE_PACKS)[number]) => void;
 }) {
   return (
-    <section className="space-y-2.5">
+    <section className="space-y-3">
       <div className="flex items-center gap-2">
-        <h3 className="whitespace-nowrap text-[20px] font-bold">骨关节服务包</h3>
+        <h3 className="whitespace-nowrap font-display text-[21px] font-bold">骨关节服务包</h3>
         <span
           className={cn(
-            "shrink-0 whitespace-nowrap rounded-md px-2 py-0.5 text-[15px] font-bold",
-            activated ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
+            "shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[14px] font-bold",
+            activated ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
           )}
         >
           {activated ? "医生甄选" : "未开通"}
         </span>
-        <button onClick={onOpenAll} className="ml-auto flex shrink-0 items-center whitespace-nowrap text-[16px] font-bold text-primary">
+        <button onClick={onOpenAll} className="ml-auto flex shrink-0 items-center whitespace-nowrap text-[15px] font-bold text-primary">
           全部服务 <ChevronRight className="size-4" />
         </button>
       </div>
 
       <button
         onClick={onOpenAll}
-        className="relative w-full overflow-hidden rounded-3xl p-4 text-left text-white"
+        className="relative w-full overflow-hidden rounded-[26px] p-6 text-left active:scale-[0.99]"
         style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
       >
-        <HeartPulse className="pointer-events-none absolute -right-4 -bottom-2 size-28 text-white/10" />
-        <p className="flex items-center gap-1.5 whitespace-nowrap text-[16px] font-semibold text-white/90">
-          <Sparkles className="size-4" /> 骨科医生 &amp; 康复治疗师联合甄选
-        </p>
-        <p className="mt-2 text-[24px] font-bold leading-snug">骨关节服务包</p>
-        <p className="mt-1 whitespace-nowrap text-[16px] text-white/85">康复方案 · 营养药膳 · 院内可对接</p>
-        <div className="mt-3 flex items-center gap-3">
-          <span className="whitespace-nowrap rounded-full bg-white/20 px-3 py-1.5 text-[16px] font-bold ring-1 ring-white/25">
-            已为 12,488 位骨友服务
+        <span className="pointer-events-none absolute -bottom-6 -right-6 size-28 rounded-full bg-white/10" />
+        <span className="pointer-events-none absolute right-8 top-3 size-10 rounded-full bg-white/5" />
+        <span className="relative block">
+          <span className="block font-display text-[22px] font-bold leading-snug text-primary-foreground">
+            骨关节康复全周期服务包
           </span>
-          <span className="ml-auto flex shrink-0 items-center whitespace-nowrap text-[17px] font-bold">
-            {activated ? "查看服务" : "了解服务"} <ChevronRight className="size-5" />
+          <span className="mt-1.5 block whitespace-nowrap text-[15px] text-primary-foreground/85">
+            专家定制 · 周期跟踪 · 效果评估
           </span>
-        </div>
+          <span className="mt-4 inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 text-[15px] font-bold text-primary">
+            {activated ? "查看服务" : "了解详情"} <ChevronRight className="size-4" />
+          </span>
+        </span>
       </button>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2.5">
         {SERVICE_PACKS.slice(0, 3).map((s) => {
           const Icon = s.icon;
           return (
             <button
               key={s.title}
               onClick={() => onPick(s)}
-              className="flex flex-col items-center gap-1.5 rounded-2xl border bg-card p-3 text-center active:bg-muted/50"
+              className="flex flex-col items-center gap-2 rounded-[22px] border bg-card p-3.5 text-center active:scale-[0.98]"
+              style={{ boxShadow: "var(--shadow-card)" }}
             >
               <span className={cn("grid size-11 place-items-center rounded-2xl", s.tint)}>
                 <Icon className="size-6" />
               </span>
-              <span className="whitespace-nowrap text-[16px] font-bold leading-tight">{s.title}</span>
+              <span className="whitespace-nowrap text-[15px] font-bold leading-tight">{s.title}</span>
             </button>
           );
         })}
@@ -259,6 +259,7 @@ function ServicePackBanner({
     </section>
   );
 }
+
 
 function ServicePackAllSheet({
   activated,
