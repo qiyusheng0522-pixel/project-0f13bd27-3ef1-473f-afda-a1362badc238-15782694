@@ -31,6 +31,7 @@ import {
   ImagePlus,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
+import { QuickEntryCard, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
 import { cn } from "@/lib/utils";
 import {
   useCaseFlow,
