@@ -399,8 +399,8 @@ export function PatientWorkbench() {
       bottom={<TabBar items={tabs} activeKey={tab} onChange={setTab} />}
     >
       {/* 演示视角切换：新用户（未建档） / 已建档患者 */}
-      <div className="sticky top-0 z-20 border-b bg-card/95 p-2 backdrop-blur">
-        <div className="grid grid-cols-2 gap-2">
+      <div className="sticky top-0 z-20 bg-card/85 px-3 py-2.5 backdrop-blur-xl">
+        <div className="grid grid-cols-2 gap-1 rounded-2xl bg-muted p-1">
           {([
             { key: "guest", label: "新用户 · 未建档" },
             { key: "member", label: "已建档患者" },
@@ -409,8 +409,8 @@ export function PatientWorkbench() {
               key={v.key}
               onClick={() => setView(v.key)}
               className={cn(
-                "whitespace-nowrap rounded-xl py-2 text-[16px] font-bold active:scale-[0.99]",
-                view === v.key ? "bg-primary text-primary-foreground" : "border bg-background text-muted-foreground",
+                "whitespace-nowrap rounded-xl py-2 text-[15px] font-bold transition-all active:scale-[0.98]",
+                view === v.key ? "bg-card text-primary shadow-sm" : "text-muted-foreground",
               )}
             >
               {v.label}
@@ -418,6 +418,7 @@ export function PatientWorkbench() {
           ))}
         </div>
       </div>
+
 
       {tab === "home" &&
         (guest ? (
