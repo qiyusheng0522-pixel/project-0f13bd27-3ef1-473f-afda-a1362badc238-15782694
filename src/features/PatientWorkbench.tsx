@@ -29,6 +29,7 @@ import {
   Utensils,
   HeartHandshake,
   ImagePlus,
+  Mic,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { QuickEntryRail, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
