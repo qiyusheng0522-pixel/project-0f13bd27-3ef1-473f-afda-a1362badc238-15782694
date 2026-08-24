@@ -998,7 +998,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
               <p className="text-[14px] font-bold">更好的康复从规律训练开始</p>
               <span className="text-primary">◆</span>
             </div>
-            <div className="rounded-xl bg-muted/30 p-3.5 ring-1 ring-border">
+            <div className="rounded-xl bg-muted p-3.5 ring-1 ring-border">
               <TagBlock icon={<AlertTriangle className="size-3.5" />} title="专病" tags={DISEASE_TAGS} tagClass="text-destructive bg-destructive/10 ring-destructive/15" onTagClick={setSelectedTag} />
               <div className="h-px bg-border my-3" />
               <TagBlock icon={<Activity className="size-3.5" />} title="待改善生活方式" tags={LIFESTYLE_TAGS} tagClass="text-warning bg-warning/10 ring-warning/20" onTagClick={setSelectedTag} />
