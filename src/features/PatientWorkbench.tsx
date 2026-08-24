@@ -1019,7 +1019,7 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
               onClick={() => setShowRehab(true)}
               className="whitespace-nowrap rounded-full bg-secondary px-3 py-1.5 text-[15px] font-bold text-primary"
             >
-              康复评估 {flow.dailyRehab.length} 次 ›
+              康复方案 ›
             </button>
           </div>
         </div>
