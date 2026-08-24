@@ -980,7 +980,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
 
   return (
     <QuickSheet title="健康方案" subtitle="安家在护 · 膝关节置换康复" onClose={onClose}>
-      <div className="min-h-full pb-6 bg-muted/20">
+      <div className="min-h-full pb-6 bg-background">
         <div className="px-4 pt-3">
           <div className="inline-flex items-center gap-1 rounded-full bg-card ring-1 ring-border p-0.5 text-[11px] font-bold">
             <button onClick={() => setPurchased(false)} className={`px-2.5 py-1.5 rounded-full transition-colors whitespace-nowrap ${!purchased ? "bg-foreground text-background" : "text-muted-foreground"}`}>未开通预览</button>
