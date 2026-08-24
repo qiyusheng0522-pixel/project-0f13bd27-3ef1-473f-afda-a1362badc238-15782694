@@ -199,11 +199,12 @@ function InboxView({ onOpen, onNewConsult }: { onOpen: (id: string) => void; onN
       </section>
 
       <section className="px-4 mt-3 flex gap-1.5 overflow-x-auto">
-        {["全部", "医生", "护士", "系统通知"].map((t, i) => (
+        {["全部", "医生", "护士", "系统通知"].map((t) => (
           <button
             key={t}
+            onClick={() => setTab(t)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-[13px] font-semibold whitespace-nowrap ${
-              i === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/70"
+              tab === t ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/70"
             }`}
           >
             {t}
@@ -356,10 +357,10 @@ function ThreadView({
       </section>
 
       <div className="sticky bottom-0 bg-background/95 backdrop-blur-xl border-t border-border px-3 py-2.5 flex items-center gap-2">
-        <button className="size-9 rounded-full grid place-items-center bg-muted" aria-label="图片">
+        <button onClick={() => toast("已从相册选择图片，发送中…")} className="size-9 rounded-full grid place-items-center bg-muted" aria-label="图片">
           <ImageIcon className="size-4" />
         </button>
-        <button className="size-9 rounded-full grid place-items-center bg-muted" aria-label="附件">
+        <button onClick={() => toast("可发送检查报告 PDF / 复查单")} className="size-9 rounded-full grid place-items-center bg-muted" aria-label="附件">
           <Paperclip className="size-4" />
         </button>
         <input
