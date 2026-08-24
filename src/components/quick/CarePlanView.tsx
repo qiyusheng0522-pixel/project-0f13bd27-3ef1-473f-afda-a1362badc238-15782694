@@ -31,6 +31,8 @@ import {
   Phone,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useMiniToast } from "@/components/quick/MiniToast";
+import { VideoSheet } from "@/components/quick/VideoSheet";
 import { QuickSheet, QuickToast } from "@/components/quick/QuickSheet";
 
 /** ---------------- 类型 ---------------- */
@@ -505,7 +507,7 @@ function TagHistoryContent() {
   );
 }
 
-function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwap }: { meal: { title: string; kcal: number; items: MealItem[] }; defaultOpen?: boolean; purchased?: boolean; mealKey?: string; onSwap: (mealTitle: string, dish: string) => void }) {
+function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwap, onPlayVideo }: { meal: { title: string; kcal: number; items: MealItem[] }; defaultOpen?: boolean; purchased?: boolean; mealKey?: string; onSwap: (mealTitle: string, dish: string) => void; onPlayVideo: (title: string, subtitle: string) => void }) {
   const [open, setOpen] = useState(defaultOpen);
   const generic = mealKey ? GENERIC_MEALS[mealKey] : undefined;
   return (
@@ -581,7 +583,7 @@ function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwa
                         {it.tip && <p className="mt-1.5 text-[11.5px] text-success/90 leading-snug"><span className="font-bold">营养师叮嘱：</span>{it.tip}</p>}
                       </div>
                       {it.video && (
-                        <button className="w-full rounded-lg ring-1 ring-warning/30 bg-warning/5 px-2.5 py-2 flex items-center gap-2 active:scale-[0.99] transition-transform">
+                        <button onClick={() => onPlayVideo(it.video!.title, `${it.video!.chef} · ${it.video!.duration}`)} className="w-full rounded-lg ring-1 ring-warning/30 bg-warning/5 px-2.5 py-2 flex items-center gap-2 active:scale-[0.99] transition-transform">
                           <span className="relative size-9 rounded-md bg-warning/15 grid place-items-center shrink-0">
                             <Play className="size-3.5 text-warning fill-warning translate-x-[1px]" />
                           </span>
@@ -628,7 +630,7 @@ function ExerciseRiskTip() {
   );
 }
 
-function ExercisePlanCard({ plan, purchased, onCheckin }: { plan: ExercisePlan; purchased: boolean; onCheckin: (name: string) => void }) {
+function ExercisePlanCard({ plan, purchased, onCheckin, onPlayVideo }: { plan: ExercisePlan; purchased: boolean; onCheckin: (name: string) => void; onPlayVideo: (title: string, subtitle: string) => void }) {
   const [done, setDone] = useState(plan.todayDone);
   const champion = plan.videos.find((v) => v.kind === "champion");
   const tutorial = plan.videos.find((v) => v.kind === "tutorial");
@@ -636,7 +638,7 @@ function ExercisePlanCard({ plan, purchased, onCheckin }: { plan: ExercisePlan; 
   return (
     <div className={`rounded-xl overflow-hidden ring-1 bg-card ${done ? "ring-success/30" : "ring-border"}`}>
       <div className="flex">
-        <button className="relative w-[110px] shrink-0 grid place-items-center overflow-hidden" style={{ background: plan.cover }}>
+        <button onClick={() => onPlayVideo(headline?.title ?? plan.name, `${plan.name} · ${plan.duration}`)} className="relative w-[110px] shrink-0 grid place-items-center overflow-hidden" style={{ background: plan.cover }}>
           <plan.icon className="size-11 text-background drop-shadow" strokeWidth={1.75} />
           <span className="absolute size-9 rounded-full bg-card/90 grid place-items-center shadow">
             <Play className="size-4 text-foreground fill-foreground translate-x-[1px]" />
@@ -681,7 +683,7 @@ function ExercisePlanCard({ plan, purchased, onCheckin }: { plan: ExercisePlan; 
             <p className="text-[12px] font-bold leading-tight truncate">{champion.title}</p>
             <p className="text-[10.5px] text-muted-foreground mt-0.5 truncate">{champion.coach} · {champion.badge} · {champion.views} 次学习</p>
           </div>
-          <button className="text-[11.5px] font-bold text-warning px-2 py-1 rounded-full bg-warning/10 ring-1 ring-warning/25 inline-flex items-center gap-0.5 shrink-0 whitespace-nowrap">
+          <button onClick={() => onPlayVideo(champion.title, `${champion.coach} · ${champion.badge}`)} className="text-[11.5px] font-bold text-warning px-2 py-1 rounded-full bg-warning/10 ring-1 ring-warning/25 inline-flex items-center gap-0.5 shrink-0 whitespace-nowrap">
             <Play className="size-3 fill-current" />跟练
           </button>
         </div>
@@ -714,7 +716,8 @@ function ExercisePlanCard({ plan, purchased, onCheckin }: { plan: ExercisePlan; 
   );
 }
 
-function WorkoutPlan({ purchased, onCheckin }: { purchased: boolean; onCheckin: (name: string) => void }) {
+function WorkoutPlan({ purchased, onCheckin, onPlayVideo }: { purchased: boolean; onCheckin: (name: string) => void; onPlayVideo: (title: string, subtitle: string) => void }) {
+  const toast = useMiniToast();
   const total = EXERCISE_PLANS.length;
   const [doneCount] = useState(EXERCISE_PLANS.filter((p) => p.todayDone).length);
   const pct = Math.round((doneCount / total) * 100);
@@ -764,12 +767,12 @@ function WorkoutPlan({ purchased, onCheckin }: { purchased: boolean; onCheckin: 
             <span className="text-[14.5px] font-extrabold tracking-tight">今日训练清单</span>
             <span className="text-[10.5px] font-bold text-primary bg-primary/10 ring-1 ring-primary/20 px-1.5 py-0.5 rounded-full whitespace-nowrap">{total} 项</span>
           </div>
-          <button className="text-[12.5px] text-primary inline-flex items-center font-bold whitespace-nowrap">打卡记录 <ChevronRight className="size-3.5" /></button>
+          <button onClick={() => toast("本周已完成 12 次训练打卡")} className="text-[12.5px] text-primary inline-flex items-center font-bold whitespace-nowrap">打卡记录 <ChevronRight className="size-3.5" /></button>
         </div>
 
         <div className="mt-3 space-y-3">
           {EXERCISE_PLANS.map((p) => (
-            <ExercisePlanCard key={p.id} plan={p} purchased={purchased} onCheckin={onCheckin} />
+            <ExercisePlanCard key={p.id} plan={p} purchased={purchased} onCheckin={onCheckin} onPlayVideo={onPlayVideo} />
           ))}
         </div>
       </div>
@@ -812,6 +815,7 @@ function DoctorReviewBanner({ review, onApprove }: { review: "pending" | "approv
 }
 
 function TeamRow({ name, role, detail }: { name: string; role: string; detail: string }) {
+  const toast = useMiniToast();
   return (
     <div className="flex items-center gap-2.5">
       <div className="size-8 rounded-full bg-primary/10 text-primary inline-flex items-center justify-center text-[13px] font-bold shrink-0">{name.slice(0, 1)}</div>
@@ -819,7 +823,7 @@ function TeamRow({ name, role, detail }: { name: string; role: string; detail: s
         <div className="text-[13px] font-semibold truncate">{name} <span className="text-muted-foreground font-normal">· {role}</span></div>
         <div className="text-[11px] text-muted-foreground truncate">{detail}</div>
       </div>
-      <button className="size-7 rounded-full bg-primary/10 text-primary inline-flex items-center justify-center shrink-0">
+      <button onClick={() => toast(`正在呼叫 ${name}（${role}）…`)} aria-label={`呼叫${name}`} className="size-7 rounded-full bg-primary/10 text-primary inline-flex items-center justify-center shrink-0">
         <Phone className="size-3.5" />
       </button>
     </div>
@@ -883,6 +887,7 @@ function UnpurchasedBody({ onPurchase }: { onPurchase: () => void }) {
 }
 
 function ServicePlanFlow({ purchased, setPurchased }: { purchased: boolean; setPurchased: (v: boolean) => void }) {
+  const toast = useMiniToast();
   return (
     <div className="rounded-2xl overflow-hidden ring-1 ring-border bg-card">
       {purchased ? (
@@ -912,7 +917,7 @@ function ServicePlanFlow({ purchased, setPurchased }: { purchased: boolean; setP
                 <TeamRow name="刘静" role="康复治疗师" detail="日常训练指导 · 关节角度评估" />
                 <TeamRow name="陈悦" role="临床营养师" detail="高蛋白补钙食谱定制" />
               </div>
-              <button className="mt-3 w-full rounded-xl bg-primary text-primary-foreground text-[14px] font-semibold py-2.5 active:opacity-90 inline-flex items-center justify-center gap-1">
+              <button onClick={() => toast("已发起群聊，医护将在 5 分钟内回复")} className="mt-3 w-full rounded-xl bg-primary text-primary-foreground text-[14px] font-semibold py-2.5 active:opacity-90 inline-flex items-center justify-center gap-1">
                 联系我的团队 <ChevronRight className="size-4" />
               </button>
             </div>
@@ -971,6 +976,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
   const review: "pending" | "approved" = "approved";
   const [swap, setSwap] = useState<{ mealTitle: string; dish: string } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [video, setVideo] = useState<{ title: string; subtitle: string } | null>(null);
   const personalized = purchased && review === "approved";
 
   const showToast = (text: string) => {
@@ -1081,7 +1087,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
 
               <div className="mt-3 space-y-3">
                 {MEALS.map((m, i) => (
-                  <MealCard key={m.key} meal={m} defaultOpen={i === 0} purchased={personalized} mealKey={m.key} onSwap={(mealTitle, dish) => setSwap({ mealTitle, dish })} />
+                  <MealCard key={m.key} meal={m} defaultOpen={i === 0} purchased={personalized} mealKey={m.key} onSwap={(mealTitle, dish) => setSwap({ mealTitle, dish })} onPlayVideo={(t, sub) => setVideo({ title: t, subtitle: sub })} />
                 ))}
               </div>
             </div>
@@ -1090,7 +1096,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
 
         {/* 运动方案 */}
         <section className="px-4 mt-4">
-          <WorkoutPlan purchased={personalized} onCheckin={(name) => showToast(`「${name}」已打卡`)} />
+          <WorkoutPlan purchased={personalized} onCheckin={(name) => showToast(`「${name}」已打卡`)} onPlayVideo={(t, sub) => setVideo({ title: t, subtitle: sub })} />
         </section>
       </div>
 
@@ -1113,6 +1119,14 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
             setSwap(null);
             showToast(`已更换为「${name}」`);
           }}
+        />
+      )}
+      {video && (
+        <VideoSheet
+          title={video.title}
+          subtitle={video.subtitle}
+          onClose={() => setVideo(null)}
+          onFinish={() => showToast("已完成跟练并打卡")}
         />
       )}
       {toast && <QuickToast text={toast} />}

@@ -23,6 +23,7 @@ import {
   Loader2,
   Clock3,
 } from "lucide-react";
+import { useMiniToast } from "@/components/quick/MiniToast";
 import { QuickSheet } from "@/components/quick/QuickSheet";
 
 type Metric = {
@@ -219,6 +220,7 @@ const DEVICES: Device[] = [
 ];
 
 function DeviceSection({ onSync }: { onSync: (name: string) => void }) {
+  const toast = useMiniToast();
   return (
     <>
       <section className="px-5 mt-5">
@@ -236,7 +238,7 @@ function DeviceSection({ onSync }: { onSync: (name: string) => void }) {
       </section>
 
       <section className="px-5 mt-5">
-        <button className="w-full rounded-2xl ring-1 ring-dashed ring-primary/40 bg-primary/5 text-primary py-3.5 text-[13px] font-bold inline-flex items-center justify-center gap-1.5 active:bg-primary/10">
+        <button onClick={() => toast("正在搜索附近蓝牙设备…")} className="w-full rounded-2xl ring-1 ring-dashed ring-primary/40 bg-primary/5 text-primary py-3.5 text-[13px] font-bold inline-flex items-center justify-center gap-1.5 active:bg-primary/10">
           <Plus className="size-4" /> 添加新设备
         </button>
         <p className="text-[11px] text-muted-foreground mt-2 px-1 leading-relaxed">

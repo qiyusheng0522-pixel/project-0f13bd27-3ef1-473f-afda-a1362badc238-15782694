@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Home,
   CalendarCheck,
@@ -35,6 +35,7 @@ import {
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { QuickEntryRail, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
 import { cn } from "@/lib/utils";
+import { VideoSheet } from "@/components/quick/VideoSheet";
 import {
   useCaseFlow,
   getDemoPatient,
@@ -577,42 +578,132 @@ function CareGroupBanner({ onOpen }: { onOpen: () => void }) {
 }
 
 function CareGroupSheet({ onClose }: { onClose: () => void }) {
+  const GROUP_NAME = "骨安膝关节康复关怀群 ⑤";
   const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [joined, setJoined] = useState(false);
+  const [tip, setTip] = useState<string | null>(null);
+
+  const show = (t: string) => {
+    setTip(t);
+    setTimeout(() => setTip(null), 1700);
+  };
+
+  const members = [
+    { n: "陈磊", r: "主任医师" },
+    { n: "刘静", r: "康复治疗师" },
+    { n: "陈悦", r: "营养师" },
+    { n: "王护", r: "责任护士" },
+  ];
+
   return (
-    <Sheet title="加入康复关怀群" onClose={onClose}>
+    <Sheet title="加入企微康复关怀群" onClose={onClose}>
       <div className="space-y-5">
-        <p className="text-[17px] leading-relaxed text-muted-foreground">
-          扫码加入「骨安康复关怀群」，专业医生、康复师和病友一起陪伴您的康复旅程。
-        </p>
-        <div className="mx-auto w-fit rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
-          <div className="grid size-44 grid-cols-6 gap-1">
-            {Array.from({ length: 36 }).map((_, i) => {
-              const filled = [0, 1, 2, 4, 5, 6, 7, 8, 10, 12, 14, 15, 16, 17, 19, 20, 22, 23, 24, 26, 28, 29, 30, 31, 32, 33, 34, 35].includes(i);
-              return (
-                <div
-                  key={i}
-                  className={cn("size-full rounded-sm", filled ? "bg-foreground" : "bg-card")}
-                />
-              );
-            })}
+        {/* 群信息卡 */}
+        <div className="rounded-3xl bg-emerald-600 p-4 text-white shadow-md">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="whitespace-nowrap rounded-full bg-white/20 px-2.5 py-1 text-[13px] font-bold">
+                企业微信 · 医护实名服务群
+              </div>
+              <div className="mt-2 truncate text-[19px] font-bold">{GROUP_NAME}</div>
+              <div className="mt-0.5 text-[14px] text-white/85">已有 128 位病友 · 医护 4 人在线</div>
+            </div>
+            <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/20">
+              <Users className="size-7" />
+            </div>
           </div>
-          <p className="mt-3 text-center text-[15px] font-bold text-foreground">长按识别二维码</p>
+          <div className="mt-3 flex items-center gap-2">
+            {members.map((m) => (
+              <div key={m.n} className="flex-1 rounded-xl bg-white/15 px-2 py-1.5 text-center">
+                <div className="text-[14px] font-bold">{m.n}</div>
+                <div className="whitespace-nowrap text-[11px] text-white/80">{m.r}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="rounded-2xl bg-muted/50 p-4">
-          <p className="text-[16px] font-bold text-foreground">群名称</p>
-          <p className="mt-1 text-[15px] text-muted-foreground">骨安膝关节康复关怀群 ⑤</p>
+
+        {/* 二维码 */}
+        <div className="rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="mx-auto w-fit rounded-2xl border-2 border-emerald-600/20 p-3">
+            <div className="grid size-44 grid-cols-6 gap-1">
+              {Array.from({ length: 36 }).map((_, i) => {
+                const filled = [0, 1, 2, 4, 5, 6, 7, 8, 10, 12, 14, 15, 16, 17, 19, 20, 22, 23, 24, 26, 28, 29, 30, 31, 32, 33, 34, 35].includes(i);
+                return <div key={i} className={cn("size-full rounded-sm", filled ? "bg-foreground" : "bg-card")} />;
+              })}
+            </div>
+          </div>
+          <p className="mt-3 text-center text-[15px] font-bold">微信长按识别 · 或保存后在企微扫码</p>
+          <p className="mt-1 text-center text-[13px] text-muted-foreground">二维码 7 天内有效（剩余 6 天）</p>
+
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => {
+                setSaved(true);
+                show("二维码已保存到相册");
+              }}
+              className="rounded-2xl bg-emerald-600 py-3.5 text-[16px] font-bold text-white active:scale-[0.98]"
+            >
+              {saved ? "已保存到相册" : "保存二维码"}
+            </button>
+            <button
+              onClick={() => {
+                navigator.clipboard?.writeText(GROUP_NAME).catch(() => {});
+                setCopied(true);
+                show("群名称已复制");
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="rounded-2xl border-2 border-emerald-600/30 py-3.5 text-[16px] font-bold text-emerald-700 active:scale-[0.98]"
+            >
+              {copied ? "已复制群名称" : "复制群名称"}
+            </button>
+          </div>
         </div>
+
+        {/* 入群三步 */}
+        <div className="rounded-3xl border bg-card p-4">
+          <p className="text-[17px] font-bold">入群三步</p>
+          <ol className="mt-2 space-y-2">
+            {["保存或长按识别上方二维码", "在企业微信中确认加入关怀群", "群内回复姓名+床号，医护为您备注"].map((s, i) => (
+              <li key={s} className="flex items-start gap-2.5">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-emerald-600/10 text-[14px] font-bold text-emerald-700">
+                  {i + 1}
+                </span>
+                <span className="text-[16px] leading-snug text-muted-foreground">{s}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* 群服务说明 */}
+        <div className="rounded-3xl bg-muted/50 p-4">
+          <p className="text-[16px] font-bold">群内可获得</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {["每日康复提醒", "医生答疑 8:00-21:00", "复查预约协助", "饮食与用药指导", "同期病友交流"].map((t) => (
+              <span key={t} className="rounded-full bg-card px-3 py-1.5 text-[14px] font-semibold text-foreground ring-1 ring-border">
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
         <button
           onClick={() => {
-            navigator.clipboard?.writeText("骨安膝关节康复关怀群 ⑤").then(() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            });
+            setJoined(true);
+            show(joined ? "正在打开企业微信群聊…" : "已记录，医护将尽快通过您的申请");
           }}
           className="w-full rounded-2xl bg-primary py-4 text-[18px] font-bold text-primary-foreground active:scale-[0.98]"
         >
-          {copied ? "已复制群名称" : "复制群名称"}
+          {joined ? "进入群聊" : "我已扫码，标记为已加入"}
         </button>
+
+        {tip && (
+          <div className="sticky bottom-2 z-[90] flex justify-center">
+            <div className="whitespace-nowrap rounded-2xl bg-foreground/90 px-4 py-2.5 text-[15px] font-bold text-background shadow-lg">
+              {tip}
+            </div>
+          </div>
+        )}
       </div>
     </Sheet>
   );
@@ -1420,7 +1511,18 @@ function AiTab({ name }: { name: string }) {
     { role: "ai", text: `${name}您好，我是骨安「骨灵」。康复动作、用药、饮食、复查都可以问我。` },
   ]);
   const [input, setInput] = useState("");
+  const [voice, setVoice] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 语音输入模拟：开启 3 秒后自动转写为文字
+  useEffect(() => {
+    if (!voice) return;
+    const id = setTimeout(() => {
+      setInput((v) => (v ? v : "我今天膝盖有点肿，还能做屈膝练习吗"));
+      setVoice(false);
+    }, 2000);
+    return () => clearTimeout(id);
+  }, [voice]);
 
   const send = (text: string) => {
     const q = text.trim();
@@ -1503,7 +1605,14 @@ function AiTab({ name }: { name: string }) {
             placeholder="说说您的问题…"
             className="min-w-0 flex-1 bg-transparent py-3 text-[17px] outline-none"
           />
-          <button aria-label="语音" className="grid size-10 shrink-0 place-items-center rounded-full text-primary active:scale-95">
+          <button
+            onClick={() => setVoice((v) => !v)}
+            aria-label="语音输入"
+            className={cn(
+              "grid size-10 shrink-0 place-items-center rounded-full text-primary active:scale-95",
+              voice && "animate-pulse bg-primary/10 ring-2 ring-primary",
+            )}
+          >
             <Mic className="size-5" />
           </button>
           <button
@@ -1562,6 +1671,7 @@ function EduTab({
   const [kw, setKw] = useState("");
   const [topic, setTopic] = useState("全部");
   const [open, setOpen] = useState<EduOpen>(null);
+  const [playing, setPlaying] = useState<string | null>(null);
   const [showRest, setShowRest] = useState(false);
 
   const filtered = useMemo(() => {
@@ -1700,7 +1810,11 @@ function EduTab({
             style={{ background: open.cover }}
           >
             {open.media === "视频" ? (
-              <button className="grid size-16 place-items-center rounded-full bg-white/25 ring-2 ring-white/60 active:scale-95">
+              <button
+                onClick={() => setPlaying(open.title)}
+                aria-label="播放视频"
+                className="grid size-16 place-items-center rounded-full bg-white/25 ring-2 ring-white/60 active:scale-95"
+              >
                 <Play className="size-8" />
               </button>
             ) : (
@@ -1733,6 +1847,9 @@ function EduTab({
             我已阅读
           </button>
         </Sheet>
+      )}
+      {playing && (
+        <VideoSheet title={playing} subtitle="骨安宣教视频 · 康复师讲解" onClose={() => setPlaying(null)} />
       )}
     </div>
   );

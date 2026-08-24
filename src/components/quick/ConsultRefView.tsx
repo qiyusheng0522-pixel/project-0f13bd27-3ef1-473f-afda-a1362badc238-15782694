@@ -215,6 +215,7 @@ function UnadmittedView({
   fireToast: (t: string) => void;
   onAskAi: () => void;
 }) {
+  const [tab, setTab] = useState("全部");
   return (
     <>
       <section className="px-4 mt-3">
@@ -261,11 +262,12 @@ function UnadmittedView({
       </section>
 
       <section className="px-4 mt-3 flex gap-1.5 overflow-x-auto">
-        {["全部", "鼓楼医生", "社区医院"].map((t, i) => (
+        {["全部", "鼓楼医生", "社区医院"].map((t) => (
           <button
             key={t}
+            onClick={() => setTab(t)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-[13px] font-semibold whitespace-nowrap ${
-              i === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/70"
+              tab === t ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/70"
             }`}
           >
             {t}

@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { MiniToastProvider } from "@/components/quick/MiniToast";
 
 /**
  * 快捷入口二级页统一外壳（全屏、适老化大字号）。
@@ -29,7 +30,9 @@ export function QuickSheet({
         </div>
         {right}
       </div>
-      <div className="flex-1 overflow-y-auto">{children}</div>
+      <MiniToastProvider>
+        <div className="flex-1 overflow-y-auto">{children}</div>
+      </MiniToastProvider>
     </div>
   );
 }
