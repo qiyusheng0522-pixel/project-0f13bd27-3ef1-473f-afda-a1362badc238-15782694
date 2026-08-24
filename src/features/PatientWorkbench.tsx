@@ -698,7 +698,7 @@ function CareGroupSheet({ onClose }: { onClose: () => void }) {
         </button>
 
         {tip && (
-          <div className="pointer-events-none fixed bottom-1/4 left-1/2 z-[90] -translate-x-1/2">
+          <div className="pointer-events-none absolute bottom-24 left-1/2 z-[90] -translate-x-1/2 px-6">
             <div className="whitespace-nowrap rounded-2xl bg-foreground/90 px-4 py-2.5 text-[15px] font-bold text-background shadow-lg">
               {tip}
             </div>
