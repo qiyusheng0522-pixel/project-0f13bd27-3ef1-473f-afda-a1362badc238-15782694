@@ -1260,12 +1260,45 @@ function AiTab({ name }: { name: string }) {
 
 type EduOpen = (EduItem & { unread?: boolean }) | null;
 
-function EduTab({ inpatient }: { inpatient: boolean }) {
+/** 结合病症 + 当前阶段推导相关宣教主题 */
+function relevantTopics(diagnosis: string, stageLabel: string, inpatient: boolean): string[] {
+  const t = new Set<string>();
+  if (/膝|置换|TKA/.test(diagnosis)) {
+    t.add("关节置换术后");
+    t.add("屈膝角度");
+  }
+  if (/髋|股/.test(diagnosis)) t.add("行走与防跌倒");
+  if (/韧带|ACL|肩/.test(diagnosis)) t.add("关节置换术后");
+  if (/术前|入院|准备|办理/.test(stageLabel)) {
+    t.add("用药安全");
+  } else if (/术后|康复|手术/.test(stageLabel)) {
+    t.add("疼痛与消肿");
+    t.add("血栓预防");
+    t.add("用药安全");
+  }
+  if (!inpatient || /出院|居家|院后|随访/.test(stageLabel)) {
+    t.add("行走与防跌倒");
+    t.add("饮食营养");
+    t.add("复查随访");
+  }
+  return [...t];
+}
+
+function EduTab({
+  inpatient,
+  diagnosis,
+  stageLabel,
+}: {
+  inpatient: boolean;
+  diagnosis: string;
+  stageLabel: string;
+}) {
   const flow = useCaseFlow();
   const scope: "院内" | "居家" = inpatient ? "院内" : "居家";
   const [kw, setKw] = useState("");
   const [topic, setTopic] = useState("全部");
   const [open, setOpen] = useState<EduOpen>(null);
+  const [showRest, setShowRest] = useState(false);
 
   const filtered = useMemo(() => {
     const q = kw.trim();
@@ -1277,8 +1310,15 @@ function EduTab({ inpatient }: { inpatient: boolean }) {
   }, [kw, topic]);
 
   const searching = kw.trim() !== "" || topic !== "全部";
-  const list = filtered.filter((e) => e.scope === scope);
-  const other = filtered.filter((e) => e.scope !== scope);
+
+  /** 默认视图：只展示与病症/阶段匹配的宣教，避免无用内容 */
+  const { recommended, rest } = useMemo(() => {
+    const topics = relevantTopics(diagnosis, stageLabel, inpatient);
+    const hit = (e: EduItem) => e.scope === scope && e.topics.some((t) => topics.includes(t));
+    const rec = EDU_LIB.filter(hit).slice(0, 4);
+    return { recommended: rec, rest: EDU_LIB.filter((e) => !rec.includes(e)) };
+  }, [diagnosis, stageLabel, inpatient, scope]);
+
 
   return (
     <div className="space-y-4 p-3 pb-6">
