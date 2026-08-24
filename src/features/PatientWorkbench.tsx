@@ -439,7 +439,13 @@ export function PatientWorkbench() {
       {tab === "schedule" &&
         (guest ? <GuestLock title="暂无日程统计" desc="建档并生成康复方案后，这里会展示您的每日打卡完成情况与趋势。" onGo={() => setTab("home")} /> : <ScheduleTab todos={todos} isDone={isDone} />)}
       {tab === "ai" && <AiTab name={name} />}
-      {tab === "edu" && <EduTab inpatient={!guest && inpatient} />}
+      {tab === "edu" && (
+        <EduTab
+          inpatient={!guest && inpatient}
+          diagnosis={patient?.diagnosis ?? "膝关节置换术后"}
+          stageLabel={stageLabel}
+        />
+      )}
       {tab === "me" &&
         (guest ? <GuestLock title="还未建立健康档案" desc="拍照上传入院单 / 诊断证明，医生确认后可查看个人信息、住院记录与知情同意。" onGo={() => setTab("home")} /> : <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />)}
     </PhoneShell>
@@ -1315,7 +1321,8 @@ function EduTab({
   const { recommended, rest } = useMemo(() => {
     const topics = relevantTopics(diagnosis, stageLabel, inpatient);
     const hit = (e: EduItem) => e.scope === scope && e.topics.some((t) => topics.includes(t));
-    const rec = EDU_LIB.filter(hit).slice(0, 4);
+    let rec = EDU_LIB.filter(hit).slice(0, 4);
+    if (!rec.length) rec = EDU_LIB.filter((e) => e.scope === scope).slice(0, 4);
     return { recommended: rec, rest: EDU_LIB.filter((e) => !rec.includes(e)) };
   }, [diagnosis, stageLabel, inpatient, scope]);
 
