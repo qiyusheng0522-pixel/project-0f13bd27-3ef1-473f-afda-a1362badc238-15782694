@@ -693,7 +693,7 @@ function ExercisePlanCard({ plan, purchased, onCheckin }: { plan: ExercisePlan; 
         </div>
       )}
 
-      <div className="mx-2.5 mb-2 rounded-lg bg-muted/40 px-2.5 py-2 flex items-center justify-between gap-2">
+      <div className="mx-2.5 mb-2 rounded-lg bg-muted px-2.5 py-2 flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[11px] text-muted-foreground">今日目标</p>
           <p className="text-[12.5px] font-bold leading-tight truncate">{plan.target}</p>
