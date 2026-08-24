@@ -1727,28 +1727,8 @@ function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpa
         </Sheet>
       )}
 
-      {panel === "record" && (
-        <Sheet title={inpatient ? "住院记录" : "出院小结"} onClose={() => setPanel(null)}>
-          <div className="space-y-3 text-[17px]">
-            <div className="rounded-2xl bg-muted/50 p-4">
-              <p className="text-[18px] font-bold">
-                {name} · {bed} · {inpatient ? `入院第 ${days} 天` : `出院后第 ${days} 天`}
-              </p>
-              <p className="mt-1 text-muted-foreground">
-                入院日期：{patient?.admissionDate ?? "—"} · 手术日期：{patient?.surgeryDate ?? "—"}
-              </p>
-            </div>
-            <ul className="space-y-2.5 text-muted-foreground">
-              <li>诊断：{patient?.diagnosis ?? "右膝骨关节炎（重度）"}</li>
-              <li>手术：{patient?.surgeryName ?? "右膝人工关节置换术"}</li>
-              <li>康复方案：{flow.planApproved ? flow.planName : "待治疗师审核"}</li>
-              <li>康复评估记录：{flow.dailyRehab.length} 次</li>
-              <li>护理记录：{flow.nurseRecords.length} 条</li>
-              {flow.dischargeNote && <li>出院意见：{flow.dischargeNote}</li>}
-            </ul>
-          </div>
-        </Sheet>
-      )}
+
+
 
       {panel === "settings" && (
         <Sheet title="提醒与字体设置" onClose={() => setPanel(null)}>
