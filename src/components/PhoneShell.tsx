@@ -41,7 +41,7 @@ export function PhoneShell({
   return (
     <div
       className={cn(
-        "relative mx-auto flex h-[1828px] w-[375px] flex-col overflow-hidden rounded-[44px] border-[10px] border-foreground/90 bg-background shadow-2xl",
+        "relative mx-auto flex h-[914px] w-[375px] flex-col overflow-hidden rounded-[44px] border-[10px] border-foreground/90 bg-background shadow-2xl",
         className,
       )}
       style={{ boxShadow: "0 30px 80px -20px rgba(15, 42, 84, 0.45)" }}
