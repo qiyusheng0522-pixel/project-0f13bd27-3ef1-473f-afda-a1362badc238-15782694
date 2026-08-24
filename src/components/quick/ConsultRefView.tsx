@@ -109,7 +109,6 @@ const ADMITTED_NURSE = {
 
 export function ConsultRefView({ onClose }: { onClose: () => void }) {
   const [admitted, setAdmitted] = useState(false);
-  const [tab, setTab] = useState("全部");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -216,6 +215,7 @@ function UnadmittedView({
   fireToast: (t: string) => void;
   onAskAi: () => void;
 }) {
+  const [tab, setTab] = useState("全部");
   return (
     <>
       <section className="px-4 mt-3">
