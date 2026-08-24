@@ -67,62 +67,102 @@ export const QUICK_ENTRIES: Entry[] = [
   { key: "consult", title: "在线问诊", desc: "骨科专科", icon: Stethoscope, tint: "bg-indigo-100 text-indigo-600" },
 ];
 
-/* ============ 悬浮球 + 悬浮面板 ============ */
+/* ============ 右侧边缘「快捷入口」拉手（支持长按拖动） + 抽屉面板 ============ */
 
-export function QuickEntryFab({ onPick }: { onPick: (k: QuickKey) => void }) {
+export function QuickEntryRail({ onPick }: { onPick: (k: QuickKey) => void }) {
   const [open, setOpen] = useState(false);
+  const [top, setTop] = useState(0.42); // 相对高度比例
+  const [dragging, setDragging] = useState(false);
+  const stateRef = useRef({ timer: 0 as unknown as ReturnType<typeof setTimeout>, moved: false, long: false, h: 1 });
+
+  const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const host = e.currentTarget.parentElement?.parentElement ?? e.currentTarget.parentElement;
+    stateRef.current.h = host?.clientHeight || 800;
+    stateRef.current.moved = false;
+    stateRef.current.long = false;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    stateRef.current.timer = setTimeout(() => {
+      stateRef.current.long = true;
+      setDragging(true);
+    }, 300);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!stateRef.current.long) return;
+    stateRef.current.moved = true;
+    const host = e.currentTarget.parentElement?.parentElement ?? e.currentTarget.parentElement;
+    const rect = host?.getBoundingClientRect();
+    if (!rect) return;
+    const ratio = (e.clientY - rect.top) / rect.height;
+    setTop(Math.min(0.86, Math.max(0.08, ratio)));
+  };
+
+  const onPointerUp = () => {
+    clearTimeout(stateRef.current.timer);
+    setDragging(false);
+    if (!stateRef.current.long && !stateRef.current.moved) setOpen(true);
+    stateRef.current.long = false;
+  };
 
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        type="button"
         aria-label="快捷入口"
-        className="absolute bottom-24 right-3 z-40 grid size-14 place-items-center rounded-full text-primary-foreground active:scale-95"
-        style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-elevated)" }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        className={cn(
+          "absolute right-0 z-40 grid h-24 w-8 touch-none place-items-center rounded-l-2xl bg-accent text-accent-foreground active:scale-95",
+          dragging ? "ring-4 ring-accent/30" : "transition-[top] duration-150",
+        )}
+        style={{ top: `${top * 100}%`, boxShadow: "var(--shadow-elevated)" }}
       >
-        <span className="flex flex-col items-center leading-none">
-          <Grid3X3 className="size-6" />
-          <span className="mt-1 text-[11px] font-bold">快捷</span>
+        <span className="text-[13px] font-bold tracking-[0.2em]" style={{ writingMode: "vertical-rl" }}>
+          快捷入口
         </span>
       </button>
 
       {open && (
-        <div className="absolute inset-0 z-50 flex flex-col justify-end">
+        <div className="absolute inset-0 z-50">
           <div className="absolute inset-0 bg-black/45" onClick={() => setOpen(false)} />
-          <div className="relative max-h-[86%] overflow-y-auto rounded-t-3xl bg-background p-4">
-            <div className="mb-3 flex items-start justify-between gap-3 px-1">
+          <div className="absolute bottom-0 right-0 top-0 flex w-[86%] max-w-[330px] flex-col bg-background shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b px-4 py-3">
               <div>
-                <h3 className="font-display text-[22px] font-bold">快捷入口</h3>
-                <p className="mt-0.5 text-[15px] text-muted-foreground">核心功能一键直达</p>
+                <h3 className="font-display text-[20px] font-bold">快捷入口</h3>
+                <p className="mt-0.5 whitespace-nowrap text-[14px] text-muted-foreground">核心功能一键直达 · 长按拉手可移动</p>
               </div>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="关闭"
-                className="grid size-10 shrink-0 place-items-center rounded-full bg-muted"
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-muted"
               >
                 <X className="size-5" />
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-2.5">
-              {QUICK_ENTRIES.map((e) => {
-                const Icon = e.icon;
-                return (
-                  <button
-                    key={e.key}
-                    onClick={() => {
-                      setOpen(false);
-                      onPick(e.key);
-                    }}
-                    className="flex flex-col items-center gap-1.5 rounded-2xl border bg-card px-1.5 py-3.5 text-center active:scale-[0.97]"
-                  >
-                    <span className={cn("grid size-12 place-items-center rounded-2xl", e.tint)}>
-                      <Icon className="size-6" />
-                    </span>
-                    <span className="whitespace-nowrap text-[16px] font-bold leading-tight">{e.title}</span>
-                    <span className="whitespace-nowrap text-[13px] leading-tight text-muted-foreground">{e.desc}</span>
-                  </button>
-                );
-              })}
+            <div className="flex-1 overflow-y-auto p-3">
+              <div className="grid grid-cols-3 gap-2.5">
+                {QUICK_ENTRIES.map((e) => {
+                  const Icon = e.icon;
+                  return (
+                    <button
+                      key={e.key}
+                      onClick={() => {
+                        setOpen(false);
+                        onPick(e.key);
+                      }}
+                      className="flex flex-col items-center gap-1.5 rounded-2xl border bg-card px-1.5 py-3 text-center active:scale-95"
+                    >
+                      <span className={cn("grid size-12 place-items-center rounded-2xl", e.tint)}>
+                        <Icon className="size-6" />
+                      </span>
+                      <span className="whitespace-nowrap text-[15px] font-bold leading-none">{e.title}</span>
+                      <span className="whitespace-nowrap text-[12px] leading-none text-muted-foreground">{e.desc}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -130,6 +170,7 @@ export function QuickEntryFab({ onPick }: { onPick: (k: QuickKey) => void }) {
     </>
   );
 }
+
 
 /* ============ 详情弹层 ============ */
 
