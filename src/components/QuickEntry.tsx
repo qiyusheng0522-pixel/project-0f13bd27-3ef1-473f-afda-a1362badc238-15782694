@@ -1302,8 +1302,17 @@ export function QuickEntrySheet({
                 ? "在线咨询"
                 : meta.title;
 
+  // 以下入口完全复用代码包中的页面样式与交互（全屏二级页）
+  if (entry === "med") return <MedsView onClose={onClose} />;
+  if (entry === "data") return <DataEntryView onClose={onClose} />;
+  if (entry === "plan") return <CarePlanView onClose={onClose} />;
+  if (entry === "diet") return <DietView onClose={onClose} />;
+  if (entry === "message") return <MessagesView onClose={onClose} />;
+  if (entry === "consult") return <ConsultRefView onClose={onClose} />;
+
   return (
     <Panel title={title} subtitle={entry === "risk" || entry === "report" ? undefined : meta.desc} onClose={onClose}>
+
       {(entry === "archive" || entry === "diet") && (
         <div>
           <p className="text-[17px] leading-relaxed text-muted-foreground">
