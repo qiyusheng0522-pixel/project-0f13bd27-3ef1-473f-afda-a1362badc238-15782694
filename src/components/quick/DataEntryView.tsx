@@ -23,6 +23,7 @@ import {
   Loader2,
   Clock3,
 } from "lucide-react";
+import { useMiniToast } from "@/components/quick/MiniToast";
 import { QuickSheet } from "@/components/quick/QuickSheet";
 
 type Metric = {
@@ -219,6 +220,7 @@ const DEVICES: Device[] = [
 ];
 
 function DeviceSection({ onSync }: { onSync: (name: string) => void }) {
+  const toast = useMiniToast();
   return (
     <>
       <section className="px-5 mt-5">
