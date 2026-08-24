@@ -9,7 +9,6 @@ import {
   Droplet,
   HeartPulse,
   Soup,
-  MessageSquare,
   Stethoscope,
   X,
   Check,
@@ -30,9 +29,6 @@ import {
   Bluetooth,
   Keyboard,
   Ban,
-  Phone,
-  Video,
-  Lock,
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -40,8 +36,6 @@ import { MedsView } from "@/components/quick/MedsView";
 import { DataEntryView } from "@/components/quick/DataEntryView";
 import { CarePlanView } from "@/components/quick/CarePlanView";
 import { DietView } from "@/components/quick/DietView";
-import { MessagesView } from "@/components/quick/MessagesView";
-import { ConsultRefView } from "@/components/quick/ConsultRefView";
 import { MiniToastProvider, useMiniToast } from "@/components/quick/MiniToast";
 
 
@@ -54,9 +48,7 @@ export type QuickKey =
   | "med"
   | "data"
   | "plan"
-  | "diet"
-  | "message"
-  | "consult";
+  | "diet";
 
 type Entry = {
   key: QuickKey;
@@ -76,8 +68,6 @@ export const QUICK_ENTRIES: Entry[] = [
   { key: "med", title: "用药管理", desc: "打卡/停药", icon: Pill, tint: "bg-teal-100 text-teal-600" },
   { key: "data", title: "数据录入", desc: "血压体温", icon: Droplet, tint: "bg-cyan-100 text-cyan-600" },
   { key: "diet", title: "饮食打卡", desc: "拍照识别", icon: Soup, tint: "bg-emerald-100 text-emerald-600" },
-  { key: "message", title: "消息", desc: "医生回复", icon: MessageSquare, tint: "bg-amber-100 text-amber-600" },
-  { key: "consult", title: "在线问诊", desc: "骨科专科", icon: Stethoscope, tint: "bg-indigo-100 text-indigo-600" },
 ];
 
 /* ============ 右侧边缘「快捷入口」拉手（支持长按拖动） + 抽屉面板 ============ */
@@ -879,145 +869,6 @@ function DataView() {
   );
 }
 
-/* ============ 消息 / 在线问诊（图 9） ============ */
-
-const CARE_TEAM = [
-  { role: "您的主管医生", name: "张敏 主任", title: "主治医生 · 入院主管", where: "关节外科 · 3 号楼 12 床", tags: ["主管医生", "查房 08:30"], badge: "主管" },
-  { role: "您的责任护士", name: "刘静 护士长", title: "责任护士 · 病区护理", where: "骨科病区 · 12 床", tags: ["责任护士", "换药 10:00"], badge: "在线" },
-  { role: "您的康复治疗师", name: "李强 治疗师", title: "康复医学科", where: "康复大厅 · 每日 15:00", tags: ["屈膝训练", "步态评估"], badge: "在线" },
-];
-
-const MSGS = [
-  { who: "张敏 主任 · 主管医生", txt: "术后 2 周复查 X 光，注意伤口保持干燥。", t: "今天 09:20", unread: true },
-  { who: "李强 治疗师", txt: "屈膝角度已达 85°，今天可增加 10 次直腿抬高。", t: "昨天 16:40" },
-  { who: "刘静 护士长", txt: "明日 08:00 空腹抽血，请勿进食。", t: "昨天 20:05" },
-];
-
-function ConsultView({ mode, onOpenAi }: { mode: "message" | "consult"; onOpenAi: () => void }) {
-  const toast = useMiniToast();
-  const [inHospital, setInHospital] = useState(true);
-
-  return (
-    <div>
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[16px] leading-snug text-muted-foreground">
-            {inHospital ? "入院期间 · 已锁定主管医护" : "未入院 · 可自由选择医生"}
-          </p>
-        </div>
-        <div className="flex shrink-0 rounded-full border bg-card p-1">
-          {(
-            [
-              { k: false, t: "未入院" },
-              { k: true, t: "入院中" },
-            ] as const
-          ).map((x) => (
-            <button
-              key={x.t}
-              onClick={() => setInHospital(x.k)}
-              className={cn(
-                "whitespace-nowrap rounded-full px-4 py-1.5 text-[15px] font-bold",
-                inHospital === x.k ? "bg-primary text-primary-foreground" : "text-muted-foreground",
-              )}
-            >
-              {x.t}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {inHospital ? (
-        <>
-          <section className="mt-3 rounded-3xl bg-primary p-5 text-primary-foreground" style={{ boxShadow: "var(--shadow-elevated)" }}>
-            <p className="flex items-center gap-2 text-[16px] font-semibold text-primary-foreground/85">
-              <ShieldCheck className="size-5" /> 入院中 · 专人专护
-            </p>
-            <p className="mt-2 font-display text-[22px] font-bold">鼓楼医院 · 关节外科</p>
-            <p className="mt-2 text-[16px] text-primary-foreground/85">3 号楼 5 层 · 12 床 · 住院号 H20260611</p>
-            <p className="mt-1 text-[16px] text-primary-foreground/85">入院 08-09 14:20 · 已住院 6 天</p>
-          </section>
-
-          <div className="mt-3 flex gap-2.5 rounded-2xl border border-warning/40 bg-warning/10 p-4">
-            <Lock className="mt-0.5 size-5 shrink-0 text-warning-foreground" />
-            <p className="text-[16px] leading-relaxed text-warning-foreground">
-              入院期间为保障医疗连续性，咨询将<span className="font-bold">仅限主管医生与责任护士</span>，不可改约其他医生。出院后自动解锁。
-            </p>
-          </div>
-        </>
-      ) : (
-        <div className="mt-3 rounded-2xl border bg-card p-4">
-          <p className="text-[17px] font-bold">骨科专科在线问诊</p>
-          <p className="mt-1 text-[16px] leading-relaxed text-muted-foreground">
-            工作日 08:00–20:00 由值班医生回复，平均响应约 8 分钟；也可先问「骨灵」智能助手。
-          </p>
-        </div>
-      )}
-
-      {mode === "message" && (
-        <>
-          <SectionTitle icon={MessageSquare} title="最新消息" right="3 条" />
-          <ul className="mt-3 space-y-2.5">
-            {MSGS.map((m) => (
-              <li key={m.txt} className="rounded-2xl border bg-card p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="flex items-center gap-2 whitespace-nowrap text-[17px] font-bold text-primary">
-                    {m.unread && <span className="size-2 rounded-full bg-destructive" />}
-                    {m.who}
-                  </p>
-                  <span className="whitespace-nowrap text-[14px] text-muted-foreground">{m.t}</span>
-                </div>
-                <p className="mt-1.5 text-[17px] leading-relaxed">{m.txt}</p>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {CARE_TEAM.slice(0, inHospital ? 3 : 1).map((p) => (
-        <div key={p.name} className="mt-4">
-          <p className="text-[16px] font-semibold text-muted-foreground">{p.role}</p>
-          <div className="mt-2 rounded-2xl border bg-card p-4">
-            <div className="flex items-start gap-3">
-              <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-secondary text-primary">
-                <Stethoscope className="size-7" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="whitespace-nowrap text-[19px] font-bold">{p.name}</p>
-                  <span className="shrink-0 whitespace-nowrap rounded-full bg-primary px-3 py-1 text-[14px] font-bold text-primary-foreground">
-                    {p.badge}
-                  </span>
-                </div>
-                <p className="mt-1 text-[16px] text-muted-foreground">{p.title}</p>
-                <p className="mt-0.5 text-[16px] text-muted-foreground">{p.where}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {p.tags.map((t) => (
-                    <span key={t} className="whitespace-nowrap rounded-md bg-secondary px-2.5 py-1 text-[14px] font-bold text-primary">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <button onClick={() => toast(`已向 ${p.name} 发起图文问诊`)} className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-primary py-2.5 text-[16px] font-bold text-primary-foreground active:scale-[0.98]">
-                <MessageSquare className="size-5" /> 图文
-              </button>
-              <button onClick={() => toast(`正在为您呼叫 ${p.name}…`)} className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-muted py-2.5 text-[16px] font-bold active:scale-[0.98]">
-                <Phone className="size-5" /> 电话
-              </button>
-              <button onClick={() => toast(`视频问诊预约成功 · ${p.name}`)} className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-muted py-2.5 text-[16px] font-bold active:scale-[0.98]">
-                <Video className="size-5" /> 视频
-              </button>
-            </div>
-          </div>
-        </div>
-      ))}
-
-      <BigButton onClick={onOpenAi}>先问「骨灵」智能助手</BigButton>
-    </div>
-  );
-}
 
 /* ============ 今日任务中心（复用代码包任务页交互，内容改为骨关节） ============ */
 
@@ -1305,17 +1156,13 @@ export function QuickEntrySheet({
             ? "用药管理"
             : entry === "data"
               ? "健康数据录入"
-              : entry === "consult"
-                ? "在线咨询"
-                : meta.title;
+              : meta.title;
 
   // 以下入口完全复用代码包中的页面样式与交互（全屏二级页）
   if (entry === "med") return <MedsView onClose={onClose} />;
   if (entry === "data") return <DataEntryView onClose={onClose} />;
   if (entry === "plan") return <CarePlanView onClose={onClose} />;
   if (entry === "diet") return <DietView onClose={onClose} />;
-  if (entry === "message") return <MessagesView onClose={onClose} />;
-  if (entry === "consult") return <ConsultRefView onClose={onClose} />;
 
   return (
     <Panel title={title} subtitle={entry === "risk" ? undefined : meta.desc} onClose={onClose}>
