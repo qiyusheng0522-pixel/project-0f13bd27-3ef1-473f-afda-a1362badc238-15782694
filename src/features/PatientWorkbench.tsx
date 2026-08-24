@@ -509,7 +509,47 @@ function GuestLock({ title, desc, onGo }: { title: string; desc: string; onGo: (
 }
 
 
-
+function StepCard({
+  no,
+  title,
+  desc,
+  icon: Icon,
+  done,
+  action,
+  onClick,
+}: {
+  no: string;
+  title: string;
+  desc: string;
+  icon: React.ElementType;
+  done: boolean;
+  action: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 rounded-2xl border bg-card p-4",
+        done && "border-success/30 bg-success/5",
+      )}
+    >
+      <span
+        className={cn(
+          "grid size-11 shrink-0 place-items-center rounded-full font-display text-[18px] font-bold",
+          done ? "bg-success text-success-foreground" : "bg-primary/10 text-primary",
+        )}
+      >
+        {done ? <Check className="size-6" /> : no}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[18px] font-bold">{title}</p>
+        <p className="text-[15px] text-muted-foreground">{desc}</p>
+      </div>
+      <div className="shrink-0">{action}</div>
+    </div>
+  );
+}
 
 function GuestHomeTab({
   onOpenEdu,
