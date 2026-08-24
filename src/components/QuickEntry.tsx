@@ -416,6 +416,7 @@ const VISIT_ROWS: [string, string][] = [
 ];
 
 function ReportView({ onGoPlan }: { onGoPlan: () => void }) {
+  const toast = useMiniToast();
   return (
     <div>
       <section className="rounded-2xl bg-secondary p-4">
@@ -655,6 +656,7 @@ const MEDS = [
 ];
 
 function MedView({ onOpenAi }: { onOpenAi: () => void }) {
+  const toast = useMiniToast();
   const [taken, setTaken] = useState<Record<string, boolean>>({});
   const [stopped, setStopped] = useState<Record<string, boolean>>({});
   const doneCount = MEDS.filter((m) => taken[m.name]).length;
@@ -892,6 +894,7 @@ const MSGS = [
 ];
 
 function ConsultView({ mode, onOpenAi }: { mode: "message" | "consult"; onOpenAi: () => void }) {
+  const toast = useMiniToast();
   const [inHospital, setInHospital] = useState(true);
 
   return (

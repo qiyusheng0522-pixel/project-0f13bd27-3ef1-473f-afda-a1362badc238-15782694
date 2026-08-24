@@ -1593,7 +1593,7 @@ function AiTab({ name }: { name: string }) {
             placeholder="说说您的问题…"
             className="min-w-0 flex-1 bg-transparent py-3 text-[17px] outline-none"
           />
-          <button aria-label="语音" className="grid size-10 shrink-0 place-items-center rounded-full text-primary active:scale-95">
+          <button onClick={() => setVoice((v) => !v)} aria-label="语音输入" className={cn("grid size-10 shrink-0 place-items-center", voice && "animate-pulse ring-2 ring-primary")} data-voice className="grid size-10 shrink-0 place-items-center rounded-full text-primary active:scale-95">
             <Mic className="size-5" />
           </button>
           <button
