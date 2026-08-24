@@ -984,108 +984,146 @@ function buildHistory(todos: SimpleTodo[], isDone: (t: SimpleTodo) => boolean): 
 function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: SimpleTodo) => boolean }) {
   const flow = useCaseFlow();
   const history = useMemo(() => buildHistory(todos, isDone), [todos, isDone]);
+  const [sel, setSel] = useState(history.length - 1);
+  const [showRehab, setShowRehab] = useState(false);
+  const day = history[Math.min(sel, history.length - 1)];
   const totalDone = history.reduce((sum, d) => sum + d.items.filter((x) => x.done).length, 0);
   const totalItems = history.reduce((sum, d) => sum + d.items.length, 0);
+  const rate = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
+
+  const dayItems = day
+    ? [...day.items].sort((a, b) => (a.time ?? "99:99").localeCompare(b.time ?? "99:99"))
+    : [];
+  const dayDone = dayItems.filter((x) => x.done).length;
 
   return (
     <div className="space-y-4 p-3 pb-6">
-      <section className="rounded-3xl border bg-card p-5">
-        <h2 className="text-[20px] font-bold">打卡记录总览</h2>
+      {/* 总览 */}
+      <section className="rounded-3xl border bg-card p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+        <h2 className="text-[20px] font-bold">近 7 天打卡</h2>
         <div className="mt-4 flex items-center gap-5">
           <div
-            className="grid size-28 shrink-0 place-items-center rounded-full"
-            style={{
-              background: `conic-gradient(var(--primary) ${totalItems ? (totalDone / totalItems) * 360 : 0}deg, var(--muted) 0deg)`,
-            }}
+            className="grid size-24 shrink-0 place-items-center rounded-full"
+            style={{ background: `conic-gradient(var(--primary) ${rate * 3.6}deg, var(--muted) 0deg)` }}
           >
-            <div className="grid size-20 place-items-center rounded-full bg-card">
-              <span className="text-[24px] font-bold text-primary">{totalItems ? Math.round((totalDone / totalItems) * 100) : 0}%</span>
+            <div className="grid size-[68px] place-items-center rounded-full bg-card">
+              <span className="text-[22px] font-bold text-primary">{rate}%</span>
             </div>
           </div>
-          <div className="space-y-1.5 text-[18px]">
+          <div className="space-y-1 text-[17px]">
             <p className="font-bold">
-              近 7 天完成 <span className="text-success">{totalDone}</span> / {totalItems} 项
+              完成 <span className="text-success">{totalDone}</span> / {totalItems} 项
             </p>
             <p className="text-muted-foreground">连续打卡 6 天</p>
-            <p className="text-muted-foreground">康复评估记录 {flow.dailyRehab.length} 次</p>
+            <button
+              onClick={() => setShowRehab(true)}
+              className="whitespace-nowrap rounded-full bg-secondary px-3 py-1.5 text-[15px] font-bold text-primary"
+            >
+              康复评估 {flow.dailyRehab.length} 次 ›
+            </button>
           </div>
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-[20px] font-bold">每日打卡明细</h2>
-        {history.map((day) => {
-          const doneCount = day.items.filter((x) => x.done).length;
-          const rate = day.items.length ? Math.round((doneCount / day.items.length) * 100) : 0;
-          return (
-            <div key={day.date} className="overflow-hidden rounded-3xl border bg-card">
-              <header className="flex items-center justify-between border-b px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <CalendarCheck className="size-5 text-primary" />
-                  <span className="text-[19px] font-bold">
-                    {day.date} · {day.label}
-                  </span>
-                </div>
+      {/* 日期选择：横向一周，点选查看当天明细，无需长滑 */}
+      <section className="rounded-3xl border bg-card p-3" style={{ boxShadow: "var(--shadow-card)" }}>
+        <div className="flex items-stretch gap-2">
+          {history.map((d, i) => {
+            const dDone = d.items.filter((x) => x.done).length;
+            const full = d.items.length > 0 && dDone === d.items.length;
+            const active = i === Math.min(sel, history.length - 1);
+            return (
+              <button
+                key={d.date}
+                onClick={() => setSel(i)}
+                className={cn(
+                  "flex flex-1 flex-col items-center gap-1 rounded-2xl py-2.5 transition-colors",
+                  active ? "bg-primary text-primary-foreground" : "bg-muted/50",
+                )}
+              >
+                <span className={cn("whitespace-nowrap text-[13px] font-bold", !active && "text-muted-foreground")}>
+                  {d.label}
+                </span>
+                <span className="text-[15px] font-bold">{d.date.slice(3)}</span>
                 <span
                   className={cn(
-                    "shrink-0 rounded-full px-2.5 py-1 text-[15px] font-bold",
-                    rate === 100 ? "bg-success/10 text-success" : "bg-primary/10 text-primary",
+                    "size-2 rounded-full",
+                    active ? "bg-primary-foreground" : full ? "bg-success" : "bg-border",
                   )}
-                >
-                  {doneCount}/{day.items.length}
-                </span>
-              </header>
-              <ul className="divide-y">
-                {day.items
-                  .sort((a, b) => (a.time ?? "99:99").localeCompare(b.time ?? "99:99"))
-                  .map((t) => {
-                    const Icon = CAT_META[t.cat].icon;
-                    return (
-                      <li key={t.id} className="flex items-center gap-3 px-4 py-3">
-                        <span className="w-[60px] shrink-0 text-[16px] font-bold text-primary">{t.time ?? "全天"}</span>
-                        <span className={cn("grid size-9 shrink-0 place-items-center rounded-xl", CAT_META[t.cat].tint)}>
-                          <Icon className="size-4.5" />
-                        </span>
-                        <p className={cn("min-w-0 flex-1 text-[17px] font-semibold leading-snug", t.done && "text-muted-foreground line-through")}>
-                          {t.title}
-                        </p>
-                        <span
-                          className={cn(
-                            "shrink-0 rounded-full px-2 py-1 text-[14px] font-bold",
-                            t.done ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
-                          )}
-                        >
-                          {t.done ? "已打卡" : "未打卡"}
-                        </span>
-                      </li>
-                    );
-                  })}
-              </ul>
-            </div>
-          );
-        })}
+                />
+              </button>
+            );
+          })}
+        </div>
       </section>
 
-      {flow.dailyRehab.length > 0 && (
-        <section className="overflow-hidden rounded-3xl border bg-card">
-          <header className="border-b px-4 py-3">
-            <h2 className="text-[19px] font-bold">康复评估记录</h2>
+      {/* 选中日明细 */}
+      {day && (
+        <section className="overflow-hidden rounded-3xl border bg-card" style={{ boxShadow: "var(--shadow-card)" }}>
+          <header className="flex items-center justify-between border-b px-4 py-3">
+            <div className="flex items-center gap-2">
+              <CalendarCheck className="size-5 text-primary" />
+              <span className="text-[19px] font-bold">
+                {day.date} · {day.label}
+              </span>
+            </div>
+            <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-[15px] font-bold text-primary">
+              {dayDone}/{dayItems.length}
+            </span>
           </header>
           <ul className="divide-y">
-            {flow.dailyRehab.map((r) => (
-              <li key={r.id} className="px-4 py-3.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[17px] font-bold">{r.date}</span>
-                  <span className="text-[15px] text-muted-foreground">评估师：{r.therapist}</span>
-                </div>
-                <p className="mt-1 text-[16px] leading-relaxed text-muted-foreground">
-                  疼痛 {r.painLevel} 分 · 伸 {r.extension} · 屈 {r.flexion}
-                </p>
-                <p className="mt-1 text-[16px] text-foreground">{r.content}</p>
-              </li>
-            ))}
+            {dayItems.map((t) => {
+              const Icon = CAT_META[t.cat].icon;
+              return (
+                <li key={t.id} className="flex items-center gap-3 px-4 py-3">
+                  <span className="w-[56px] shrink-0 text-[16px] font-bold text-primary">{t.time ?? "全天"}</span>
+                  <span className={cn("grid size-9 shrink-0 place-items-center rounded-xl", CAT_META[t.cat].tint)}>
+                    <Icon className="size-4" />
+                  </span>
+                  <p
+                    className={cn(
+                      "min-w-0 flex-1 text-[17px] font-semibold leading-snug",
+                      t.done && "text-muted-foreground line-through",
+                    )}
+                  >
+                    {t.title}
+                  </p>
+                  <span
+                    className={cn(
+                      "shrink-0 whitespace-nowrap rounded-full px-2 py-1 text-[14px] font-bold",
+                      t.done ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {t.done ? "已打卡" : "未打卡"}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </section>
+      )}
+
+      {showRehab && (
+        <Sheet title="康复评估记录" onClose={() => setShowRehab(false)}>
+          {flow.dailyRehab.length === 0 ? (
+            <p className="text-[17px] text-muted-foreground">暂无康复评估记录，治疗师评估后会显示在这里。</p>
+          ) : (
+            <ul className="space-y-3">
+              {flow.dailyRehab.map((r) => (
+                <li key={r.id} className="rounded-2xl border p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[17px] font-bold">{r.date}</span>
+                    <span className="text-[15px] text-muted-foreground">评估师：{r.therapist}</span>
+                  </div>
+                  <p className="mt-1 text-[16px] leading-relaxed text-muted-foreground">
+                    疼痛 {r.painLevel} 分 · 伸 {r.extension} · 屈 {r.flexion}
+                  </p>
+                  <p className="mt-1 text-[16px]">{r.content}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Sheet>
       )}
     </div>
   );
