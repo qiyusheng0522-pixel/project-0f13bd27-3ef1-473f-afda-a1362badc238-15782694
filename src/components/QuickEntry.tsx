@@ -77,7 +77,7 @@ export function QuickEntryFab({ onPick }: { onPick: (k: QuickKey) => void }) {
       <button
         onClick={() => setOpen(true)}
         aria-label="快捷入口"
-        className="absolute bottom-4 right-3 z-40 grid size-16 place-items-center rounded-full text-primary-foreground active:scale-95"
+        className="absolute bottom-24 right-3 z-40 grid size-14 place-items-center rounded-full text-primary-foreground active:scale-95"
         style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-elevated)" }}
       >
         <span className="flex flex-col items-center leading-none">
