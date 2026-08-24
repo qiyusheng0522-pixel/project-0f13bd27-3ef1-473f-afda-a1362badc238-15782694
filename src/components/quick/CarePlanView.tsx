@@ -487,7 +487,7 @@ function TagHistoryContent() {
       <p className="mt-1 text-[13px] text-muted-foreground">您已成功移除 {REMOVED_TAGS.length} 个标签，康复进展顺利！</p>
       <div className="mt-4 space-y-3">
         {REMOVED_TAGS.map((t) => (
-          <div key={t.name} className="rounded-xl ring-1 ring-border bg-muted/30 p-3">
+          <div key={t.name} className="rounded-xl ring-1 ring-border bg-muted p-3">
             <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
               <div className="flex items-center gap-2">
                 <span className="text-[14px] font-bold line-through decoration-muted-foreground/60 text-muted-foreground">{t.name}</span>
