@@ -801,6 +801,10 @@ function HomeTab({
 
 
         {/* 分类待办 */}
+        <div ref={todoRef} className="scroll-mt-3">
+          <h2 className="font-display text-[21px] font-bold">今日待办</h2>
+        </div>
+
         {CAT_ORDER.map((cat) => {
           const list = todos.filter((t) => t.cat === cat);
           if (!list.length) return null;
