@@ -1360,7 +1360,13 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
   const rate = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
 
   const dayItems = day
-    ? [...day.items].sort((a, b) => (a.time ?? "99:99").localeCompare(b.time ?? "99:99"))
+    ? [...day.items].sort((a, b) => {
+        const aAllDay = !a.time || a.time.includes("全天");
+        const bAllDay = !b.time || b.time.includes("全天");
+        if (aAllDay && !bAllDay) return -1;
+        if (!aAllDay && bAllDay) return 1;
+        return (a.time ?? "99:99").localeCompare(b.time ?? "99:99");
+      })
     : [];
   const dayDone = dayItems.filter((x) => x.done).length;
 
