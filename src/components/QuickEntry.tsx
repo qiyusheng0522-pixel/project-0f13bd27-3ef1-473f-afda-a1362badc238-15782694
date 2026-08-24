@@ -36,6 +36,13 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MedsView } from "@/components/quick/MedsView";
+import { DataEntryView } from "@/components/quick/DataEntryView";
+import { CarePlanView } from "@/components/quick/CarePlanView";
+import { DietView } from "@/components/quick/DietView";
+import { MessagesView } from "@/components/quick/MessagesView";
+import { ConsultRefView } from "@/components/quick/ConsultRefView";
+
 
 
 export type QuickKey =
