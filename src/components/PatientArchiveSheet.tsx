@@ -73,6 +73,31 @@ export function PatientArchiveSheet({
           </div>
         </div>
 
+        {/* 异常指标总览（治疗师 / 护理录入）—— 护士、医生、治疗师多端同步高亮 */}
+        {careAbnormal.length > 0 && (
+          <div className="rounded-2xl border-2 border-destructive bg-destructive/10 p-3">
+            <div className="flex items-center gap-1 text-[11px] font-bold text-destructive">
+              <AlertTriangle className="h-3.5 w-3.5 animate-pulse" />
+              异常指标提醒 · 共 {careAbnormal.length} 项（护理 / 治疗师录入）
+            </div>
+            <div className="mt-2 space-y-1">
+              {careAbnormal.map((a) => (
+                <div
+                  key={`ov-${a.id}`}
+                  className="flex items-center justify-between gap-2 rounded-lg bg-destructive px-2 py-1.5 text-[10px] font-bold text-destructive-foreground ring-2 ring-destructive/30"
+                >
+                  <span>⚠ {a.label}</span>
+                  <span className="font-mono">{a.value}</span>
+                  <span className="shrink-0 font-normal opacity-80">{a.source}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-1.5 text-[10px] text-destructive">医生 / 护士 / 治疗师端均可查看，请及时处理并记录处置措施。</div>
+          </div>
+        )}
+
+
+
         {/* 跨角色共享备注 */}
         <SectionTitle icon={StickyNote} text="患者备注（跨角色共享）" tone="text-info" />
         <div className="space-y-1.5">
