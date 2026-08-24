@@ -31,7 +31,7 @@ import {
   ImagePlus,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
-import { QuickEntryCard, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
+import { QuickEntryFab, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
 import { cn } from "@/lib/utils";
 import {
   useCaseFlow,
@@ -390,6 +390,8 @@ export function PatientWorkbench() {
 
   const [view, setView] = useState<"guest" | "member">("guest");
   const guest = view === "guest";
+  const [quick, setQuick] = useState<QuickKey | null>(null);
+  const [quickScale, setQuickScale] = useState(false);
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -418,6 +420,27 @@ export function PatientWorkbench() {
         title="骨安 · 患者"
         subtitle={guest ? "新用户 · 未建档" : inpatient ? "住院中" : "居家康复"}
         bottom={<TabBar items={tabs} activeKey={tab} onChange={setTab} />}
+        float={
+          <>
+            <QuickEntryFab onPick={(k) => setQuick(k)} />
+            {quick && (
+              <QuickEntrySheet
+                entry={quick}
+                onClose={() => setQuick(null)}
+                onGoTodos={() => {
+                  setQuick(null);
+                  setTab("home");
+                }}
+                onOpenScale={() => setQuickScale(true)}
+                onOpenAi={() => {
+                  setQuick(null);
+                  setTab("ai");
+                }}
+              />
+            )}
+            {quickScale && <ScaleSheet onClose={() => setQuickScale(false)} onSubmit={() => setQuickScale(false)} />}
+          </>
+        }
       >
         {tab === "home" &&
           (guest ? (
@@ -501,7 +524,6 @@ function GuestHomeTab({
   const [scaleOpen, setScaleOpen] = useState(false);
   const [scaleDone, setScaleDone] = useState(false);
   const [allOpen, setAllOpen] = useState(false);
-  const [quick, setQuick] = useState<QuickKey | null>(null);
 
 
   return (
@@ -666,19 +688,6 @@ function GuestHomeTab({
           <p className="mt-1 text-[15px] leading-snug text-muted-foreground/80">完成建档与量表后自动出现康复动作、用药、护理与问卷</p>
         </section>
 
-        {/* 快捷入口 */}
-        <QuickEntryCard onPick={(k) => setQuick(k)} />
-
-        {quick && (
-          <QuickEntrySheet
-            entry={quick}
-            onClose={() => setQuick(null)}
-            onGoTodos={() => setQuick(null)}
-            onOpenScale={() => setScaleOpen(true)}
-            onOpenAi={onOpenAi}
-          />
-        )}
-
       <ServicePackBanner activated={false} onOpenAll={() => setAllOpen(true)} onPick={(s) => (s.title === "宣教百科" ? onOpenEdu() : setAllOpen(true))} />
 
       {allOpen && (
@@ -740,7 +749,6 @@ function HomeTab({
   const [archivePhoto, setArchivePhoto] = useState<string | null>(null);
   const [pack, setPack] = useState<(typeof SERVICE_PACKS)[number] | null>(null);
   const [allOpen, setAllOpen] = useState(false);
-  const [quick, setQuick] = useState<QuickKey | null>(null);
   const [scaleOpen, setScaleOpen] = useState(false);
   const todoRef = useRef<HTMLDivElement>(null);
 
@@ -844,10 +852,6 @@ function HomeTab({
           <PathRail current={toPathIdx(stageIdx)} onDark />
         </button>
 
-        {/* 快捷入口 */}
-        <QuickEntryCard onPick={(k) => setQuick(k)} />
-
-
         {/* 分类待办 */}
         <div ref={todoRef} className="scroll-mt-3">
           <h2 className="font-display text-[21px] font-bold">今日待办</h2>
@@ -939,19 +943,6 @@ function HomeTab({
             if (s.title === "宣教百科") onOpenEdu();
             else setPack(s);
           }}
-        />
-      )}
-
-      {quick && (
-        <QuickEntrySheet
-          entry={quick}
-          onClose={() => setQuick(null)}
-          onGoTodos={() => {
-            setQuick(null);
-            todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-          onOpenScale={() => setScaleOpen(true)}
-          onOpenAi={onOpenAi}
         />
       )}
 
