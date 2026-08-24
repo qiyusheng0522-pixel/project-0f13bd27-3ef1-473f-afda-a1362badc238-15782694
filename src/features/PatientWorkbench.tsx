@@ -485,129 +485,167 @@ function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: ()
 
 
   return (
-    <div className="space-y-4 p-3 pb-6">
-      <section className="rounded-3xl p-5 text-white" style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}>
-        <span className="rounded-full bg-white/20 px-3 py-1 text-[16px] font-bold ring-1 ring-white/30">新用户</span>
-        <p className="mt-3 text-[24px] font-bold leading-snug">欢迎使用骨安</p>
-        <p className="mt-1 text-[18px] leading-snug text-white/90">先建立健康档案，医生确认后即可查看康复方案与每日待办。</p>
-      </section>
+    <div className="pb-8">
+      {/* Hero：白底 + 大字标题 */}
+      <header className="bg-card px-6 pb-7 pt-7">
+        <h1 className="font-display text-[34px] font-bold leading-none tracking-tight text-primary">你好，</h1>
+        <p className="mt-2 text-[19px] font-medium text-muted-foreground">欢迎开始康复旅程</p>
+        <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/10">
+          <span className="size-2 animate-pulse rounded-full bg-warning" />
+          康复状态：{photo ? "资料核对中" : "待建档"}
+        </div>
+      </header>
 
-      {!photo ? (
-        <section className="rounded-3xl border-2 border-amber-400 bg-amber-50 p-4">
-          <div className="flex items-start gap-3">
-            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-amber-500/15 text-amber-700">
-              <Camera className="size-6" />
-            </span>
-            <div className="min-w-0">
-              <p className="whitespace-nowrap text-[19px] font-bold text-amber-800">您还没有建立健康档案</p>
-              <p className="mt-1 text-[16px] leading-snug text-amber-700">请拍照上传「入院单 / 诊断证明」，医生确认后自动建档。</p>
-            </div>
-          </div>
-          <label className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-3.5 text-[19px] font-bold text-white active:scale-[0.99]">
-            <Camera className="size-6" /> 立即拍照建档
-            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
-          </label>
-          <label className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-amber-400 py-3 text-[17px] font-bold text-amber-800">
-            <ImagePlus className="size-5" /> 从相册选择照片
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
-          </label>
-        </section>
-      ) : (
-        <section className="rounded-3xl border bg-card p-4">
-          <div className="flex items-center gap-3">
-            <img src={photo} alt="入院单照片" className="size-16 rounded-xl object-cover" />
-            <div className="min-w-0">
-              <p className="text-[18px] font-bold text-success">入院单已上传</p>
-              <p className="mt-0.5 text-[16px] text-muted-foreground">医护正在核对，建档完成后消息通知您</p>
-            </div>
-          </div>
-          <button
-            onClick={onDone}
-            className="mt-3 w-full rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
-            style={{ background: "var(--gradient-primary)" }}
+      <div className="space-y-5 px-5 pt-5">
+        {/* 建档入口 */}
+        {!photo ? (
+          <label
+            className="flex items-center justify-between rounded-3xl bg-primary p-5 active:scale-[0.99]"
+            style={{ boxShadow: "var(--shadow-elevated)" }}
           >
-            查看已建档患者视角
-          </button>
-        </section>
-      )}
+            <span className="flex items-center gap-3">
+              <span className="grid size-12 place-items-center rounded-2xl bg-white/20 text-primary-foreground">
+                <Camera className="size-6" />
+              </span>
+              <span className="text-primary-foreground">
+                <span className="block whitespace-nowrap text-[19px] font-bold">拍照建档</span>
+                <span className="mt-0.5 block text-[15px] text-primary-foreground/80">上传入院单 · 智能录入</span>
+              </span>
+            </span>
+            <ChevronRight className="size-6 text-primary-foreground/70" />
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) setPhoto(URL.createObjectURL(f));
+              }}
+            />
+          </label>
+        ) : (
+          <section className="rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
+            <div className="flex items-center gap-3">
+              <img src={photo} alt="入院单照片" className="size-16 rounded-2xl object-cover" />
+              <div className="min-w-0">
+                <p className="text-[18px] font-bold text-success">入院单已上传</p>
+                <p className="mt-0.5 text-[15px] text-muted-foreground">医护正在核对，建档完成后消息通知您</p>
+              </div>
+            </div>
+            <button
+              onClick={onDone}
+              className="mt-3 w-full rounded-2xl bg-primary py-3.5 text-[18px] font-bold text-primary-foreground active:scale-[0.98]"
+            >
+              查看已建档患者视角
+            </button>
+          </section>
+        )}
 
-      <section className="overflow-hidden rounded-3xl border bg-card">
-        <header className="border-b bg-primary/5 px-4 py-3">
-          <h3 className="whitespace-nowrap text-[19px] font-bold">三步开始使用</h3>
-        </header>
-        <ul className="divide-y">
-          {GUEST_STEPS.map((s) => {
-            const done = s.n === 1 ? !!photo : s.n === 2 ? scaleDone : false;
-            return (
-              <li key={s.n} className="px-4 py-3.5">
-                <div className="flex items-center gap-3">
-                  <span
-                    className={cn(
-                      "grid size-10 shrink-0 place-items-center rounded-full text-[17px] font-bold",
-                      done ? "bg-success/15 text-success" : "bg-primary/10 text-primary",
-                    )}
-                  >
-                    {done ? <Check className="size-5" /> : s.n}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[18px] font-bold leading-snug">{s.title}</p>
-                    <p className="mt-0.5 text-[16px] text-muted-foreground">{s.desc}</p>
-                  </div>
-                  {done && (
-                    <span className="ml-auto shrink-0 whitespace-nowrap rounded-full bg-success/10 px-2.5 py-1 text-[15px] font-bold text-success">
-                      已完成
-                    </span>
-                  )}
-                </div>
-
-                {s.n === 1 &&
-                  (photo ? (
-                    <label className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border-2 py-3 text-[17px] font-bold">
-                      <Camera className="size-5" /> 重新拍照上传
-                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
-                    </label>
-                  ) : (
-                    <label
-                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
-                      style={{ background: "var(--gradient-primary)" }}
+        {/* 三步时间线 */}
+        <section>
+          <h2 className="font-display text-[21px] font-bold">三步开始康复</h2>
+          <div className="mt-5 space-y-5">
+            {GUEST_STEPS.map((s, idx) => {
+              const done = s.n === 1 ? !!photo : s.n === 2 ? scaleDone : false;
+              const active = s.n === 1 ? !photo : s.n === 2 ? !!photo && !scaleDone : !!photo && scaleDone;
+              const last = idx === GUEST_STEPS.length - 1;
+              return (
+                <div key={s.n} className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <span
+                      className={cn(
+                        "z-10 grid size-10 shrink-0 place-items-center rounded-full border-2 bg-card text-[17px] font-bold",
+                        done
+                          ? "border-success text-success"
+                          : active
+                            ? "border-primary text-primary"
+                            : "border-border text-muted-foreground",
+                      )}
                     >
-                      <Camera className="size-5" /> 拍照上传入院单
-                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }} />
-                    </label>
-                  ))}
+                      {done ? <Check className="size-5" /> : s.n}
+                    </span>
+                    {!last && <span className="-mb-5 mt-2 w-0.5 flex-1 bg-border" />}
+                  </div>
 
-                {s.n === 2 && (
-                  <button
-                    onClick={() => setScaleOpen(true)}
+                  <div
                     className={cn(
-                      "mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold",
-                      scaleDone ? "border-2 text-foreground" : "text-primary-foreground",
+                      "flex-1 rounded-[26px] border bg-card p-5",
+                      !done && !active && "opacity-60",
                     )}
-                    style={scaleDone ? undefined : { background: "var(--gradient-primary)" }}
+                    style={{ boxShadow: "var(--shadow-card)" }}
                   >
-                    <ClipboardList className="size-5" /> {scaleDone ? "查看/修改量表" : "填写专科量表"}
-                  </button>
-                )}
+                    <div className="flex items-start gap-2">
+                      <div className="min-w-0">
+                        <h3 className="text-[19px] font-bold leading-snug">{s.title}</h3>
+                        <p className="mt-1 text-[15px] leading-snug text-muted-foreground">{s.desc}</p>
+                      </div>
+                      {done && (
+                        <span className="ml-auto shrink-0 whitespace-nowrap rounded-full bg-success/10 px-2.5 py-1 text-[14px] font-bold text-success">
+                          已完成
+                        </span>
+                      )}
+                    </div>
 
-                {s.n === 3 && (
-                  <button
-                    onClick={onDone}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold text-primary-foreground"
-                    style={{ background: "var(--gradient-primary)" }}
-                  >
-                    <CalendarCheck className="size-5" /> 查看今日待办清单
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+                    {s.n === 1 && (
+                      <label
+                        className={cn(
+                          "mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold active:scale-[0.98]",
+                          photo ? "border-2 text-foreground" : "bg-primary text-primary-foreground",
+                        )}
+                      >
+                        <Camera className="size-5" /> {photo ? "重新拍照上传" : "拍照上传入院单"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) setPhoto(URL.createObjectURL(f));
+                          }}
+                        />
+                      </label>
+                    )}
 
-      <section className="rounded-3xl border-2 border-dashed p-5 text-center">
-        <p className="text-[18px] font-bold">今日待办暂未生成</p>
-        <p className="mt-1 text-[16px] leading-snug text-muted-foreground">建档并完成量表后，康复动作、用药、护理、问卷会自动出现在首页。</p>
-      </section>
+                    {s.n === 2 && (
+                      <button
+                        onClick={() => setScaleOpen(true)}
+                        className={cn(
+                          "mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold active:scale-[0.98]",
+                          scaleDone ? "border-2 text-foreground" : active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        <ClipboardList className="size-5" /> {scaleDone ? "查看/修改量表" : "填写专科量表"}
+                      </button>
+                    )}
+
+                    {s.n === 3 && (
+                      <button
+                        onClick={onDone}
+                        className={cn(
+                          "mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold active:scale-[0.98]",
+                          active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        <CalendarCheck className="size-5" /> 查看今日待办清单
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="rounded-[26px] border-2 border-dashed bg-muted/30 px-6 py-8 text-center">
+          <span className="mx-auto grid size-12 place-items-center rounded-full bg-card text-muted-foreground">
+            <CalendarCheck className="size-6" />
+          </span>
+          <p className="mt-3 text-[18px] font-bold text-muted-foreground">今日待办暂未生成</p>
+          <p className="mt-1 text-[15px] leading-snug text-muted-foreground/80">完成建档与量表后自动出现康复动作、用药、护理与问卷</p>
+        </section>
+
 
       <ServicePackBanner activated={false} onOpenAll={() => setAllOpen(true)} onPick={(s) => (s.title === "宣教百科" ? onOpenEdu() : setAllOpen(true))} />
 
