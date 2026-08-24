@@ -31,6 +31,7 @@ import {
   ImagePlus,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
+import { QuickEntryCard, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
 import { cn } from "@/lib/utils";
 import {
   useCaseFlow,
@@ -391,14 +392,10 @@ export function PatientWorkbench() {
   const guest = view === "guest";
 
   return (
-    <PhoneShell
-      title="骨安 · 患者"
-      subtitle={guest ? "新用户 · 未建档" : inpatient ? "住院中" : "居家康复"}
-      bottom={<TabBar items={tabs} activeKey={tab} onChange={setTab} />}
-    >
-      {/* 演示视角切换：新用户（未建档） / 已建档患者 */}
-      <div className="sticky top-0 z-20 bg-card/85 px-3 py-2.5 backdrop-blur-xl">
-        <div className="grid grid-cols-2 gap-1 rounded-2xl bg-muted p-1">
+    <div className="flex flex-col items-center gap-3">
+      {/* 演示视角切换（预览框外，全局切换） */}
+      <div className="w-[375px]">
+        <div className="grid grid-cols-2 gap-1 rounded-2xl border bg-card p-1" style={{ boxShadow: "var(--shadow-card)" }}>
           {([
             { key: "guest", label: "新用户 · 未建档" },
             { key: "member", label: "已建档患者" },
@@ -407,8 +404,8 @@ export function PatientWorkbench() {
               key={v.key}
               onClick={() => setView(v.key)}
               className={cn(
-                "whitespace-nowrap rounded-xl py-2 text-[15px] font-bold transition-all active:scale-[0.98]",
-                view === v.key ? "bg-card text-primary shadow-sm" : "text-muted-foreground",
+                "whitespace-nowrap rounded-xl py-2 text-[14px] font-bold transition-all active:scale-[0.98]",
+                view === v.key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground",
               )}
             >
               {v.label}
@@ -417,38 +414,48 @@ export function PatientWorkbench() {
         </div>
       </div>
 
-
-      {tab === "home" &&
-        (guest ? (
-          <GuestHomeTab onOpenEdu={() => setTab("edu")} onDone={() => setView("member")} />
-        ) : (
-          <HomeTab
-            name={name}
-            bed={bed}
-            days={days}
-            inpatient={inpatient}
+      <PhoneShell
+        title="骨安 · 患者"
+        subtitle={guest ? "新用户 · 未建档" : inpatient ? "住院中" : "居家康复"}
+        bottom={<TabBar items={tabs} activeKey={tab} onChange={setTab} />}
+      >
+        {tab === "home" &&
+          (guest ? (
+            <GuestHomeTab
+              onOpenEdu={() => setTab("edu")}
+              onDone={() => setView("member")}
+              onOpenAi={() => setTab("ai")}
+            />
+          ) : (
+            <HomeTab
+              name={name}
+              bed={bed}
+              days={days}
+              inpatient={inpatient}
+              stageLabel={stageLabel}
+              stageIdx={Math.max(stageIndex(flow.stage), 0)}
+              todos={todos}
+              isDone={isDone}
+              onToggle={onToggle}
+              hasArchive
+              onOpenEdu={() => setTab("edu")}
+              onOpenAi={() => setTab("ai")}
+            />
+          ))}
+        {tab === "schedule" &&
+          (guest ? <GuestLock title="暂无日程统计" desc="建档并生成康复方案后，这里会展示您的每日打卡完成情况与趋势。" onGo={() => setTab("home")} /> : <ScheduleTab todos={todos} isDone={isDone} />)}
+        {tab === "ai" && <AiTab name={name} />}
+        {tab === "edu" && (
+          <EduTab
+            inpatient={!guest && inpatient}
+            diagnosis={patient?.diagnosis ?? "膝关节置换术后"}
             stageLabel={stageLabel}
-            stageIdx={Math.max(stageIndex(flow.stage), 0)}
-            todos={todos}
-            isDone={isDone}
-            onToggle={onToggle}
-            hasArchive
-            onOpenEdu={() => setTab("edu")}
           />
-        ))}
-      {tab === "schedule" &&
-        (guest ? <GuestLock title="暂无日程统计" desc="建档并生成康复方案后，这里会展示您的每日打卡完成情况与趋势。" onGo={() => setTab("home")} /> : <ScheduleTab todos={todos} isDone={isDone} />)}
-      {tab === "ai" && <AiTab name={name} />}
-      {tab === "edu" && (
-        <EduTab
-          inpatient={!guest && inpatient}
-          diagnosis={patient?.diagnosis ?? "膝关节置换术后"}
-          stageLabel={stageLabel}
-        />
-      )}
-      {tab === "me" &&
-        (guest ? <GuestLock title="还未建立健康档案" desc="拍照上传入院单 / 诊断证明，医生确认后可查看个人信息、住院记录与知情同意。" onGo={() => setTab("home")} /> : <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />)}
-    </PhoneShell>
+        )}
+        {tab === "me" &&
+          (guest ? <GuestLock title="还未建立健康档案" desc="拍照上传入院单 / 诊断证明，医生确认后可查看个人信息、住院记录与知情同意。" onGo={() => setTab("home")} /> : <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />)}
+      </PhoneShell>
+    </div>
   );
 }
 
@@ -481,11 +488,20 @@ const GUEST_STEPS = [
   { n: 3, title: "查看康复方案", desc: "医生确认后生成每日打卡待办" },
 ];
 
-function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: () => void }) {
+function GuestHomeTab({
+  onOpenEdu,
+  onDone,
+  onOpenAi,
+}: {
+  onOpenEdu: () => void;
+  onDone: () => void;
+  onOpenAi: () => void;
+}) {
   const [photo, setPhoto] = useState<string | null>(null);
   const [scaleOpen, setScaleOpen] = useState(false);
   const [scaleDone, setScaleDone] = useState(false);
   const [allOpen, setAllOpen] = useState(false);
+  const [quick, setQuick] = useState<QuickKey | null>(null);
 
 
   return (
@@ -650,6 +666,18 @@ function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: ()
           <p className="mt-1 text-[15px] leading-snug text-muted-foreground/80">完成建档与量表后自动出现康复动作、用药、护理与问卷</p>
         </section>
 
+        {/* 快捷入口 */}
+        <QuickEntryCard onPick={(k) => setQuick(k)} />
+
+        {quick && (
+          <QuickEntrySheet
+            entry={quick}
+            onClose={() => setQuick(null)}
+            onGoTodos={() => setQuick(null)}
+            onOpenScale={() => setScaleOpen(true)}
+            onOpenAi={onOpenAi}
+          />
+        )}
 
       <ServicePackBanner activated={false} onOpenAll={() => setAllOpen(true)} onPick={(s) => (s.title === "宣教百科" ? onOpenEdu() : setAllOpen(true))} />
 
@@ -693,6 +721,7 @@ function HomeTab({
   onToggle,
   hasArchive,
   onOpenEdu,
+  onOpenAi,
 }: {
   name: string;
   bed: string;
@@ -705,12 +734,16 @@ function HomeTab({
   onToggle: (t: SimpleTodo) => void;
   hasArchive: boolean;
   onOpenEdu: () => void;
+  onOpenAi: () => void;
 }) {
   const [pathOpen, setPathOpen] = useState(false);
   const [archivePhoto, setArchivePhoto] = useState<string | null>(null);
   const [pack, setPack] = useState<(typeof SERVICE_PACKS)[number] | null>(null);
   const [allOpen, setAllOpen] = useState(false);
+  const [quick, setQuick] = useState<QuickKey | null>(null);
+  const [scaleOpen, setScaleOpen] = useState(false);
   const todoRef = useRef<HTMLDivElement>(null);
+
 
 
   const remaining = todos.filter((t) => !isDone(t)).length;
@@ -811,6 +844,8 @@ function HomeTab({
           <PathRail current={toPathIdx(stageIdx)} onDark />
         </button>
 
+        {/* 快捷入口 */}
+        <QuickEntryCard onPick={(k) => setQuick(k)} />
 
 
         {/* 分类待办 */}
@@ -906,6 +941,21 @@ function HomeTab({
           }}
         />
       )}
+
+      {quick && (
+        <QuickEntrySheet
+          entry={quick}
+          onClose={() => setQuick(null)}
+          onGoTodos={() => {
+            setQuick(null);
+            todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          onOpenScale={() => setScaleOpen(true)}
+          onOpenAi={onOpenAi}
+        />
+      )}
+
+      {scaleOpen && <ScaleSheet onClose={() => setScaleOpen(false)} onSubmit={() => setScaleOpen(false)} />}
 
 
       {pack && (
