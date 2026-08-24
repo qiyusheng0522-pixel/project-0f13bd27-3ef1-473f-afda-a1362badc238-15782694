@@ -599,6 +599,69 @@ function GuestHomeTab({
         )}
 
 
+        {/* 三步开始康复 */}
+        <section className="space-y-3">
+          <h2 className="font-display text-[21px] font-bold">三步开始康复</h2>
+          <div className="space-y-3">
+            <StepCard
+              no="01"
+              title="拍照上传"
+              desc="上传入院单/诊断证明，建立档案"
+              icon={Camera}
+              done={!!photo}
+              action={
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96]">
+                  <Camera className="size-4" />
+                  {photo ? "重新上传" : "去拍照"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) setPhoto(URL.createObjectURL(f));
+                    }}
+                  />
+                </label>
+              }
+            />
+            <StepCard
+              no="02"
+              title="填写量表"
+              desc="完成专科评估，帮助医生了解病情"
+              icon={ClipboardList}
+              done={scaleDone}
+              action={
+                <button
+                  onClick={() => setScaleOpen(true)}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96]"
+                >
+                  <ClipboardList className="size-4" />
+                  {scaleDone ? "重新填写" : "去填写"}
+                </button>
+              }
+            />
+            <StepCard
+              no="03"
+              title="查看待办"
+              desc="建档完成后查看每日康复任务"
+              icon={CalendarCheck}
+              done={false}
+              action={
+                <button
+                  onClick={onDone}
+                  disabled={!photo || !scaleDone}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96] disabled:opacity-40"
+                >
+                  <CalendarCheck className="size-4" />
+                  去查看
+                </button>
+              }
+            />
+          </div>
+        </section>
+
         <section className="rounded-[26px] border-2 border-dashed bg-muted/30 px-6 py-8 text-center">
           <span className="mx-auto grid size-12 place-items-center rounded-full bg-card text-muted-foreground">
             <CalendarCheck className="size-6" />
