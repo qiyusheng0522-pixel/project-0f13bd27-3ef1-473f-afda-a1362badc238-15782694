@@ -1651,7 +1651,7 @@ function MeTab({ name, bed, inpatient, days }: { name: string; bed: string; inpa
         </header>
         <ul className="divide-y">
           <MeRow icon={MessageSquare} label="消息中心" badge={unread ? `${unread} 条未读` : undefined} onClick={() => setPanel("messages")} />
-          <MeRow icon={FileText} label={inpatient ? "住院记录" : "出院小结"} onClick={() => setPanel("record")} />
+          
           <MeRow icon={Bell} label="提醒与字体设置" onClick={() => setPanel("settings")} />
         </ul>
       </section>
