@@ -669,8 +669,9 @@ function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: ()
           }}
         />
       )}
-
+      </div>
     </div>
+
   );
 }
 
