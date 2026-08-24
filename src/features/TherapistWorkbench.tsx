@@ -941,6 +941,76 @@ function PostOpList({
   );
 }
 
+/* ---------- 术中评估情况（异常指标高亮展示） ---------- */
+function IntraOpAssessmentBlock({ patient }: { patient: Patient }) {
+  const flow = useCaseFlow();
+  const isDemo = patient.id === DEMO_PATIENT_ID;
+  const rec = isDemo
+    ? flow.intraOp
+    : (() => {
+        const n = patient.name.length + patient.id.length;
+        return {
+          by: "手术团队",
+          at: patient.surgeryDate ?? "—",
+          anesthesia: "全麻 + 神经阻滞",
+          bleeding: n % 2 === 0 ? "180 ml" : "460 ml",
+          implant: "—",
+          duration: n % 3 === 0 ? "135 min" : "92 min",
+          complication: n % 2 === 0 ? "无" : "关节内粘连，行松解",
+          advice: "",
+        };
+      })();
+  if (!rec) return null;
+  const fields = intraOpAssessment(rec);
+  const abnormal = fields.filter((f) => f.abnormal);
+
+  return (
+    <div className={cn("border-t p-3", abnormal.length > 0 ? "bg-destructive/5" : "bg-muted/20")}>
+      <div className="mb-1.5 flex items-center justify-between">
+        <div className="flex items-center gap-1 text-[10px] font-bold text-foreground">
+          <Activity className="h-3 w-3 text-primary" />术中评估情况
+        </div>
+        {abnormal.length > 0 ? (
+          <span className="flex items-center gap-0.5 rounded-full bg-destructive px-1.5 py-0.5 text-[9px] font-bold text-destructive-foreground">
+            <AlertTriangle className="h-2.5 w-2.5" />异常 {abnormal.length} 项
+          </span>
+        ) : (
+          <span className="rounded-full bg-success/15 px-1.5 py-0.5 text-[9px] font-bold text-success">术中平稳</span>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {fields.map((f) => (
+          <span
+            key={f.label}
+            className={cn(
+              "rounded-md px-1.5 py-0.5 text-[10px]",
+              f.abnormal
+                ? "bg-destructive font-bold text-destructive-foreground ring-2 ring-destructive/40"
+                : "bg-card text-muted-foreground",
+            )}
+          >
+            {f.abnormal && "⚠ "}
+            {f.label} {f.value}
+          </span>
+        ))}
+      </div>
+      {abnormal.length > 0 && (
+        <div className="mt-1.5 space-y-1">
+          {abnormal.map((f) => (
+            <div
+              key={f.label}
+              className="rounded-lg border border-destructive/30 bg-destructive/10 p-2 text-[10px] font-medium text-destructive"
+            >
+              ⚠ {f.label} {f.value} · {f.note}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-1.5">
