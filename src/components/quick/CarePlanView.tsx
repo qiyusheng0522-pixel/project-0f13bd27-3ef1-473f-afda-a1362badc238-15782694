@@ -967,8 +967,8 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
   const [activeDate, setActiveDate] = useState("06/11");
   const [selectedTag, setSelectedTag] = useState<TagItem | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [purchased, setPurchased] = useState(false);
-  const [review, setReview] = useState<"pending" | "approved">("pending");
+  const purchased = true;
+  const review: "pending" | "approved" = "approved";
   const [swap, setSwap] = useState<{ mealTitle: string; dish: string } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const personalized = purchased && review === "approved";
@@ -981,15 +981,6 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
   return (
     <QuickSheet title="健康方案" subtitle="安家在护 · 膝关节置换康复" onClose={onClose}>
       <div className="min-h-full pb-6 bg-background">
-        <div className="px-4 pt-3">
-          <div className="inline-flex items-center gap-1 rounded-full bg-card ring-1 ring-border p-0.5 text-[11px] font-bold">
-            <button onClick={() => setPurchased(false)} className={`px-2.5 py-1.5 rounded-full transition-colors whitespace-nowrap ${!purchased ? "bg-foreground text-background" : "text-muted-foreground"}`}>未开通预览</button>
-            <button onClick={() => setPurchased(true)} className={`px-2.5 py-1.5 rounded-full transition-colors inline-flex items-center gap-0.5 whitespace-nowrap ${purchased ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-              <Crown className="size-3" />已开通预览
-            </button>
-          </div>
-        </div>
-
         {/* 标签 */}
         <section className="px-4 mt-3">
           <div className="rounded-2xl p-4 ring-1 ring-primary/15 bg-card">
@@ -1017,8 +1008,8 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
 
         {/* 方案与专家服务 */}
         <section className="px-4 mt-4">
-          <ServicePlanFlow purchased={purchased} setPurchased={setPurchased} />
-          {purchased && <DoctorReviewBanner review={review} onApprove={() => setReview("approved")} />}
+          <ServicePlanFlow purchased={purchased} setPurchased={() => {}} />
+          <DoctorReviewBanner review={review} onApprove={() => {}} />
         </section>
 
         {/* 饮食方案 */}

@@ -48,7 +48,6 @@ import { ConsultRefView } from "@/components/quick/ConsultRefView";
 export type QuickKey =
   | "archive"
   | "risk"
-  | "report"
   | "scale"
   | "today"
   | "med"
@@ -70,12 +69,11 @@ type Entry = {
 export const QUICK_ENTRIES: Entry[] = [
   { key: "archive", title: "完善档案", desc: "第 1 步", icon: Camera, tint: "bg-sky-100 text-sky-600" },
   { key: "risk", title: "风险评估", desc: "第 2 步", icon: ShieldCheck, tint: "bg-violet-100 text-violet-600" },
-  { key: "report", title: "报告方案", desc: "第 3 步", icon: FileText, tint: "bg-fuchsia-100 text-fuchsia-600" },
-  { key: "scale", title: "评估问卷", desc: "专病量表", icon: ScrollText, tint: "bg-slate-200 text-slate-700" },
+  { key: "plan", title: "健康方案", desc: "执行与服务", icon: HeartPulse, tint: "bg-rose-100 text-rose-600" },
+  { key: "scale", title: "问卷评估", desc: "专病量表", icon: ScrollText, tint: "bg-slate-200 text-slate-700" },
   { key: "today", title: "今日任务", desc: "打卡得分", icon: ClipboardList, tint: "bg-orange-100 text-orange-600" },
   { key: "med", title: "用药管理", desc: "打卡/停药", icon: Pill, tint: "bg-teal-100 text-teal-600" },
   { key: "data", title: "数据录入", desc: "血压体温", icon: Droplet, tint: "bg-cyan-100 text-cyan-600" },
-  { key: "plan", title: "健康方案", desc: "执行与服务", icon: HeartPulse, tint: "bg-rose-100 text-rose-600" },
   { key: "diet", title: "饮食打卡", desc: "拍照识别", icon: Soup, tint: "bg-emerald-100 text-emerald-600" },
   { key: "message", title: "消息", desc: "医生回复", icon: MessageSquare, tint: "bg-amber-100 text-amber-600" },
   { key: "consult", title: "在线问诊", desc: "骨科专科", icon: Stethoscope, tint: "bg-indigo-100 text-indigo-600" },
@@ -1297,9 +1295,7 @@ export function QuickEntrySheet({
   const title =
     entry === "risk"
       ? "我的风险评估"
-      : entry === "report"
-        ? "专病体检报告"
-        : entry === "scale"
+      : entry === "scale"
           ? "评估中心"
           : entry === "med"
             ? "用药管理"
@@ -1318,7 +1314,7 @@ export function QuickEntrySheet({
   if (entry === "consult") return <ConsultRefView onClose={onClose} />;
 
   return (
-    <Panel title={title} subtitle={entry === "risk" || entry === "report" ? undefined : meta.desc} onClose={onClose}>
+    <Panel title={title} subtitle={entry === "risk" ? undefined : meta.desc} onClose={onClose}>
 
       {entry === "archive" && (
         <div>
@@ -1360,7 +1356,6 @@ export function QuickEntrySheet({
       )}
 
       {entry === "risk" && <RiskView />}
-      {entry === "report" && <ReportView onGoPlan={onGoTodos} />}
       {entry === "scale" && <ScaleCenterView onOpenScale={() => { onClose(); onOpenScale(); }} />}
       {entry === "today" && <TaskCenterView onGoTodos={() => { onClose(); onGoTodos(); }} />}
 
