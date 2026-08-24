@@ -35,7 +35,10 @@ export function PatientArchiveSheet({
   const intraOp = patient.id === DEMO_PATIENT_ID ? flow.intraOp : null;
   const intraOpFields = intraOp ? intraOpFindings(intraOp) : [];
   const intraOpAbnormal = intraOpFields.filter((f) => f.abnormal);
-  const nurseAbnormal = patient.id === DEMO_PATIENT_ID ? flow.abnormal.filter((a) => a.source === "护士") : [];
+  const careAbnormal =
+    patient.id === DEMO_PATIENT_ID
+      ? flow.abnormal.filter((a) => a.source === "护士" || a.source === "治疗师")
+      : [];
   return (
     <Sheet onClose={onClose} title="患者档案">
       <div className="space-y-3 p-3">
