@@ -14,6 +14,7 @@ export function PhoneShell({
   hideHeader,
   bottom,
   overlay,
+  float,
   className,
 }: {
   title?: string;
@@ -24,8 +25,11 @@ export function PhoneShell({
   bottom?: ReactNode;
   /** 固定在底部导航上方、不随内容滚动的浮层（如使用引导） */
   overlay?: ReactNode;
+  /** 覆盖整机的浮层（悬浮按钮 / 全屏弹层），坐标以手机为基准 */
+  float?: ReactNode;
   className?: string;
 }) {
+
 
   const [time, setTime] = useState("09:41");
   useEffect(() => {
@@ -92,9 +96,16 @@ export function PhoneShell({
       <div className="flex justify-center bg-card pb-1.5 pt-1">
         <div className="h-1 w-28 rounded-full bg-foreground/80" />
       </div>
+
+      {/* 整机浮层 */}
+      {float && (
+        <div className="pointer-events-none absolute inset-0 z-50 [&>*]:pointer-events-auto">{float}</div>
+      )}
     </div>
   );
 }
+
+
 
 export function TabBar({
   items,
