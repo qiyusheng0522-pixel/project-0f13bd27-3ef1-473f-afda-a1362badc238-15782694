@@ -941,7 +941,9 @@ function HomeTab({
           </ol>
         </Sheet>
       )}
+      </div>
     </div>
+
   );
 }
 
