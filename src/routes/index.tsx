@@ -21,7 +21,7 @@ const roleIcons = {
   patient: HeartPulse,
 } as const;
 
-const roles: Role[] = ["secretary", "doctor-on-duty", "surgical-team", "therapist", "patient"];
+const roles: Role[] = ["patient", "secretary", "doctor-on-duty", "surgical-team", "therapist"];
 
 const flow = [
   { n: "01", t: "门诊登记", who: "护士/秘书" },
