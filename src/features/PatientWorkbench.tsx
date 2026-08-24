@@ -1311,92 +1311,133 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
 
 const AI_CHIPS = ["膝盖肿了怎么办", "今天能下地走路吗", "康复动作做几组", "抗凝药漏服了"];
 
+const AI_CATS: { key: string; label: string; icon: React.ElementType; prompt: string }[] = [
+  { key: "find", label: "寻医", icon: Stethoscope, prompt: "帮我推荐一位关节外科主治医生" },
+  { key: "drug", label: "问药", icon: Pill, prompt: "利伐沙班怎么吃？漏服了怎么办？" },
+  { key: "report", label: "报告解读", icon: FileText, prompt: "请帮我解读膝关节复查报告" },
+  { key: "plan", label: "康复方案", icon: HeartPulse, prompt: "结合我的档案，给我本周的康复方案" },
+];
+
+function aiAnswerFor(q: string): string {
+  const map: { k: string; a: string }[] = [
+    { k: "肿", a: "术后早期肿胀属常见现象：请抬高患肢 20-30cm、每次冰敷 15-20 分钟（每日 3-4 次），并按时完成踝泵运动。若出现明显红肿热痛或发热，请立即联系主管医生。" },
+    { k: "走", a: "今日可在助行器辅助下床边站立、室内行走 2-3 次，每次 5-10 分钟。行走时患肢部分负重，出现明显疼痛（VAS>5）请立即休息。" },
+    { k: "动作", a: "本阶段康复动作：踝泵 3 组 × 20 次；直腿抬高 3 组 × 10 次；床边垂膝屈膝训练 10 分钟（目标 0-100°）。每次动作间隔 2 小时，训练后可冰敷。" },
+    { k: "药", a: "利伐沙班每日固定时间服用 10mg；若漏服且距下次服药超过 12 小时，可立即补服，切勿一次服双倍剂量。服药期间注意牙龈出血、皮下瘀斑，如有请及时告知医生。" },
+    { k: "医生", a: "为您匹配到 3 位关节外科医生：\n· 王主任（主任医师）· 周三上午门诊\n· 李主治（副主任医师）· 明日下午可预约\n· 张治疗师（康复）· 随时线上指导\n可在「在线问诊」直接发起图文咨询。" },
+    { k: "报告", a: "已识别您的复查报告：屈膝 85°（同期目标 100°），假体位置良好，无松动征象。建议：加强屈膝与股四头肌训练，2 周后复查活动度。" },
+    { k: "方案", a: "本周康复方案：\n1) 运动：踝泵 / 直腿抬高 / 屈膝训练，每日 3 次\n2) 营养：高蛋白 + 补钙，药食同源汤品每日 1 次\n3) 监测：疼痛 VAS、屈膝角度、小腿周径\n4) 用药：塞来昔布、利伐沙班、钙尔奇 D 按时打卡" },
+  ];
+  return (
+    map.find((m) => q.includes(m.k))?.a ??
+    "已收到您的问题，正在结合您的康复档案分析。建议先记录当前疼痛评分与屈膝角度，稍后由骨灵给出个性化建议。"
+  );
+}
+
 function AiTab({ name }: { name: string }) {
-  const [msgs, setMsgs] = useState<{ role: "ai" | "me"; text: string }[]>([]);
+  const [msgs, setMsgs] = useState<{ role: "ai" | "me"; text: string }[]>([
+    { role: "ai", text: `${name}您好，我是骨安「骨灵」。康复动作、用药、饮食、复查都可以问我。` },
+  ]);
   const [input, setInput] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const send = (text: string) => {
     const q = text.trim();
     if (!q) return;
     setInput("");
     setMsgs((m) => [...m, { role: "me", text: q }]);
-    setTimeout(() => {
-      setMsgs((m) => [
-        ...m,
-        {
-          role: "ai",
-          text: "我已记录您的情况。术后早期肿胀属常见现象：请抬高患肢 20-30cm、每次冰敷 15-20 分钟，并按时完成踝泵运动。若出现明显红肿热痛或发热，请立即联系您的主管医生。",
-        },
-      ]);
-    }, 600);
+    setTimeout(() => setMsgs((m) => [...m, { role: "ai", text: aiAnswerFor(q) }]), 500);
+    setTimeout(() => scrollRef.current?.scrollTo({ top: 99999, behavior: "smooth" }), 550);
   };
 
   return (
     <div className="flex h-full flex-col bg-background">
-      <div
-        className={cn(
-          "flex-1 space-y-3 p-4",
-          msgs.length === 0 ? "overflow-hidden" : "overflow-y-auto",
-        )}
-      >
-        {msgs.length === 0 && (
-          <div className="flex h-full flex-col gap-3">
-            <div
-              className="shrink-0 rounded-3xl p-4 text-white"
-              style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
-            >
-              <div className="flex items-center gap-2 text-[15px] font-semibold text-white/90">
-                <Sparkles className="size-4" /> 骨灵 · AI 主治医生
-              </div>
-              <p className="mt-1.5 text-[20px] font-bold leading-snug">{name}，我在这里</p>
-              <p className="mt-0.5 whitespace-nowrap text-[15px] text-white/90">康复 · 用药 · 饮食 · 复查都可问</p>
-            </div>
-            <div className="grid flex-1 grid-cols-2 gap-2">
-              {AI_CHIPS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => send(c)}
-                  className="flex h-full min-h-16 items-center justify-center rounded-2xl border bg-card px-3 text-center text-[16px] font-semibold leading-snug active:scale-[0.99]"
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+      {/* 头部 */}
+      <div className="flex shrink-0 items-center gap-2.5 border-b bg-card px-3 py-2.5">
+        <span
+          className="grid size-11 shrink-0 place-items-center rounded-2xl text-primary-foreground"
+          style={{ background: "var(--gradient-primary)" }}
+        >
+          <Sparkles className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="whitespace-nowrap text-[17px] font-bold leading-tight">骨安 · 骨灵大模型</p>
+          <p className="mt-0.5 whitespace-nowrap text-[14px] text-muted-foreground">结合您的康复档案给出个性化建议</p>
+        </div>
+      </div>
 
+      {/* 消息 */}
+      <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
         {msgs.map((m, i) => (
           <div key={i} className={cn("flex", m.role === "me" ? "justify-end" : "justify-start")}>
             <p
               className={cn(
-                "max-w-[80%] rounded-2xl px-4 py-3 text-[17px] leading-relaxed",
-                m.role === "me" ? "bg-primary text-primary-foreground" : "border bg-card",
+                "max-w-[84%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-[17px] leading-relaxed",
+                m.role === "me"
+                  ? "rounded-br-md bg-primary text-primary-foreground"
+                  : "rounded-bl-md border bg-card",
               )}
             >
               {m.text}
             </p>
           </div>
         ))}
+        {msgs.length <= 1 && (
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            {AI_CHIPS.map((c) => (
+              <button
+                key={c}
+                onClick={() => send(c)}
+                className="rounded-2xl border bg-card px-3 py-3 text-center text-[16px] font-semibold leading-snug active:scale-[0.98]"
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      <div className="flex items-center gap-2 border-t bg-card p-3">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && send(input)}
-          placeholder="说说您的问题…"
-          className="h-12 min-w-0 flex-1 rounded-full border bg-background px-4 text-[17px] outline-none focus:border-primary"
-        />
-        <button
-          onClick={() => send(input)}
-          aria-label="发送"
-          className="grid size-12 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground active:scale-95"
-        >
-          <Send className="size-5" />
-        </button>
+
+      {/* 分类快捷 + 输入 */}
+      <div className="shrink-0 border-t bg-card px-3 pb-3 pt-2">
+        <div className="mb-2 flex gap-1.5 overflow-x-auto">
+          {AI_CATS.map((c) => {
+            const Icon = c.icon;
+            return (
+              <button
+                key={c.key}
+                onClick={() => send(c.prompt)}
+                className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-primary/10 px-3 py-1.5 text-[15px] font-bold text-primary active:scale-95"
+              >
+                <Icon className="size-4" /> {c.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-2 rounded-full border bg-muted/40 pl-3.5 pr-1">
+          <Sparkles className="size-4 shrink-0 text-primary" />
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && send(input)}
+            placeholder="说说您的问题…"
+            className="min-w-0 flex-1 bg-transparent py-3 text-[17px] outline-none"
+          />
+          <button aria-label="语音" className="grid size-10 shrink-0 place-items-center rounded-full text-primary active:scale-95">
+            <Mic className="size-5" />
+          </button>
+          <button
+            onClick={() => send(input)}
+            aria-label="发送"
+            className="my-1 grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground active:scale-95"
+          >
+            <Send className="size-5" />
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
 
 /* ============ 科普 ============ */
 
