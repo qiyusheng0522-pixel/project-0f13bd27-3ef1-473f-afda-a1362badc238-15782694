@@ -699,6 +699,7 @@ function HomeTab({
   onToggle,
   hasArchive,
   onOpenEdu,
+  onOpenAi,
 }: {
   name: string;
   bed: string;
@@ -711,12 +712,16 @@ function HomeTab({
   onToggle: (t: SimpleTodo) => void;
   hasArchive: boolean;
   onOpenEdu: () => void;
+  onOpenAi: () => void;
 }) {
   const [pathOpen, setPathOpen] = useState(false);
   const [archivePhoto, setArchivePhoto] = useState<string | null>(null);
   const [pack, setPack] = useState<(typeof SERVICE_PACKS)[number] | null>(null);
   const [allOpen, setAllOpen] = useState(false);
+  const [quick, setQuick] = useState<QuickKey | null>(null);
+  const [scaleOpen, setScaleOpen] = useState(false);
   const todoRef = useRef<HTMLDivElement>(null);
+
 
 
   const remaining = todos.filter((t) => !isDone(t)).length;
