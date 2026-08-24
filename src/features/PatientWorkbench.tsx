@@ -487,11 +487,20 @@ const GUEST_STEPS = [
   { n: 3, title: "查看康复方案", desc: "医生确认后生成每日打卡待办" },
 ];
 
-function GuestHomeTab({ onOpenEdu, onDone }: { onOpenEdu: () => void; onDone: () => void }) {
+function GuestHomeTab({
+  onOpenEdu,
+  onDone,
+  onOpenAi,
+}: {
+  onOpenEdu: () => void;
+  onDone: () => void;
+  onOpenAi: () => void;
+}) {
   const [photo, setPhoto] = useState<string | null>(null);
   const [scaleOpen, setScaleOpen] = useState(false);
   const [scaleDone, setScaleDone] = useState(false);
   const [allOpen, setAllOpen] = useState(false);
+  const [quick, setQuick] = useState<QuickKey | null>(null);
 
 
   return (
