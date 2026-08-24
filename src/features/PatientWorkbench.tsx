@@ -31,7 +31,7 @@ import {
   ImagePlus,
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
-import { QuickEntryFab, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
+import { QuickEntryRail, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
 import { cn } from "@/lib/utils";
 import {
   useCaseFlow,
@@ -422,7 +422,7 @@ export function PatientWorkbench() {
         bottom={<TabBar items={tabs} activeKey={tab} onChange={setTab} />}
         float={
           <>
-            <QuickEntryFab onPick={(k) => setQuick(k)} />
+            <QuickEntryRail onPick={(k) => setQuick(k)} />
             {quick && (
               <QuickEntrySheet
                 entry={quick}
