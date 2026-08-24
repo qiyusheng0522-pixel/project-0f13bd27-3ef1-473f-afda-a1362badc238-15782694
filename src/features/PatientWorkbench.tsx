@@ -792,18 +792,25 @@ function HomeTab({
           </section>
         )}
 
-        {/* 当前阶段 */}
+        {/* 当前阶段 + 住院流程轨道 */}
         <button
           onClick={() => setPathOpen(true)}
-          className="flex w-full items-center justify-between rounded-3xl bg-primary p-5 text-left active:scale-[0.99]"
+          className="w-full rounded-3xl bg-primary p-5 text-left active:scale-[0.99]"
           style={{ boxShadow: "var(--shadow-elevated)" }}
         >
-          <span className="min-w-0">
-            <span className="block text-[15px] font-semibold text-primary-foreground/80">当前阶段</span>
-            <span className="mt-0.5 block whitespace-nowrap font-display text-[22px] font-bold text-primary-foreground">{stageLabel}</span>
-          </span>
-          <ChevronRight className="size-6 shrink-0 text-primary-foreground/70" />
+          <div className="flex items-center justify-between gap-2">
+            <span className="min-w-0">
+              <span className="block text-[15px] font-semibold text-primary-foreground/80">当前阶段</span>
+              <span className="mt-0.5 block whitespace-nowrap font-display text-[22px] font-bold text-primary-foreground">
+                {PATH_STEPS[toPathIdx(stageIdx)]!.no} {PATH_STEPS[toPathIdx(stageIdx)]!.line1}
+                {PATH_STEPS[toPathIdx(stageIdx)]!.line2}
+              </span>
+            </span>
+            <ChevronRight className="size-6 shrink-0 text-primary-foreground/70" />
+          </div>
+          <PathRail current={toPathIdx(stageIdx)} onDark />
         </button>
+
 
 
         {/* 分类待办 */}
@@ -920,46 +927,134 @@ function HomeTab({
       )}
 
       {pathOpen && (
+        <Sheet title="住院流程" onClose={() => setPathOpen(false)}>
+          <PathRail current={toPathIdx(stageIdx)} />
+          <div className="mt-4 flex items-center gap-4 text-[15px] font-semibold text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full bg-success" /> 已完成
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full bg-primary" /> 进行中
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full bg-muted-foreground/30" /> 待进行
+            </span>
+          </div>
 
-        <Sheet title="我的住院路径" onClose={() => setPathOpen(false)}>
-          <ol className="space-y-2">
-            {STAGE_STEPS.map((s, i) => {
-              const state = i < stageIdx ? "done" : i === stageIdx ? "current" : "todo";
+          <ol className="mt-4 space-y-2">
+            {PATH_STEPS.map((s, i) => {
+              const pi = toPathIdx(stageIdx);
+              const state = i < pi ? "done" : i === pi ? "current" : "todo";
               return (
                 <li
-                  key={s.key}
+                  key={s.no}
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl border p-3.5",
+                    "flex items-start gap-3 rounded-2xl border p-3.5",
                     state === "current" && "border-primary bg-primary/5",
                   )}
                 >
                   <span
                     className={cn(
-                      "grid size-9 shrink-0 place-items-center rounded-full text-[16px] font-bold",
+                      "grid size-9 shrink-0 place-items-center rounded-full text-[15px] font-bold",
                       state === "done" && "bg-success/15 text-success",
                       state === "current" && "bg-primary text-primary-foreground",
                       state === "todo" && "bg-muted text-muted-foreground",
                     )}
                   >
-                    {state === "done" ? <Check className="size-5" /> : i + 1}
+                    {state === "done" ? <Check className="size-5" /> : s.no}
                   </span>
-                  <span className="text-[18px] font-bold">{s.label}</span>
-                  {state === "current" && (
-                    <span className="ml-auto rounded-full bg-primary/10 px-2.5 py-1 text-[15px] font-bold text-primary">
-                      当前
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2">
+                      <span className="text-[18px] font-bold">
+                        {s.line1}
+                        {s.line2}
+                      </span>
+                      {state === "current" && (
+                        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[14px] font-bold text-primary">
+                          当前
+                        </span>
+                      )}
                     </span>
-                  )}
+                    <span className="mt-0.5 block text-[15px] leading-snug text-muted-foreground">{s.desc}</span>
+                  </span>
                 </li>
               );
             })}
           </ol>
         </Sheet>
       )}
+
       </div>
     </div>
 
   );
 }
+
+/* ============ 住院流程横向轨道（01–06） ============ */
+
+function PathRail({ current, onDark }: { current: number; onDark?: boolean }) {
+  return (
+    <div className={cn("mt-4 flex items-start", onDark ? "text-primary-foreground" : "text-foreground")}>
+      {PATH_STEPS.map((s, i) => {
+        const state = i < current ? "done" : i === current ? "current" : "todo";
+        return (
+          <div key={s.no} className="relative flex min-w-0 flex-1 flex-col items-center">
+            {/* 连接线 */}
+            {i > 0 && (
+              <span
+                className={cn(
+                  "absolute right-1/2 top-[13px] h-[3px] w-full",
+                  state === "todo"
+                    ? onDark
+                      ? "bg-primary-foreground/25"
+                      : "bg-muted"
+                    : onDark
+                      ? "bg-primary-foreground"
+                      : "bg-success",
+                )}
+              />
+            )}
+            <span
+              className={cn(
+                "relative z-10 grid size-7 place-items-center rounded-full text-[12px] font-bold",
+                onDark
+                  ? state === "todo"
+                    ? "bg-primary-foreground/25 text-primary-foreground/80"
+                    : state === "current"
+                      ? "bg-primary-foreground text-primary ring-4 ring-primary-foreground/30"
+                      : "bg-primary-foreground text-primary"
+                  : state === "todo"
+                    ? "bg-muted text-muted-foreground"
+                    : state === "current"
+                      ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                      : "bg-success text-white",
+              )}
+            >
+              {state === "done" ? <Check className="size-4" /> : s.no}
+            </span>
+            <span
+              className={cn(
+                "mt-1.5 text-center text-[13px] font-bold leading-tight",
+                onDark
+                  ? state === "todo"
+                    ? "text-primary-foreground/60"
+                    : "text-primary-foreground"
+                  : state === "todo"
+                    ? "text-muted-foreground"
+                    : "text-foreground",
+              )}
+            >
+              {s.line1}
+              <br />
+              {s.line2}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 
 /* ============ 日程（过往打卡记录明细） ============ */
 
