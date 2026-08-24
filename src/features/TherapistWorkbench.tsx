@@ -908,6 +908,9 @@ function PostOpList({
             <Metric label="是否下地" value={p.status === "in-surgery" ? "未" : "已下地"} trend="up" />
           </div>
 
+          <IntraOpAssessmentBlock patient={p} />
+
+
           <div className="grid grid-cols-2 gap-0 border-t">
             <button
               onClick={() => onAddRecord(p)}
