@@ -532,7 +532,7 @@ function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwa
             <div className="rounded-lg bg-card ring-1 ring-border p-3 space-y-2.5">
               <p className="text-[12px] text-muted-foreground leading-snug">{generic.intro}</p>
               {generic.groups.map((g, gi) => (
-                <div key={gi} className="rounded-md bg-muted/40 ring-1 ring-border px-2.5 py-2">
+                <div key={gi} className="rounded-md bg-muted ring-1 ring-border px-2.5 py-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[13.5px] font-bold">{g.label}</span>
                     <span className="text-[11.5px] text-primary font-semibold tabular-nums whitespace-nowrap">{g.portion}</span>
