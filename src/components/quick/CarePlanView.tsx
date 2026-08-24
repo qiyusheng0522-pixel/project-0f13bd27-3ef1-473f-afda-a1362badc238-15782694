@@ -509,7 +509,7 @@ function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwa
   const [open, setOpen] = useState(defaultOpen);
   const generic = mealKey ? GENERIC_MEALS[mealKey] : undefined;
   return (
-    <div className="rounded-xl bg-muted/40 p-3">
+    <div className="rounded-xl bg-muted p-3">
       <div className="flex items-center justify-between px-1 gap-2">
         <button onClick={() => setOpen((v) => !v)} className="flex-1 flex items-center gap-2 text-left active:opacity-70 min-w-0" aria-expanded={open}>
           <ChevronDown className={`size-4 text-muted-foreground shrink-0 transition-transform ${open ? "" : "-rotate-90"}`} />
