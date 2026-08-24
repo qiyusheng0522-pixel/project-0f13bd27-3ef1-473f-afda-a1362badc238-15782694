@@ -414,7 +414,7 @@ const VISIT_ROWS: [string, string][] = [
   ["就诊时间", "2 周内复诊"],
 ];
 
-function _ReportView({ onGoPlan }: { onGoPlan: () => void }) {
+function ReportView({ onGoPlan }: { onGoPlan: () => void }) {
   return (
     <div>
       <section className="rounded-2xl bg-secondary p-4">

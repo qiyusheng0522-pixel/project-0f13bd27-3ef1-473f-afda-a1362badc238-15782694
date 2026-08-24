@@ -826,7 +826,7 @@ function TeamRow({ name, role, detail }: { name: string; role: string; detail: s
   );
 }
 
-function _UnpurchasedBody({ onPurchase }: { onPurchase: () => void }) {
+function UnpurchasedBody({ onPurchase }: { onPurchase: () => void }) {
   return (
     <div className="p-4 space-y-3.5">
       <div className="rounded-xl bg-destructive/5 ring-1 ring-destructive/15 p-3.5">
@@ -926,7 +926,7 @@ function ServicePlanFlow({ purchased, setPurchased }: { purchased: boolean; setP
               <AlertTriangle className="size-3" />系统识别：康复达标风险较高
             </p>
           </div>
-          <_UnpurchasedBody onPurchase={() => setPurchased(true)} />
+          <UnpurchasedBody onPurchase={() => setPurchased(true)} />
         </>
       )}
     </div>
