@@ -740,7 +740,7 @@ function WorkoutPlan({ purchased, onCheckin }: { purchased: boolean; onCheckin: 
       </div>
 
       <div className="px-4 pb-4">
-        <div className="rounded-xl bg-muted/30 p-3 ring-1 ring-border">
+        <div className="rounded-xl bg-muted p-3 ring-1 ring-border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[12.5px] text-muted-foreground">今日打卡进度</p>
