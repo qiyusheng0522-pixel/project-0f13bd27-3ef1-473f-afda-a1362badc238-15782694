@@ -1043,7 +1043,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
 
             <div className="px-4 mt-2 flex gap-1">
               {([{ k: "nutrition", l: "营养方案" }, { k: "herbal", l: "药食同源" }] as const).map((t) => (
-                <button key={t.k} onClick={() => setPlan(t.k)} className={`px-3.5 py-1.5 text-[13px] font-bold rounded-t-xl transition-colors whitespace-nowrap ${plan === t.k ? "bg-muted/30 text-primary" : "text-foreground/55"}`}>{t.l}</button>
+                <button key={t.k} onClick={() => setPlan(t.k)} className={`px-3.5 py-1.5 text-[13px] font-bold rounded-t-xl transition-colors whitespace-nowrap ${plan === t.k ? "bg-muted text-primary" : "text-foreground/55"}`}>{t.l}</button>
               ))}
             </div>
 
