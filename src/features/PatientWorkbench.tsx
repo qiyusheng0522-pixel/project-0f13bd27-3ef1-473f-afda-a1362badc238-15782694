@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Home,
   CalendarCheck,
@@ -439,7 +439,13 @@ export function PatientWorkbench() {
       {tab === "schedule" &&
         (guest ? <GuestLock title="暂无日程统计" desc="建档并生成康复方案后，这里会展示您的每日打卡完成情况与趋势。" onGo={() => setTab("home")} /> : <ScheduleTab todos={todos} isDone={isDone} />)}
       {tab === "ai" && <AiTab name={name} />}
-      {tab === "edu" && <EduTab inpatient={!guest && inpatient} />}
+      {tab === "edu" && (
+        <EduTab
+          inpatient={!guest && inpatient}
+          diagnosis={patient?.diagnosis ?? "膝关节置换术后"}
+          stageLabel={stageLabel}
+        />
+      )}
       {tab === "me" &&
         (guest ? <GuestLock title="还未建立健康档案" desc="拍照上传入院单 / 诊断证明，医生确认后可查看个人信息、住院记录与知情同意。" onGo={() => setTab("home")} /> : <MeTab name={name} bed={bed} inpatient={inpatient} days={days} />)}
     </PhoneShell>
@@ -704,6 +710,8 @@ function HomeTab({
   const [archivePhoto, setArchivePhoto] = useState<string | null>(null);
   const [pack, setPack] = useState<(typeof SERVICE_PACKS)[number] | null>(null);
   const [allOpen, setAllOpen] = useState(false);
+  const todoRef = useRef<HTMLDivElement>(null);
+
 
   const remaining = todos.filter((t) => !isDone(t)).length;
   const archived = hasArchive || !!archivePhoto;
@@ -722,9 +730,13 @@ function HomeTab({
             <span className="size-2 animate-pulse rounded-full bg-success" />
             {inpatient ? "住院中" : "居家康复"}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-4 py-2 text-[15px] font-bold text-muted-foreground">
-            今日待办 {remaining} 项
-          </span>
+          <button
+            onClick={() => todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary px-4 py-2 text-[15px] font-bold text-primary ring-1 ring-primary/15 active:scale-[0.98]"
+          >
+            今日待办 {remaining} 项 <ChevronRight className="size-4" />
+          </button>
+
         </div>
       </header>
 
@@ -795,6 +807,10 @@ function HomeTab({
 
 
         {/* 分类待办 */}
+        <div ref={todoRef} className="scroll-mt-3">
+          <h2 className="font-display text-[21px] font-bold">今日待办</h2>
+        </div>
+
         {CAT_ORDER.map((cat) => {
           const list = todos.filter((t) => t.cat === cat);
           if (!list.length) return null;
@@ -1019,7 +1035,7 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
               onClick={() => setShowRehab(true)}
               className="whitespace-nowrap rounded-full bg-secondary px-3 py-1.5 text-[15px] font-bold text-primary"
             >
-              康复评估 {flow.dailyRehab.length} 次 ›
+              康复方案 ›
             </button>
           </div>
         </div>
@@ -1104,11 +1120,36 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
       )}
 
       {showRehab && (
-        <Sheet title="康复评估记录" onClose={() => setShowRehab(false)}>
-          {flow.dailyRehab.length === 0 ? (
-            <p className="text-[17px] text-muted-foreground">暂无康复评估记录，治疗师评估后会显示在这里。</p>
+        <Sheet title="康复方案" onClose={() => setShowRehab(false)}>
+          <p className="text-[17px] leading-relaxed text-muted-foreground">
+            由您的主管治疗师制定，动作与角度会随恢复情况调整。
+          </p>
+          <h3 className="mt-4 text-[18px] font-bold">今日康复动作</h3>
+          {todos.filter((t) => t.cat === "康复动作").length === 0 ? (
+            <p className="mt-2 text-[17px] text-muted-foreground">暂无康复动作，方案生成后会显示在这里。</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="mt-2 space-y-2">
+              {todos
+                .filter((t) => t.cat === "康复动作")
+                .map((t) => (
+                  <li key={t.id} className="rounded-2xl border p-3.5">
+                    <p className="text-[18px] font-bold leading-snug">{t.title}</p>
+                    <p className="mt-1 text-[16px] leading-snug text-muted-foreground">{t.detail}</p>
+                    {t.time && (
+                      <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[14px] font-bold text-primary">
+                        <Clock className="size-4" /> {t.time}
+                      </span>
+                    )}
+                  </li>
+                ))}
+            </ul>
+          )}
+
+          <h3 className="mt-5 text-[18px] font-bold">治疗师评估调整记录</h3>
+          {flow.dailyRehab.length === 0 ? (
+            <p className="mt-2 text-[17px] text-muted-foreground">暂无评估记录，治疗师评估后会显示在这里。</p>
+          ) : (
+            <ul className="mt-2 space-y-3">
               {flow.dailyRehab.map((r) => (
                 <li key={r.id} className="rounded-2xl border p-4">
                   <div className="flex items-center justify-between">
@@ -1125,6 +1166,7 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
           )}
         </Sheet>
       )}
+
     </div>
   );
 }
@@ -1155,33 +1197,38 @@ function AiTab({ name }: { name: string }) {
 
   return (
     <div className="flex h-full flex-col bg-background">
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+      <div
+        className={cn(
+          "flex-1 space-y-3 p-4",
+          msgs.length === 0 ? "overflow-hidden" : "overflow-y-auto",
+        )}
+      >
         {msgs.length === 0 && (
-          <div className="space-y-4">
+          <div className="flex h-full flex-col gap-3">
             <div
-              className="rounded-3xl p-5 text-white"
+              className="shrink-0 rounded-3xl p-4 text-white"
               style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
             >
-              <div className="flex items-center gap-2 text-[16px] font-semibold text-white/90">
-                <Sparkles className="size-5" /> 骨灵 · AI 主治医生
+              <div className="flex items-center gap-2 text-[15px] font-semibold text-white/90">
+                <Sparkles className="size-4" /> 骨灵 · AI 主治医生
               </div>
-              <p className="mt-2 text-[22px] font-bold leading-snug">{name}，我在这里</p>
-              <p className="mt-1 text-[17px] text-white/90">康复、用药、饮食、复查都可以问我</p>
+              <p className="mt-1.5 text-[20px] font-bold leading-snug">{name}，我在这里</p>
+              <p className="mt-0.5 whitespace-nowrap text-[15px] text-white/90">康复 · 用药 · 饮食 · 复查都可问</p>
             </div>
-            <div className="space-y-2">
+            <div className="grid flex-1 grid-cols-2 gap-2">
               {AI_CHIPS.map((c) => (
                 <button
                   key={c}
                   onClick={() => send(c)}
-                  className="flex w-full items-center justify-between rounded-2xl border bg-card px-4 py-3.5 text-left text-[18px] font-semibold active:scale-[0.99]"
+                  className="flex h-full min-h-16 items-center justify-center rounded-2xl border bg-card px-3 text-center text-[16px] font-semibold leading-snug active:scale-[0.99]"
                 >
                   {c}
-                  <ChevronRight className="size-5 text-muted-foreground" />
                 </button>
               ))}
             </div>
           </div>
         )}
+
         {msgs.map((m, i) => (
           <div key={i} className={cn("flex", m.role === "me" ? "justify-end" : "justify-start")}>
             <p
@@ -1219,12 +1266,45 @@ function AiTab({ name }: { name: string }) {
 
 type EduOpen = (EduItem & { unread?: boolean }) | null;
 
-function EduTab({ inpatient }: { inpatient: boolean }) {
+/** 结合病症 + 当前阶段推导相关宣教主题 */
+function relevantTopics(diagnosis: string, stageLabel: string, inpatient: boolean): string[] {
+  const t = new Set<string>();
+  if (/膝|置换|TKA/.test(diagnosis)) {
+    t.add("关节置换术后");
+    t.add("屈膝角度");
+  }
+  if (/髋|股/.test(diagnosis)) t.add("行走与防跌倒");
+  if (/韧带|ACL|肩/.test(diagnosis)) t.add("关节置换术后");
+  if (/术前|入院|准备|办理/.test(stageLabel)) {
+    t.add("用药安全");
+  } else if (/术后|康复|手术/.test(stageLabel)) {
+    t.add("疼痛与消肿");
+    t.add("血栓预防");
+    t.add("用药安全");
+  }
+  if (!inpatient || /出院|居家|院后|随访/.test(stageLabel)) {
+    t.add("行走与防跌倒");
+    t.add("饮食营养");
+    t.add("复查随访");
+  }
+  return [...t];
+}
+
+function EduTab({
+  inpatient,
+  diagnosis,
+  stageLabel,
+}: {
+  inpatient: boolean;
+  diagnosis: string;
+  stageLabel: string;
+}) {
   const flow = useCaseFlow();
   const scope: "院内" | "居家" = inpatient ? "院内" : "居家";
   const [kw, setKw] = useState("");
   const [topic, setTopic] = useState("全部");
   const [open, setOpen] = useState<EduOpen>(null);
+  const [showRest, setShowRest] = useState(false);
 
   const filtered = useMemo(() => {
     const q = kw.trim();
@@ -1236,8 +1316,16 @@ function EduTab({ inpatient }: { inpatient: boolean }) {
   }, [kw, topic]);
 
   const searching = kw.trim() !== "" || topic !== "全部";
-  const list = filtered.filter((e) => e.scope === scope);
-  const other = filtered.filter((e) => e.scope !== scope);
+
+  /** 默认视图：只展示与病症/阶段匹配的宣教，避免无用内容 */
+  const { recommended, rest } = useMemo(() => {
+    const topics = relevantTopics(diagnosis, stageLabel, inpatient);
+    const hit = (e: EduItem) => e.scope === scope && e.topics.some((t) => topics.includes(t));
+    let rec = EDU_LIB.filter(hit).slice(0, 4);
+    if (!rec.length) rec = EDU_LIB.filter((e) => e.scope === scope).slice(0, 4);
+    return { recommended: rec, rest: EDU_LIB.filter((e) => !rec.includes(e)) };
+  }, [diagnosis, stageLabel, inpatient, scope]);
+
 
   return (
     <div className="space-y-4 p-3 pb-6">
@@ -1313,19 +1401,39 @@ function EduTab({ inpatient }: { inpatient: boolean }) {
         )
       ) : (
         <>
-          <EduGroup title={`${scope}必读宣教`}>
-            {list.map((e) => (
+          <div className="rounded-2xl bg-secondary/60 px-4 py-3">
+            <p className="text-[16px] font-bold text-primary">
+              按您的病症与当前阶段推荐：{diagnosis} · {stageLabel}
+            </p>
+          </div>
+
+          <EduGroup title={`${scope}必读（${recommended.length} 条）`}>
+            {recommended.map((e) => (
               <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
             ))}
           </EduGroup>
 
-          <EduGroup title={scope === "院内" ? "出院后可提前了解" : "住院期间回顾"}>
-            {other.map((e) => (
-              <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
-            ))}
-          </EduGroup>
+          {rest.length > 0 && (
+            <>
+              <button
+                onClick={() => setShowRest((v) => !v)}
+                className="flex w-full items-center justify-center gap-1 rounded-2xl border-2 py-3 text-[17px] font-bold text-primary"
+              >
+                {showRest ? "收起其他宣教" : `查看其他宣教 ${rest.length} 条`}
+                <ChevronRight className={cn("size-5", showRest && "rotate-90")} />
+              </button>
+              {showRest && (
+                <EduGroup title="其他宣教">
+                  {rest.map((e) => (
+                    <EduCard key={e.title} item={e} onOpen={() => setOpen(e)} />
+                  ))}
+                </EduGroup>
+              )}
+            </>
+          )}
         </>
       )}
+
 
       {open && (
         <Sheet title={open.title} onClose={() => setOpen(null)}>
