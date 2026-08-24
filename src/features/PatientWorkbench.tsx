@@ -990,6 +990,72 @@ function HomeTab({
   );
 }
 
+/* ============ 住院流程横向轨道（01–06） ============ */
+
+function PathRail({ current, onDark }: { current: number; onDark?: boolean }) {
+  return (
+    <div className={cn("mt-4 flex items-start", onDark ? "text-primary-foreground" : "text-foreground")}>
+      {PATH_STEPS.map((s, i) => {
+        const state = i < current ? "done" : i === current ? "current" : "todo";
+        return (
+          <div key={s.no} className="relative flex min-w-0 flex-1 flex-col items-center">
+            {/* 连接线 */}
+            {i > 0 && (
+              <span
+                className={cn(
+                  "absolute right-1/2 top-[13px] h-[3px] w-full",
+                  state === "todo"
+                    ? onDark
+                      ? "bg-primary-foreground/25"
+                      : "bg-muted"
+                    : onDark
+                      ? "bg-primary-foreground"
+                      : "bg-success",
+                )}
+              />
+            )}
+            <span
+              className={cn(
+                "relative z-10 grid size-7 place-items-center rounded-full text-[12px] font-bold",
+                onDark
+                  ? state === "todo"
+                    ? "bg-primary-foreground/25 text-primary-foreground/80"
+                    : state === "current"
+                      ? "bg-primary-foreground text-primary ring-4 ring-primary-foreground/30"
+                      : "bg-primary-foreground text-primary"
+                  : state === "todo"
+                    ? "bg-muted text-muted-foreground"
+                    : state === "current"
+                      ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                      : "bg-success text-white",
+              )}
+            >
+              {state === "done" ? <Check className="size-4" /> : s.no}
+            </span>
+            <span
+              className={cn(
+                "mt-1.5 text-center text-[13px] font-bold leading-tight",
+                onDark
+                  ? state === "todo"
+                    ? "text-primary-foreground/60"
+                    : "text-primary-foreground"
+                  : state === "todo"
+                    ? "text-muted-foreground"
+                    : "text-foreground",
+              )}
+            >
+              {s.line1}
+              <br />
+              {s.line2}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
 /* ============ 日程（过往打卡记录明细） ============ */
 
 interface DayRecord {
