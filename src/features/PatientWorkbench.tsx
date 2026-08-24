@@ -1104,11 +1104,36 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
       )}
 
       {showRehab && (
-        <Sheet title="康复评估记录" onClose={() => setShowRehab(false)}>
-          {flow.dailyRehab.length === 0 ? (
-            <p className="text-[17px] text-muted-foreground">暂无康复评估记录，治疗师评估后会显示在这里。</p>
+        <Sheet title="康复方案" onClose={() => setShowRehab(false)}>
+          <p className="text-[17px] leading-relaxed text-muted-foreground">
+            由您的主管治疗师制定，动作与角度会随恢复情况调整。
+          </p>
+          <h3 className="mt-4 text-[18px] font-bold">今日康复动作</h3>
+          {todos.filter((t) => t.cat === "康复动作").length === 0 ? (
+            <p className="mt-2 text-[17px] text-muted-foreground">暂无康复动作，方案生成后会显示在这里。</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="mt-2 space-y-2">
+              {todos
+                .filter((t) => t.cat === "康复动作")
+                .map((t) => (
+                  <li key={t.id} className="rounded-2xl border p-3.5">
+                    <p className="text-[18px] font-bold leading-snug">{t.title}</p>
+                    <p className="mt-1 text-[16px] leading-snug text-muted-foreground">{t.detail}</p>
+                    {t.time && (
+                      <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[14px] font-bold text-primary">
+                        <Clock className="size-4" /> {t.time}
+                      </span>
+                    )}
+                  </li>
+                ))}
+            </ul>
+          )}
+
+          <h3 className="mt-5 text-[18px] font-bold">治疗师评估调整记录</h3>
+          {flow.dailyRehab.length === 0 ? (
+            <p className="mt-2 text-[17px] text-muted-foreground">暂无评估记录，治疗师评估后会显示在这里。</p>
+          ) : (
+            <ul className="mt-2 space-y-3">
               {flow.dailyRehab.map((r) => (
                 <li key={r.id} className="rounded-2xl border p-4">
                   <div className="flex items-center justify-between">
@@ -1125,6 +1150,7 @@ function ScheduleTab({ todos, isDone }: { todos: SimpleTodo[]; isDone: (t: Simpl
           )}
         </Sheet>
       )}
+
     </div>
   );
 }
