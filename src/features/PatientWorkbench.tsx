@@ -1155,33 +1155,38 @@ function AiTab({ name }: { name: string }) {
 
   return (
     <div className="flex h-full flex-col bg-background">
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+      <div
+        className={cn(
+          "flex-1 space-y-3 p-4",
+          msgs.length === 0 ? "overflow-hidden" : "overflow-y-auto",
+        )}
+      >
         {msgs.length === 0 && (
-          <div className="space-y-4">
+          <div className="flex h-full flex-col gap-3">
             <div
-              className="rounded-3xl p-5 text-white"
+              className="shrink-0 rounded-3xl p-4 text-white"
               style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
             >
-              <div className="flex items-center gap-2 text-[16px] font-semibold text-white/90">
-                <Sparkles className="size-5" /> 骨灵 · AI 主治医生
+              <div className="flex items-center gap-2 text-[15px] font-semibold text-white/90">
+                <Sparkles className="size-4" /> 骨灵 · AI 主治医生
               </div>
-              <p className="mt-2 text-[22px] font-bold leading-snug">{name}，我在这里</p>
-              <p className="mt-1 text-[17px] text-white/90">康复、用药、饮食、复查都可以问我</p>
+              <p className="mt-1.5 text-[20px] font-bold leading-snug">{name}，我在这里</p>
+              <p className="mt-0.5 whitespace-nowrap text-[15px] text-white/90">康复 · 用药 · 饮食 · 复查都可问</p>
             </div>
-            <div className="space-y-2">
+            <div className="grid flex-1 grid-cols-2 gap-2">
               {AI_CHIPS.map((c) => (
                 <button
                   key={c}
                   onClick={() => send(c)}
-                  className="flex w-full items-center justify-between rounded-2xl border bg-card px-4 py-3.5 text-left text-[18px] font-semibold active:scale-[0.99]"
+                  className="flex h-full min-h-16 items-center justify-center rounded-2xl border bg-card px-3 text-center text-[16px] font-semibold leading-snug active:scale-[0.99]"
                 >
                   {c}
-                  <ChevronRight className="size-5 text-muted-foreground" />
                 </button>
               ))}
             </div>
           </div>
         )}
+
         {msgs.map((m, i) => (
           <div key={i} className={cn("flex", m.role === "me" ? "justify-end" : "justify-start")}>
             <p
