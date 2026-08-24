@@ -665,6 +665,18 @@ function GuestHomeTab({
           <p className="mt-1 text-[15px] leading-snug text-muted-foreground/80">完成建档与量表后自动出现康复动作、用药、护理与问卷</p>
         </section>
 
+        {/* 快捷入口 */}
+        <QuickEntryCard onPick={(k) => setQuick(k)} />
+
+        {quick && (
+          <QuickEntrySheet
+            entry={quick}
+            onClose={() => setQuick(null)}
+            onGoTodos={() => setQuick(null)}
+            onOpenScale={() => setScaleOpen(true)}
+            onOpenAi={onOpenAi}
+          />
+        )}
 
       <ServicePackBanner activated={false} onOpenAll={() => setAllOpen(true)} onPick={(s) => (s.title === "宣教百科" ? onOpenEdu() : setAllOpen(true))} />
 
