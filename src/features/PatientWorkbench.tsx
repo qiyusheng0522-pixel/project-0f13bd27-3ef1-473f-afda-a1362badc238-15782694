@@ -1510,7 +1510,18 @@ function AiTab({ name }: { name: string }) {
     { role: "ai", text: `${name}您好，我是骨安「骨灵」。康复动作、用药、饮食、复查都可以问我。` },
   ]);
   const [input, setInput] = useState("");
+  const [voice, setVoice] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 语音输入模拟：开启 3 秒后自动转写为文字
+  useEffect(() => {
+    if (!voice) return;
+    const id = setTimeout(() => {
+      setInput((v) => (v ? v : "我今天膝盖有点肿，还能做屈膝练习吗"));
+      setVoice(false);
+    }, 2000);
+    return () => clearTimeout(id);
+  }, [voice]);
 
   const send = (text: string) => {
     const q = text.trim();
