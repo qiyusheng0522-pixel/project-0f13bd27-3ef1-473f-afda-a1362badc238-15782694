@@ -567,7 +567,7 @@ function CareGroupBanner({ onOpen }: { onOpen: () => void }) {
         </div>
         <div className="min-w-0">
           <div className="text-[18px] font-bold text-white">加入康复关怀群</div>
-          <div className="text-[14px] text-white/85">专业医生团队在线答疑</div>
+          <div className="text-[14px] text-white/85">康复提醒 · 病友交流 · 智能助手</div>
         </div>
       </div>
       <span className="shrink-0 rounded-xl bg-white px-3.5 py-2 text-[15px] font-bold text-amber-600 shadow-sm active:scale-95">
@@ -589,13 +589,6 @@ function CareGroupSheet({ onClose }: { onClose: () => void }) {
     setTimeout(() => setTip(null), 1700);
   };
 
-  const members = [
-    { n: "陈磊", r: "主任医师" },
-    { n: "刘静", r: "康复治疗师" },
-    { n: "陈悦", r: "营养师" },
-    { n: "王护", r: "责任护士" },
-  ];
-
   return (
     <Sheet title="加入企微康复关怀群" onClose={onClose}>
       <div className="space-y-5">
@@ -604,22 +597,14 @@ function CareGroupSheet({ onClose }: { onClose: () => void }) {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="whitespace-nowrap rounded-full bg-white/20 px-2.5 py-1 text-[13px] font-bold">
-                企业微信 · 医护实名服务群
+                企业微信 · 康复关怀群
               </div>
               <div className="mt-2 truncate text-[19px] font-bold">{GROUP_NAME}</div>
-              <div className="mt-0.5 text-[14px] text-white/85">已有 128 位病友 · 医护 4 人在线</div>
+              <div className="mt-0.5 text-[14px] text-white/85">已有 128 位病友加入交流</div>
             </div>
             <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/20">
               <Users className="size-7" />
             </div>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            {members.map((m) => (
-              <div key={m.n} className="flex-1 rounded-xl bg-white/15 px-2 py-1.5 text-center">
-                <div className="text-[14px] font-bold">{m.n}</div>
-                <div className="whitespace-nowrap text-[11px] text-white/80">{m.r}</div>
-              </div>
-            ))}
           </div>
         </div>
 
@@ -664,7 +649,7 @@ function CareGroupSheet({ onClose }: { onClose: () => void }) {
         <div className="rounded-3xl border bg-card p-4">
           <p className="text-[17px] font-bold">入群三步</p>
           <ol className="mt-2 space-y-2">
-            {["保存或长按识别上方二维码", "在企业微信中确认加入关怀群", "群内回复姓名+床号，医护为您备注"].map((s, i) => (
+            {["保存或长按识别上方二维码", "在企业微信中确认加入关怀群", "群内回复姓名+住院号，助手为您备注"].map((s, i) => (
               <li key={s} className="flex items-start gap-2.5">
                 <span className="grid size-7 shrink-0 place-items-center rounded-full bg-emerald-600/10 text-[14px] font-bold text-emerald-700">
                   {i + 1}
@@ -679,7 +664,7 @@ function CareGroupSheet({ onClose }: { onClose: () => void }) {
         <div className="rounded-3xl bg-muted/50 p-4">
           <p className="text-[16px] font-bold">群内可获得</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {["每日康复提醒", "医生答疑 8:00-21:00", "复查预约协助", "饮食与用药指导", "同期病友交流"].map((t) => (
+            {["每日康复提醒", "智能康复问答", "复查预约协助", "饮食与用药指导", "同期病友交流"].map((t) => (
               <span key={t} className="rounded-full bg-card px-3 py-1.5 text-[14px] font-semibold text-foreground ring-1 ring-border">
                 {t}
               </span>
@@ -690,7 +675,7 @@ function CareGroupSheet({ onClose }: { onClose: () => void }) {
         <button
           onClick={() => {
             setJoined(true);
-            show(joined ? "正在打开企业微信群聊…" : "已记录，医护将尽快通过您的申请");
+            show(joined ? "正在打开企业微信群聊…" : "已记录，请等待群助手确认");
           }}
           className="w-full rounded-2xl bg-primary py-4 text-[18px] font-bold text-primary-foreground active:scale-[0.98]"
         >
