@@ -687,7 +687,7 @@ function ExercisePlanCard({ plan, purchased, onCheckin }: { plan: ExercisePlan; 
         </div>
       )}
       {!purchased && (
-        <div className="mx-2.5 mb-2 rounded-lg bg-muted/50 ring-1 ring-dashed ring-border px-2.5 py-1.5 flex items-center gap-1.5">
+        <div className="mx-2.5 mb-2 rounded-lg bg-muted ring-1 ring-dashed ring-border px-2.5 py-1.5 flex items-center gap-1.5">
           <Lock className="size-3 text-muted-foreground shrink-0" />
           <p className="text-[11px] text-muted-foreground leading-snug">开通专属方案解锁 <span className="font-bold text-foreground/80">康复专家 1:1 陪练</span> 与个性化强度调整</p>
         </div>
