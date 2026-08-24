@@ -128,8 +128,8 @@ export function QuickEntryRail({ onPick }: { onPick: (k: QuickKey) => void }) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         className={cn(
-          "absolute right-0 z-40 grid h-24 w-8 touch-none place-items-center rounded-l-2xl bg-accent text-accent-foreground active:scale-95",
-          dragging ? "ring-4 ring-accent/30" : "transition-[top] duration-150",
+          "absolute right-0 z-40 grid h-24 w-8 touch-none place-items-center rounded-l-2xl bg-amber-500 text-white active:scale-95",
+          dragging ? "ring-4 ring-amber-500/30" : "transition-[top] duration-150",
         )}
         style={{ top: `${top * 100}%`, boxShadow: "var(--shadow-elevated)" }}
       >

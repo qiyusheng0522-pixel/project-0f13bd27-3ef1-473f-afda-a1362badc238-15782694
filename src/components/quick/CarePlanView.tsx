@@ -487,7 +487,7 @@ function TagHistoryContent() {
       <p className="mt-1 text-[13px] text-muted-foreground">您已成功移除 {REMOVED_TAGS.length} 个标签，康复进展顺利！</p>
       <div className="mt-4 space-y-3">
         {REMOVED_TAGS.map((t) => (
-          <div key={t.name} className="rounded-xl ring-1 ring-border bg-muted/30 p-3">
+          <div key={t.name} className="rounded-xl ring-1 ring-border bg-muted p-3">
             <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
               <div className="flex items-center gap-2">
                 <span className="text-[14px] font-bold line-through decoration-muted-foreground/60 text-muted-foreground">{t.name}</span>
@@ -509,7 +509,7 @@ function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwa
   const [open, setOpen] = useState(defaultOpen);
   const generic = mealKey ? GENERIC_MEALS[mealKey] : undefined;
   return (
-    <div className="rounded-xl bg-muted/40 p-3">
+    <div className="rounded-xl bg-muted p-3">
       <div className="flex items-center justify-between px-1 gap-2">
         <button onClick={() => setOpen((v) => !v)} className="flex-1 flex items-center gap-2 text-left active:opacity-70 min-w-0" aria-expanded={open}>
           <ChevronDown className={`size-4 text-muted-foreground shrink-0 transition-transform ${open ? "" : "-rotate-90"}`} />
@@ -532,7 +532,7 @@ function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwa
             <div className="rounded-lg bg-card ring-1 ring-border p-3 space-y-2.5">
               <p className="text-[12px] text-muted-foreground leading-snug">{generic.intro}</p>
               {generic.groups.map((g, gi) => (
-                <div key={gi} className="rounded-md bg-muted/40 ring-1 ring-border px-2.5 py-2">
+                <div key={gi} className="rounded-md bg-muted ring-1 ring-border px-2.5 py-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[13.5px] font-bold">{g.label}</span>
                     <span className="text-[11.5px] text-primary font-semibold tabular-nums whitespace-nowrap">{g.portion}</span>
@@ -545,7 +545,7 @@ function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwa
                   {g.note && <p className="mt-1 text-[11.5px] text-muted-foreground leading-snug">提示：{g.note}</p>}
                 </div>
               ))}
-              <div className="rounded-md bg-primary/5 ring-1 ring-dashed ring-primary/25 px-2.5 py-2 flex items-center gap-2">
+              <div className="rounded-md bg-primary/[0.08] ring-1 ring-dashed ring-primary/25 px-2.5 py-2 flex items-center gap-2">
                 <Lock className="size-3 text-primary shrink-0" />
                 <p className="text-[11.5px] text-foreground/75 leading-snug flex-1">开通后将基于您的康复阶段与口味生成 <span className="font-bold text-primary">具体菜品</span> 与 <span className="font-bold text-primary">名厨做法</span></p>
               </div>
@@ -687,13 +687,13 @@ function ExercisePlanCard({ plan, purchased, onCheckin }: { plan: ExercisePlan; 
         </div>
       )}
       {!purchased && (
-        <div className="mx-2.5 mb-2 rounded-lg bg-muted/50 ring-1 ring-dashed ring-border px-2.5 py-1.5 flex items-center gap-1.5">
+        <div className="mx-2.5 mb-2 rounded-lg bg-muted ring-1 ring-dashed ring-border px-2.5 py-1.5 flex items-center gap-1.5">
           <Lock className="size-3 text-muted-foreground shrink-0" />
           <p className="text-[11px] text-muted-foreground leading-snug">开通专属方案解锁 <span className="font-bold text-foreground/80">康复专家 1:1 陪练</span> 与个性化强度调整</p>
         </div>
       )}
 
-      <div className="mx-2.5 mb-2 rounded-lg bg-muted/40 px-2.5 py-2 flex items-center justify-between gap-2">
+      <div className="mx-2.5 mb-2 rounded-lg bg-muted px-2.5 py-2 flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[11px] text-muted-foreground">今日目标</p>
           <p className="text-[12.5px] font-bold leading-tight truncate">{plan.target}</p>
@@ -740,7 +740,7 @@ function WorkoutPlan({ purchased, onCheckin }: { purchased: boolean; onCheckin: 
       </div>
 
       <div className="px-4 pb-4">
-        <div className="rounded-xl bg-muted/30 p-3 ring-1 ring-border">
+        <div className="rounded-xl bg-muted p-3 ring-1 ring-border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[12.5px] text-muted-foreground">今日打卡进度</p>
@@ -980,7 +980,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
 
   return (
     <QuickSheet title="健康方案" subtitle="安家在护 · 膝关节置换康复" onClose={onClose}>
-      <div className="min-h-full pb-6 bg-muted/20">
+      <div className="min-h-full pb-6 bg-background">
         <div className="px-4 pt-3">
           <div className="inline-flex items-center gap-1 rounded-full bg-card ring-1 ring-border p-0.5 text-[11px] font-bold">
             <button onClick={() => setPurchased(false)} className={`px-2.5 py-1.5 rounded-full transition-colors whitespace-nowrap ${!purchased ? "bg-foreground text-background" : "text-muted-foreground"}`}>未开通预览</button>
@@ -998,7 +998,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
               <p className="text-[14px] font-bold">更好的康复从规律训练开始</p>
               <span className="text-primary">◆</span>
             </div>
-            <div className="rounded-xl bg-muted/30 p-3.5 ring-1 ring-border">
+            <div className="rounded-xl bg-muted p-3.5 ring-1 ring-border">
               <TagBlock icon={<AlertTriangle className="size-3.5" />} title="专病" tags={DISEASE_TAGS} tagClass="text-destructive bg-destructive/10 ring-destructive/15" onTagClick={setSelectedTag} />
               <div className="h-px bg-border my-3" />
               <TagBlock icon={<Activity className="size-3.5" />} title="待改善生活方式" tags={LIFESTYLE_TAGS} tagClass="text-warning bg-warning/10 ring-warning/20" onTagClick={setSelectedTag} />
@@ -1043,11 +1043,11 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
 
             <div className="px-4 mt-2 flex gap-1">
               {([{ k: "nutrition", l: "营养方案" }, { k: "herbal", l: "药食同源" }] as const).map((t) => (
-                <button key={t.k} onClick={() => setPlan(t.k)} className={`px-3.5 py-1.5 text-[13px] font-bold rounded-t-xl transition-colors whitespace-nowrap ${plan === t.k ? "bg-muted/30 text-primary" : "text-foreground/55"}`}>{t.l}</button>
+                <button key={t.k} onClick={() => setPlan(t.k)} className={`px-3.5 py-1.5 text-[13px] font-bold rounded-t-xl transition-colors whitespace-nowrap ${plan === t.k ? "bg-muted text-primary" : "text-foreground/55"}`}>{t.l}</button>
               ))}
             </div>
 
-            <div className="bg-muted/30 px-4 pt-4 pb-4">
+            <div className="bg-muted px-4 pt-4 pb-4">
               <p className="text-center text-[13px] text-muted-foreground">当前您执行的是 <span className="text-warning font-bold">{plan === "nutrition" ? "营养方案" : "药食同源方案"}</span></p>
 
               <div className="mt-3 flex items-center justify-between gap-2">
