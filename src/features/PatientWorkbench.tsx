@@ -920,6 +920,21 @@ function HomeTab({
         />
       )}
 
+      {quick && (
+        <QuickEntrySheet
+          entry={quick}
+          onClose={() => setQuick(null)}
+          onGoTodos={() => {
+            setQuick(null);
+            todoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          onOpenScale={() => setScaleOpen(true)}
+          onOpenAi={onOpenAi}
+        />
+      )}
+
+      {scaleOpen && <ScaleSheet onClose={() => setScaleOpen(false)} onSubmit={() => setScaleOpen(false)} />}
+
 
       {pack && (
         <Sheet title={pack.title} onClose={() => setPack(null)}>
