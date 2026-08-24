@@ -704,6 +704,8 @@ function HomeTab({
   const [archivePhoto, setArchivePhoto] = useState<string | null>(null);
   const [pack, setPack] = useState<(typeof SERVICE_PACKS)[number] | null>(null);
   const [allOpen, setAllOpen] = useState(false);
+  const todoRef = useRef<HTMLDivElement>(null);
+
 
   const remaining = todos.filter((t) => !isDone(t)).length;
   const archived = hasArchive || !!archivePhoto;
