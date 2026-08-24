@@ -1047,7 +1047,7 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
               ))}
             </div>
 
-            <div className="bg-muted/30 px-4 pt-4 pb-4">
+            <div className="bg-muted px-4 pt-4 pb-4">
               <p className="text-center text-[13px] text-muted-foreground">当前您执行的是 <span className="text-warning font-bold">{plan === "nutrition" ? "营养方案" : "药食同源方案"}</span></p>
 
               <div className="mt-3 flex items-center justify-between gap-2">
