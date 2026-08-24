@@ -35,7 +35,10 @@ export function PatientArchiveSheet({
   const intraOp = patient.id === DEMO_PATIENT_ID ? flow.intraOp : null;
   const intraOpFields = intraOp ? intraOpFindings(intraOp) : [];
   const intraOpAbnormal = intraOpFields.filter((f) => f.abnormal);
-  const nurseAbnormal = patient.id === DEMO_PATIENT_ID ? flow.abnormal.filter((a) => a.source === "护士") : [];
+  const careAbnormal =
+    patient.id === DEMO_PATIENT_ID
+      ? flow.abnormal.filter((a) => a.source === "护士" || a.source === "治疗师")
+      : [];
   return (
     <Sheet onClose={onClose} title="患者档案">
       <div className="space-y-3 p-3">
@@ -69,6 +72,31 @@ export function PatientArchiveSheet({
             <Field label="责任医生" value={patient.responsibleDoctor ?? "—"} />
           </div>
         </div>
+
+        {/* 异常指标总览（治疗师 / 护理录入）—— 护士、医生、治疗师多端同步高亮 */}
+        {careAbnormal.length > 0 && (
+          <div className="rounded-2xl border-2 border-destructive bg-destructive/10 p-3">
+            <div className="flex items-center gap-1 text-[11px] font-bold text-destructive">
+              <AlertTriangle className="h-3.5 w-3.5 animate-pulse" />
+              异常指标提醒 · 共 {careAbnormal.length} 项（护理 / 治疗师录入）
+            </div>
+            <div className="mt-2 space-y-1">
+              {careAbnormal.map((a) => (
+                <div
+                  key={`ov-${a.id}`}
+                  className="flex items-center justify-between gap-2 rounded-lg bg-destructive px-2 py-1.5 text-[10px] font-bold text-destructive-foreground ring-2 ring-destructive/30"
+                >
+                  <span>⚠ {a.label}</span>
+                  <span className="font-mono">{a.value}</span>
+                  <span className="shrink-0 font-normal opacity-80">{a.source}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-1.5 text-[10px] text-destructive">医生 / 护士 / 治疗师端均可查看，请及时处理并记录处置措施。</div>
+          </div>
+        )}
+
+
 
         {/* 跨角色共享备注 */}
         <SectionTitle icon={StickyNote} text="患者备注（跨角色共享）" tone="text-info" />
@@ -266,17 +294,17 @@ export function PatientArchiveSheet({
           </>
         )}
 
-        {/* 护士录入的住院指标异常（含 DVT / 血栓）—— 多端同步高亮 */}
-        {nurseAbnormal.length > 0 && (
+        {/* 治疗师 / 护士录入的指标异常（含 DVT / 血栓）—— 多端同步高亮 */}
+        {careAbnormal.length > 0 && (
           <>
-            <SectionTitle icon={ShieldAlert} text="住院指标异常 · 护士录入（含血栓）" tone="text-destructive" />
+            <SectionTitle icon={ShieldAlert} text="指标异常 · 护理 / 治疗师录入（含血栓）" tone="text-destructive" />
             <div className="rounded-xl border bg-destructive/5 p-3 text-[11px]">
               <div className="mb-2 flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-1 text-[10px] font-bold text-destructive">
                 <AlertTriangle className="h-3 w-3" />
-                护理录入存在 {nurseAbnormal.length} 项异常指标，已同步医生 / 治疗师 / 患者端
+                共 {careAbnormal.length} 项异常指标，已同步医生 / 护士 / 治疗师 / 患者端
               </div>
               <div className="flex flex-wrap gap-1">
-                {nurseAbnormal.map((a) => (
+                {careAbnormal.map((a) => (
                   <span
                     key={a.id}
                     className="animate-pulse rounded-md bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground ring-2 ring-destructive/40"
@@ -286,7 +314,7 @@ export function PatientArchiveSheet({
                 ))}
               </div>
               <div className="mt-2 space-y-1">
-                {nurseAbnormal.map((a) => (
+                {careAbnormal.map((a) => (
                   <div
                     key={`n-${a.id}`}
                     className="rounded-lg border border-destructive/30 bg-destructive/5 p-2 text-[10px] text-destructive"
@@ -298,6 +326,7 @@ export function PatientArchiveSheet({
               </div>
             </div>
           </>
+
         )}
 
 
