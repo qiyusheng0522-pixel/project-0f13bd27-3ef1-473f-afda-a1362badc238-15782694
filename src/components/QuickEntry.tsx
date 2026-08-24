@@ -1352,21 +1352,8 @@ export function QuickEntrySheet({
       {entry === "data" && <DataView />}
       {(entry === "message" || entry === "consult") && <ConsultView mode={entry} onOpenAi={onOpenAi} />}
 
-      {entry === "today" && (
-        <div>
-          <p className="text-[17px] leading-relaxed text-muted-foreground">
-            今日任务包含康复动作、用药、护理与问卷，每完成一项可获得打卡积分。
-          </p>
-          <BigButton
-            onClick={() => {
-              onClose();
-              onGoTodos();
-            }}
-          >
-            去打卡
-          </BigButton>
-        </div>
-      )}
+      {entry === "today" && <TaskCenterView onGoTodos={() => { onClose(); onGoTodos(); }} />}
+
 
       {entry === "plan" && (
         <div className="space-y-2.5">
