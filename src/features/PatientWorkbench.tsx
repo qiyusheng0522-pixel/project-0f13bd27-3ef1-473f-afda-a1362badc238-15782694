@@ -934,7 +934,11 @@ function HomeTab({
         </div>
 
         {CAT_ORDER.map((cat) => {
-          const list = todos.filter((t) => t.cat === cat);
+          const isAllDay = (t: { time?: string }) => !t.time || t.time.includes("全天");
+          const list = todos
+            .filter((t) => t.cat === cat)
+            .slice()
+            .sort((a, b) => Number(isAllDay(b)) - Number(isAllDay(a)));
           if (!list.length) return null;
           const meta = CAT_META[cat];
           const Icon = meta.icon;
