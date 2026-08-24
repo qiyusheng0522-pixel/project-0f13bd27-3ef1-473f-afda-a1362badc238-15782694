@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Camera,
   ShieldCheck,
@@ -14,7 +14,13 @@ import {
   X,
   Check,
   ChevronRight,
-  Grid3X3,
+  Mic,
+  Smartphone,
+  Timer,
+  Image as ImageIcon,
+  CheckCircle2,
+  Dumbbell,
+  Utensils,
   Plus,
   Clock,
   AlertTriangle,
@@ -30,6 +36,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export type QuickKey =
   | "archive"
