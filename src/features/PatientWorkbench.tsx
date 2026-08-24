@@ -5,6 +5,7 @@ import {
   Sparkles,
   BookOpen,
   User,
+  Users,
   Dumbbell,
   Pill,
   Stethoscope,
@@ -548,6 +549,72 @@ function StepCard({
       </div>
       <div className="shrink-0">{action}</div>
     </div>
+  );
+}
+
+/* ============ 康复关怀群入群引导 ============ */
+
+function CareGroupBanner({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button
+      onClick={onOpen}
+      className="mt-5 flex w-full items-center justify-between rounded-2xl border border-warning/20 bg-warning/10 p-4 text-left active:scale-[0.99]"
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-warning/20 text-warning">
+          <Users className="size-6" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-[18px] font-bold text-warning-foreground">加入康复关怀群</div>
+          <div className="text-[14px] text-warning-foreground/80">专业医生团队在线答疑</div>
+        </div>
+      </div>
+      <span className="shrink-0 rounded-xl bg-warning px-3.5 py-2 text-[15px] font-bold text-warning-foreground shadow-sm active:scale-95">
+        立即加入
+      </span>
+    </button>
+  );
+}
+
+function CareGroupSheet({ onClose }: { onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <Sheet title="加入康复关怀群" onClose={onClose}>
+      <div className="space-y-5">
+        <p className="text-[17px] leading-relaxed text-muted-foreground">
+          扫码加入「骨安康复关怀群」，专业医生、康复师和病友一起陪伴您的康复旅程。
+        </p>
+        <div className="mx-auto w-fit rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="grid size-44 grid-cols-6 gap-1">
+            {Array.from({ length: 36 }).map((_, i) => {
+              const filled = [0, 1, 2, 4, 5, 6, 7, 8, 10, 12, 14, 15, 16, 17, 19, 20, 22, 23, 24, 26, 28, 29, 30, 31, 32, 33, 34, 35].includes(i);
+              return (
+                <div
+                  key={i}
+                  className={cn("size-full rounded-sm", filled ? "bg-foreground" : "bg-card")}
+                />
+              );
+            })}
+          </div>
+          <p className="mt-3 text-center text-[15px] font-bold text-foreground">长按识别二维码</p>
+        </div>
+        <div className="rounded-2xl bg-muted/50 p-4">
+          <p className="text-[16px] font-bold text-foreground">群名称</p>
+          <p className="mt-1 text-[15px] text-muted-foreground">骨安膝关节康复关怀群 ⑤</p>
+        </div>
+        <button
+          onClick={() => {
+            navigator.clipboard?.writeText("骨安膝关节康复关怀群 ⑤").then(() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            });
+          }}
+          className="w-full rounded-2xl bg-primary py-4 text-[18px] font-bold text-primary-foreground active:scale-[0.98]"
+        >
+          {copied ? "已复制群名称" : "复制群名称"}
+        </button>
+      </div>
+    </Sheet>
   );
 }
 
