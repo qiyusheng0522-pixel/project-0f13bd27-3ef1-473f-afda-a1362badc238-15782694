@@ -596,9 +596,119 @@ function IntraOpTab({
           </button>
         );
       })}
+
+      <IntraOpHistory filledIntraOp={filledIntraOp} onOpen={onOpen} />
     </div>
   );
 }
+
+/* ---------- 历史术中量表（保留近 3 天 · 时间倒序） ---------- */
+const MOCK_INTRAOP_HISTORY: {
+  id: string;
+  name: string;
+  bedNo: string;
+  surgery: string;
+  by: string;
+  hoursAgo: number;
+}[] = [
+  { id: "h1", name: "孙顺英", bedNo: "03", surgery: "右肩关节镜 SLAP 修补", by: "王主任（主刀）", hoursAgo: 6 },
+  { id: "h2", name: "范芳进", bedNo: "05", surgery: "左膝髌骨修补", by: "李医生（一助）", hoursAgo: 27 },
+  { id: "h3", name: "杨成轩", bedNo: "08", surgery: "右跟腱缝合", by: "陈医生（二助）", hoursAgo: 50 },
+  { id: "h4", name: "胡国玉", bedNo: "09", surgery: "左膝 PCL 重建", by: "王主任（主刀）", hoursAgo: 68 },
+  { id: "h5", name: "赵晓敏", bedNo: "11", surgery: "右膝 ACL 重建", by: "李医生（一助）", hoursAgo: 96 },
+];
+
+function IntraOpHistory({
+  filledIntraOp,
+  onOpen,
+}: {
+  filledIntraOp: Record<string, number>;
+  onOpen: (p: Patient) => void;
+}) {
+  const now = Date.now();
+  const WINDOW = 3 * 86400000;
+
+  const fromState = Object.entries(filledIntraOp)
+    .filter(([, ts]) => now - ts < WINDOW)
+    .map(([id, ts]) => {
+      const p = patients.find((x) => x.id === id);
+      return {
+        key: id,
+        patient: p,
+        name: p?.name ?? "—",
+        bedNo: p?.bedNo ?? "--",
+        surgery: p?.surgeryName ?? "—",
+        by: "本次填写",
+        at: ts,
+      };
+    });
+
+  const rows = [
+    ...fromState,
+    ...MOCK_INTRAOP_HISTORY.filter((h) => h.hoursAgo * 3600000 < WINDOW).map((h) => ({
+      key: h.id,
+      patient: undefined as Patient | undefined,
+      name: h.name,
+      bedNo: h.bedNo,
+      surgery: h.surgery,
+      by: h.by,
+      at: now - h.hoursAgo * 3600000,
+    })),
+  ].sort((a, b) => b.at - a.at);
+
+  const fmt = (t: number) => {
+    const d = new Date(t);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  return (
+    <div className="overflow-hidden rounded-2xl border bg-card" style={{ boxShadow: "var(--shadow-card)" }}>
+      <div className="flex items-center justify-between border-b px-3 py-2">
+        <div className="flex items-center gap-1 text-[12px] font-semibold">
+          <FileSignature className="h-3.5 w-3.5 text-primary" />历史术中量表
+        </div>
+        <span className="text-[10px] text-muted-foreground">近 3 天 · {rows.length} 份 · 时间倒序</span>
+      </div>
+      {rows.length === 0 ? (
+        <div className="p-5 text-center text-[11px] text-muted-foreground">近 3 天暂无历史术中量表</div>
+      ) : (
+        <div className="divide-y">
+          {rows.map((r) => {
+            const remainH = Math.max(0, Math.ceil((WINDOW - (now - r.at)) / 3600000));
+            return (
+              <button
+                key={r.key}
+                onClick={() => r.patient && onOpen(r.patient)}
+                className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left active:bg-muted/30"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
+                      {r.bedNo}床
+                    </span>
+                    <span className="text-[12px] font-bold">{r.name}</span>
+                    <span className="rounded-full bg-success/15 px-1.5 py-0.5 text-[9px] font-medium text-success">
+                      已填写
+                    </span>
+                  </div>
+                  <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                    {r.surgery} · {r.by}
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-[10px] font-medium text-foreground">{fmt(r.at)}</div>
+                  <div className="text-[9px] text-muted-foreground">保留 {remainH} 小时</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 /* ---------- 术中量表编辑 ---------- */
 const TEAM_MEMBERS = ["王主任（主刀）", "李医生（一助）", "陈医生（二助）", "朱年鑫（治疗师）"];

@@ -55,9 +55,17 @@ export function DoctorOnDutyWorkbench() {
   const myPatients = patients.filter((p) => p.responsibleDoctor === "朱医生");
 
   const todaySurgery = patients.filter((p) => p.status === "admitted" && p.preOpFindings);
+  // 当天未采集到术前数据的患者：保留至次日继续补充
+  const pendingData = patients.filter(
+    (p) =>
+      p.status === "admitted" &&
+      p.responsibleDoctor === "朱医生" &&
+      (!p.preOpFindings || p.preOpFindings.length === 0 || p.preOpFindings.some((f) => !f.value?.trim())),
+  );
   const tasks = todayTasks["doctor-on-duty"];
   const abnormalCount = todaySurgery.filter((p) => p.preOpAbnormal).length;
   const pendingPush = todaySurgery.filter((p) => !pushed.has(p.id)).length;
+
 
   const showToast = (t: string) => {
     setToast(t);
@@ -107,6 +115,8 @@ export function DoctorOnDutyWorkbench() {
       {tab === "scales" && (
         <ScalesTab
           list={todaySurgery}
+          pending={pendingData}
+
           pushed={pushed}
           onEdit={(p) => setEditor(p)}
           onPush={handlePush}
@@ -333,12 +343,14 @@ function HomeTab({
 
 function ScalesTab({
   list,
+  pending,
   pushed,
   onEdit,
   onPush,
   onAdmit,
 }: {
   list: typeof patients;
+  pending: typeof patients;
   pushed: Set<string>;
   onEdit: (p: Patient) => void;
   onPush: (p: Patient) => void;
@@ -357,8 +369,46 @@ function ScalesTab({
         住院录入 / 拍照识别
       </button>
 
+      {pending.length > 0 && (
+        <div className="overflow-hidden rounded-2xl border border-warning/40 bg-warning/5">
+          <div className="flex items-center justify-between border-b border-warning/30 px-3 py-2">
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-warning-foreground">
+              <AlertTriangle className="h-3.5 w-3.5" />待补充术前评估 · {pending.length} 例
+            </div>
+            <span className="text-[9px] text-muted-foreground">当天未采集 · 顺延次日</span>
+          </div>
+          <div className="divide-y divide-warning/20">
+            {pending.map((p) => (
+              <div key={p.id} className="flex items-center justify-between gap-2 px-3 py-2.5">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
+                      {p.bedNo ?? "--"}床
+                    </span>
+                    <span className="text-[12px] font-bold">{p.name}</span>
+                    <span className="rounded-full bg-warning/25 px-1.5 py-0.5 text-[9px] font-bold text-warning-foreground">
+                      数据未采集
+                    </span>
+                  </div>
+                  <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                    {p.diagnosis} · 入院 {p.admissionDate ?? "—"} · 患者信息已保留
+                  </div>
+                </div>
+                <button
+                  onClick={() => onEdit(p)}
+                  className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium text-primary-foreground active:opacity-90"
+                  style={{ background: "var(--gradient-primary)" }}
+                >
+                  继续补充
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="text-xs font-semibold">明日手术 · {list.length} 例</div>
+
 
       {list.map((p) => {
         const isPushed = pushed.has(p.id);
