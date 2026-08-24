@@ -542,34 +542,8 @@ function GuestHomeTab({
       </header>
 
       <div className="space-y-5 px-5 pt-5">
-        {/* 建档入口 */}
-        {!photo ? (
-          <label
-            className="flex items-center justify-between rounded-3xl bg-primary p-5 active:scale-[0.99]"
-            style={{ boxShadow: "var(--shadow-elevated)" }}
-          >
-            <span className="flex items-center gap-3">
-              <span className="grid size-12 place-items-center rounded-2xl bg-white/20 text-primary-foreground">
-                <Camera className="size-6" />
-              </span>
-              <span className="text-primary-foreground">
-                <span className="block whitespace-nowrap text-[19px] font-bold">拍照建档</span>
-                <span className="mt-0.5 block text-[15px] text-primary-foreground/80">上传入院单 · 智能录入</span>
-              </span>
-            </span>
-            <ChevronRight className="size-6 text-primary-foreground/70" />
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setPhoto(URL.createObjectURL(f));
-              }}
-            />
-          </label>
-        ) : (
+        {/* 已上传入院单 */}
+        {photo && (
           <section className="rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
             <div className="flex items-center gap-3">
               <img src={photo} alt="入院单照片" className="size-16 rounded-2xl object-cover" />
@@ -587,101 +561,6 @@ function GuestHomeTab({
           </section>
         )}
 
-        {/* 三步时间线 */}
-        <section>
-          <h2 className="font-display text-[21px] font-bold">三步开始康复</h2>
-          <div className="mt-5 space-y-5">
-            {GUEST_STEPS.map((s, idx) => {
-              const done = s.n === 1 ? !!photo : s.n === 2 ? scaleDone : false;
-              const active = s.n === 1 ? !photo : s.n === 2 ? !!photo && !scaleDone : !!photo && scaleDone;
-              const last = idx === GUEST_STEPS.length - 1;
-              return (
-                <div key={s.n} className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <span
-                      className={cn(
-                        "z-10 grid size-10 shrink-0 place-items-center rounded-full border-2 bg-card text-[17px] font-bold",
-                        done
-                          ? "border-success text-success"
-                          : active
-                            ? "border-primary text-primary"
-                            : "border-border text-muted-foreground",
-                      )}
-                    >
-                      {done ? <Check className="size-5" /> : s.n}
-                    </span>
-                    {!last && <span className="-mb-5 mt-2 w-0.5 flex-1 bg-border" />}
-                  </div>
-
-                  <div
-                    className={cn(
-                      "flex-1 rounded-[26px] border bg-card p-5",
-                      !done && !active && "opacity-60",
-                    )}
-                    style={{ boxShadow: "var(--shadow-card)" }}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className="min-w-0">
-                        <h3 className="text-[19px] font-bold leading-snug">{s.title}</h3>
-                        <p className="mt-1 text-[15px] leading-snug text-muted-foreground">{s.desc}</p>
-                      </div>
-                      {done && (
-                        <span className="ml-auto shrink-0 whitespace-nowrap rounded-full bg-success/10 px-2.5 py-1 text-[14px] font-bold text-success">
-                          已完成
-                        </span>
-                      )}
-                    </div>
-
-                    {s.n === 1 && (
-                      <label
-                        className={cn(
-                          "mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold active:scale-[0.98]",
-                          photo ? "border-2 text-foreground" : "bg-primary text-primary-foreground",
-                        )}
-                      >
-                        <Camera className="size-5" /> {photo ? "重新拍照上传" : "拍照上传入院单"}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          capture="environment"
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) setPhoto(URL.createObjectURL(f));
-                          }}
-                        />
-                      </label>
-                    )}
-
-                    {s.n === 2 && (
-                      <button
-                        onClick={() => setScaleOpen(true)}
-                        className={cn(
-                          "mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold active:scale-[0.98]",
-                          scaleDone ? "border-2 text-foreground" : active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        <ClipboardList className="size-5" /> {scaleDone ? "查看/修改量表" : "填写专科量表"}
-                      </button>
-                    )}
-
-                    {s.n === 3 && (
-                      <button
-                        onClick={onDone}
-                        className={cn(
-                          "mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[18px] font-bold active:scale-[0.98]",
-                          active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        <CalendarCheck className="size-5" /> 查看今日待办清单
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
 
         <section className="rounded-[26px] border-2 border-dashed bg-muted/30 px-6 py-8 text-center">
           <span className="mx-auto grid size-12 place-items-center rounded-full bg-card text-muted-foreground">
