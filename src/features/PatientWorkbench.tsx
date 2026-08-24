@@ -558,18 +558,18 @@ function CareGroupBanner({ onOpen }: { onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="mt-5 flex w-full items-center justify-between rounded-2xl border border-warning/20 bg-warning/10 p-4 text-left active:scale-[0.99]"
+      className="mt-5 flex w-full items-center justify-between rounded-2xl bg-amber-500 p-4 text-left text-white shadow-md active:scale-[0.99]"
     >
       <div className="flex min-w-0 items-center gap-3">
-        <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-warning/20 text-warning">
+        <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/25 text-white">
           <Users className="size-6" />
         </div>
         <div className="min-w-0">
-          <div className="text-[18px] font-bold text-warning-foreground">加入康复关怀群</div>
-          <div className="text-[14px] text-warning-foreground/80">专业医生团队在线答疑</div>
+          <div className="text-[18px] font-bold text-white">加入康复关怀群</div>
+          <div className="text-[14px] text-white/85">专业医生团队在线答疑</div>
         </div>
       </div>
-      <span className="shrink-0 rounded-xl bg-warning px-3.5 py-2 text-[15px] font-bold text-warning-foreground shadow-sm active:scale-95">
+      <span className="shrink-0 rounded-xl bg-white px-3.5 py-2 text-[15px] font-bold text-amber-600 shadow-sm active:scale-95">
         立即加入
       </span>
     </button>
