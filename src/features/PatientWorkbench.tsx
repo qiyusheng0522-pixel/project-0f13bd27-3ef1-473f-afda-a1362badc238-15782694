@@ -56,6 +56,21 @@ const CAT_META: Record<TodoCat, { icon: React.ElementType; tint: string }> = {
   宣教: { icon: BookOpen, tint: "text-sky-600 bg-sky-500/10" },
 };
 
+/* ============ 住院流程（患者视角 6 步） ============ */
+
+const PATH_STEPS: { no: string; line1: string; line2: string; desc: string }[] = [
+  { no: "01", line1: "住院", line2: "准备", desc: "证件与用品准备、术前检查预约" },
+  { no: "02", line1: "住院", line2: "办理", desc: "入院登记、床位分配、护理评估" },
+  { no: "03", line1: "手术", line2: "宣教", desc: "麻醉与手术配合、禁食水要点" },
+  { no: "04", line1: "术后", line2: "须知", desc: "体位摆放、疼痛管理、踝泵练习" },
+  { no: "05", line1: "出院", line2: "引导", desc: "出院评估、用药与复查安排" },
+  { no: "06", line1: "院后", line2: "康复", desc: "居家康复计划与随访提醒" },
+];
+
+/** 后台 7 个环节 → 患者 6 步流程 */
+const PATH_MAP = [0, 1, 2, 2, 3, 3, 5];
+const toPathIdx = (i: number) => PATH_MAP[Math.max(0, Math.min(i, PATH_MAP.length - 1))] ?? 0;
+
 interface SimpleTodo {
   id: string;
   title: string;
