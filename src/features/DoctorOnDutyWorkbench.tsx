@@ -55,9 +55,17 @@ export function DoctorOnDutyWorkbench() {
   const myPatients = patients.filter((p) => p.responsibleDoctor === "朱医生");
 
   const todaySurgery = patients.filter((p) => p.status === "admitted" && p.preOpFindings);
+  // 当天未采集到术前数据的患者：保留至次日继续补充
+  const pendingData = patients.filter(
+    (p) =>
+      p.status === "admitted" &&
+      p.responsibleDoctor === "朱医生" &&
+      (!p.preOpFindings || p.preOpFindings.length === 0 || p.preOpFindings.some((f) => !f.value?.trim())),
+  );
   const tasks = todayTasks["doctor-on-duty"];
   const abnormalCount = todaySurgery.filter((p) => p.preOpAbnormal).length;
   const pendingPush = todaySurgery.filter((p) => !pushed.has(p.id)).length;
+
 
   const showToast = (t: string) => {
     setToast(t);
