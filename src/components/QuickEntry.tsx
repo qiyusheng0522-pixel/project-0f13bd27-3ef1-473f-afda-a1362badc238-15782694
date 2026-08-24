@@ -414,7 +414,7 @@ const VISIT_ROWS: [string, string][] = [
   ["就诊时间", "2 周内复诊"],
 ];
 
-function ReportView({ onGoPlan }: { onGoPlan: () => void }) {
+function _ReportView({ onGoPlan }: { onGoPlan: () => void }) {
   return (
     <div>
       <section className="rounded-2xl bg-secondary p-4">
@@ -1295,9 +1295,7 @@ export function QuickEntrySheet({
   const title =
     entry === "risk"
       ? "我的风险评估"
-      : entry === "report"
-        ? "专病体检报告"
-        : entry === "scale"
+      : entry === "scale"
           ? "评估中心"
           : entry === "med"
             ? "用药管理"
@@ -1316,7 +1314,7 @@ export function QuickEntrySheet({
   if (entry === "consult") return <ConsultRefView onClose={onClose} />;
 
   return (
-    <Panel title={title} subtitle={entry === "risk" || entry === "report" ? undefined : meta.desc} onClose={onClose}>
+    <Panel title={title} subtitle={entry === "risk" ? undefined : meta.desc} onClose={onClose}>
 
       {entry === "archive" && (
         <div>
@@ -1358,7 +1356,6 @@ export function QuickEntrySheet({
       )}
 
       {entry === "risk" && <RiskView />}
-      {entry === "report" && <ReportView onGoPlan={onGoTodos} />}
       {entry === "scale" && <ScaleCenterView onOpenScale={() => { onClose(); onOpenScale(); }} />}
       {entry === "today" && <TaskCenterView onGoTodos={() => { onClose(); onGoTodos(); }} />}
 
