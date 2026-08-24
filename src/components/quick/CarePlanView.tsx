@@ -1121,6 +1121,14 @@ export function CarePlanView({ onClose }: { onClose: () => void }) {
           }}
         />
       )}
+      {video && (
+        <VideoSheet
+          title={video.title}
+          subtitle={video.subtitle}
+          onClose={() => setVideo(null)}
+          onFinish={() => showToast("已完成跟练并打卡")}
+        />
+      )}
       {toast && <QuickToast text={toast} />}
     </QuickSheet>
   );
