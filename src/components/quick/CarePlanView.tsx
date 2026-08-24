@@ -545,7 +545,7 @@ function MealCard({ meal, defaultOpen = false, purchased = false, mealKey, onSwa
                   {g.note && <p className="mt-1 text-[11.5px] text-muted-foreground leading-snug">提示：{g.note}</p>}
                 </div>
               ))}
-              <div className="rounded-md bg-primary/5 ring-1 ring-dashed ring-primary/25 px-2.5 py-2 flex items-center gap-2">
+              <div className="rounded-md bg-primary/[0.08] ring-1 ring-dashed ring-primary/25 px-2.5 py-2 flex items-center gap-2">
                 <Lock className="size-3 text-primary shrink-0" />
                 <p className="text-[11.5px] text-foreground/75 leading-snug flex-1">开通后将基于您的康复阶段与口味生成 <span className="font-bold text-primary">具体菜品</span> 与 <span className="font-bold text-primary">名厨做法</span></p>
               </div>
