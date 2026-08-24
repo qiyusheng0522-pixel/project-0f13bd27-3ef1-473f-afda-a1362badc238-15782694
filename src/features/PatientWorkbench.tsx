@@ -719,8 +719,8 @@ function GuestHomeTab({
         <div className="relative">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="font-display text-[34px] font-bold leading-none tracking-tight">你好，</h1>
-              <p className="mt-2 text-[19px] font-medium text-primary-foreground/85">欢迎开启康复旅程</p>
+              <h1 className="font-display text-[34px] font-bold leading-none tracking-tight">您好，</h1>
+              <p className="mt-2 text-[19px] font-medium text-primary-foreground/85">三步开启健康之旅</p>
             </div>
             <div className="grid size-12 shrink-0 place-items-center rounded-full bg-white/20 text-primary-foreground">
               <User className="size-6" />
