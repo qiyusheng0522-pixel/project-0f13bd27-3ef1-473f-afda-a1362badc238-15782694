@@ -13,7 +13,7 @@ import {
   Trash2,
   Download,
 } from "lucide-react";
-import { matchRule, surgeryScaleRules } from "@/lib/surgery-scale-map";
+import { matchRule } from "@/lib/surgery-scale-map";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
