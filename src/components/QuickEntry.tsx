@@ -36,6 +36,7 @@ import { MedsView } from "@/components/quick/MedsView";
 import { DataEntryView } from "@/components/quick/DataEntryView";
 import { CarePlanView } from "@/components/quick/CarePlanView";
 import { DietView } from "@/components/quick/DietView";
+import { ArchiveView } from "@/components/quick/ArchiveView";
 import { MiniToastProvider, useMiniToast } from "@/components/quick/MiniToast";
 
 
@@ -1137,15 +1138,16 @@ export function QuickEntrySheet({
   onGoTodos,
   onOpenScale,
   onOpenAi,
+  onArchived,
 }: {
   entry: QuickKey;
   onClose: () => void;
   onGoTodos: () => void;
   onOpenScale: () => void;
   onOpenAi: () => void;
+  onArchived?: () => void;
 }) {
   const meta = QUICK_ENTRIES.find((e) => e.key === entry)!;
-  const [photo, setPhoto] = useState<string | null>(null);
 
   const title =
     entry === "risk"
@@ -1159,6 +1161,7 @@ export function QuickEntrySheet({
               : meta.title;
 
   // 以下入口完全复用代码包中的页面样式与交互（全屏二级页）
+  if (entry === "archive") return <ArchiveView onClose={onClose} onUploaded={onArchived} />;
   if (entry === "med") return <MedsView onClose={onClose} />;
   if (entry === "data") return <DataEntryView onClose={onClose} />;
   if (entry === "plan") return <CarePlanView onClose={onClose} />;
@@ -1167,44 +1170,8 @@ export function QuickEntrySheet({
   return (
     <Panel title={title} subtitle={entry === "risk" ? undefined : meta.desc} onClose={onClose}>
 
-      {entry === "archive" && (
-        <div>
-          <p className="text-[17px] leading-relaxed text-muted-foreground">
-            拍照上传「入院单 / 诊断证明 / 检查报告」，系统自动识别姓名、诊断与手术信息。
-          </p>
-          {photo && <img src={photo} alt="上传的照片" className="mt-4 h-44 w-full rounded-2xl object-cover" />}
-          <label className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-[18px] font-bold text-primary-foreground active:scale-[0.98]">
-            <Camera className="size-6" /> {photo ? "重新拍照" : "拍照上传"}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setPhoto(URL.createObjectURL(f));
-              }}
-            />
-          </label>
-          <label className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border-2 py-3 text-[17px] font-bold active:scale-[0.98]">
-            从相册选择
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setPhoto(URL.createObjectURL(f));
-              }}
-            />
-          </label>
-          {photo && (
-            <p className="mt-3 rounded-2xl bg-success/10 px-4 py-3 text-[17px] font-bold text-success">
-              识别成功：右膝骨关节炎 · 全膝关节置换术
-            </p>
-          )}
-        </div>
-      )}
+
+
 
       {entry === "risk" && <RiskView />}
       {entry === "scale" && <ScaleCenterView onOpenScale={() => { onClose(); onOpenScale(); }} />}

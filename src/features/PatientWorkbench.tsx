@@ -397,6 +397,7 @@ export function PatientWorkbench() {
   const guest = view === "guest";
   const [quick, setQuick] = useState<QuickKey | null>(null);
   const [quickScale, setQuickScale] = useState(false);
+  const [archiveUploaded, setArchiveUploaded] = useState(false);
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -437,6 +438,7 @@ export function PatientWorkbench() {
                   setTab("home");
                 }}
                 onOpenScale={() => setQuickScale(true)}
+                onArchived={() => setArchiveUploaded(true)}
                 onOpenAi={() => {
                   setQuick(null);
                   setTab("ai");
@@ -450,6 +452,8 @@ export function PatientWorkbench() {
         {tab === "home" &&
           (guest ? (
             <GuestHomeTab
+              archiveUploaded={archiveUploaded}
+              onOpenArchive={() => setQuick("archive")}
               onOpenEdu={() => setTab("edu")}
               onDone={() => setView("member")}
               onOpenAi={() => setTab("ai")}
@@ -698,12 +702,17 @@ function GuestHomeTab({
   onOpenEdu,
   onDone,
   onOpenAi,
+  onOpenArchive,
+  archiveUploaded,
 }: {
   onOpenEdu: () => void;
   onDone: () => void;
   onOpenAi: () => void;
+  onOpenArchive: () => void;
+  archiveUploaded: boolean;
 }) {
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [localPhoto, setPhoto] = useState<string | null>(null);
+  const photo = localPhoto ?? (archiveUploaded ? "uploaded" : null);
   const [scaleOpen, setScaleOpen] = useState(false);
   const [scaleDone, setScaleDone] = useState(false);
   const [allOpen, setAllOpen] = useState(false);
@@ -739,7 +748,13 @@ function GuestHomeTab({
         {photo && (
           <section className="rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
             <div className="flex items-center gap-3">
-              <img src={photo} alt="入院单照片" className="size-16 rounded-2xl object-cover" />
+              {localPhoto ? (
+                <img src={localPhoto} alt="入院单照片" className="size-16 rounded-2xl object-cover" />
+              ) : (
+                <div className="grid size-16 place-items-center rounded-2xl bg-success/10 text-success">
+                  <Camera className="size-7" />
+                </div>
+              )}
               <div className="min-w-0">
                 <p className="text-[18px] font-bold text-success">入院单已上传</p>
                 <p className="mt-0.5 text-[15px] text-muted-foreground">医护正在核对，建档完成后消息通知您</p>
@@ -764,20 +779,13 @@ function GuestHomeTab({
               icon={Camera}
               done={!!photo}
               action={
-                <label className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96]">
+                <button
+                  onClick={onOpenArchive}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96]"
+                >
                   <Camera className="size-4" />
-                  {photo ? "重新上传" : "去拍照"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) setPhoto(URL.createObjectURL(f));
-                    }}
-                  />
-                </label>
+                  {photo ? "继续上传" : "去拍照"}
+                </button>
               }
             />
             <StepCard
