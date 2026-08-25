@@ -55,12 +55,17 @@ export function DoctorOnDutyWorkbench() {
 
   const myPatients = patients.filter((p) => p.responsibleDoctor === "朱医生");
 
-  const todaySurgery = patients.filter((p) => p.status === "admitted" && p.preOpFindings);
+  // 入院与手术同一天的患者：不进入值班医生环节，由系统直接推送手术团队
+  const directToTeam = patients.filter((p) => p.status === "admitted" && isSameDaySurgery(p));
+  const isDirect = (p: Patient) => directToTeam.some((d) => d.id === p.id);
+
+  const todaySurgery = patients.filter((p) => p.status === "admitted" && p.preOpFindings && !isDirect(p));
   // 当天未采集到术前数据的患者：保留至次日继续补充
   const pendingData = patients.filter(
     (p) =>
       p.status === "admitted" &&
       p.responsibleDoctor === "朱医生" &&
+      !isDirect(p) &&
       (!p.preOpFindings || p.preOpFindings.length === 0 || p.preOpFindings.some((f) => !f.value?.trim())),
   );
   const tasks = todayTasks["doctor-on-duty"];
