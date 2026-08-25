@@ -622,6 +622,7 @@ function InpatientTab({ list, onSelect, onBatchEducation }: { list: typeof patie
                     {p.infectious && <Tag color="destructive">传</Tag>}
                     {p.communicationDifficult && <Tag color="warning">沟</Tag>}
                     {assignedBeds[p.id] && <Tag color="success">新分配</Tag>}
+                    {p.id === DEMO_PATIENT_ID && flow.readmitCount > 0 && <Tag color="warning">重新入院</Tag>}
                   </div>
                   <div className="mt-0.5 text-[11px] text-muted-foreground">{p.diagnosis}</div>
                   <div className="text-[10px] text-muted-foreground">{p.surgeryName}</div>
