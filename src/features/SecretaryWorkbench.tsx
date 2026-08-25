@@ -510,6 +510,7 @@ function OutpatientTab({
 }
 
 function InpatientTab({ list, onSelect, onBatchEducation }: { list: typeof patients; onSelect: (p: Patient) => void; onBatchEducation: () => void }) {
+  const flow = useCaseFlow();
   const [sub, setSub] = useState<"all" | "discharge">("all");
   const [bedAssign, setBedAssign] = useState<Patient | null>(null);
   const [assignedBeds, setAssignedBeds] = useState<Record<string, string>>({});
