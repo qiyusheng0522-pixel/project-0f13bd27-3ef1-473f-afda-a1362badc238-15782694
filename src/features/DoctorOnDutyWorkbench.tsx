@@ -413,7 +413,7 @@ function ScalesTab({
             <div className="flex items-center gap-1 text-[11px] font-semibold text-warning-foreground">
               <AlertTriangle className="h-3.5 w-3.5" />待补充术前评估 · {pending.length} 例
             </div>
-            <span className="text-[9px] text-muted-foreground">当天未采集 · 顺延次日</span>
+            <span className="text-[9px] text-muted-foreground">当天未采集 · 患者保留至次日继续补录</span>
           </div>
           <div className="divide-y divide-warning/20">
             {pending.map((p) => (
