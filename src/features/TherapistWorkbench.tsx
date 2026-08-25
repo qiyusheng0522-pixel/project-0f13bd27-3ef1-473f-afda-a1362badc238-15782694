@@ -323,7 +323,17 @@ export function TherapistWorkbench() {
           onConfirm={(note) => {
             setDischargedAt((s) => ({ ...s, [overlay.patient.id]: Date.now() }));
             if (overlay.patient.id === DEMO_PATIENT_ID) dischargePatient(note);
-            showToast(`已确认 ${overlay.patient.name} 出院 · 评估保留 3 天`);
+            showToast(`已确认 ${overlay.patient.name} 出院 · ${READMIT_WINDOW_DAYS} 天内可重新入院`);
+            setOverlay(null);
+          }}
+          onContinueStay={(note) => {
+            setDischargedAt((s) => {
+              const next = { ...s };
+              delete next[overlay.patient.id];
+              return next;
+            });
+            if (overlay.patient.id === DEMO_PATIENT_ID) continueStay(note);
+            showToast(`${overlay.patient.name} 康复未达预期，继续住院`);
             setOverlay(null);
           }}
         />
@@ -336,6 +346,12 @@ export function TherapistWorkbench() {
           onClose={() => setOverlay(null)}
           onArchive={(p) => setOverlay({ kind: "archive", patient: p })}
           onChat={(p) => setOverlay({ kind: "chat", patient: p })}
+          readmitDaysLeft={(p) => {
+            if (p.id === DEMO_PATIENT_ID) return readmitDaysLeft();
+            const at = dischargedAt[p.id];
+            if (!at) return READMIT_WINDOW_DAYS;
+            return Math.max(0, READMIT_WINDOW_DAYS - Math.floor((Date.now() - at) / 86400000));
+          }}
           onReadmit={(p) => {
             if (p.id === DEMO_PATIENT_ID) {
               readmitPatient();
@@ -344,7 +360,7 @@ export function TherapistWorkbench() {
                 delete next[p.id];
                 return next;
               });
-              showToast(`${p.name} 已重新入院 · 沿用 ${p.bedNo ?? "原"} 床，可继续每日康复记录`);
+              showToast(`${p.name} 已重新入院 · 沿用 ${p.bedNo ?? "原"} 床，护士与治疗师端同步展示`);
             } else {
               showToast(`${p.name} 已重新入院 · 沿用原床位`);
             }
