@@ -36,6 +36,7 @@ import { MedsView } from "@/components/quick/MedsView";
 import { DataEntryView } from "@/components/quick/DataEntryView";
 import { CarePlanView } from "@/components/quick/CarePlanView";
 import { DietView } from "@/components/quick/DietView";
+import { ArchiveView } from "@/components/quick/ArchiveView";
 import { MiniToastProvider, useMiniToast } from "@/components/quick/MiniToast";
 
 
@@ -1137,12 +1138,14 @@ export function QuickEntrySheet({
   onGoTodos,
   onOpenScale,
   onOpenAi,
+  onArchived,
 }: {
   entry: QuickKey;
   onClose: () => void;
   onGoTodos: () => void;
   onOpenScale: () => void;
   onOpenAi: () => void;
+  onArchived?: () => void;
 }) {
   const meta = QUICK_ENTRIES.find((e) => e.key === entry)!;
   const [photo, setPhoto] = useState<string | null>(null);
@@ -1159,6 +1162,7 @@ export function QuickEntrySheet({
               : meta.title;
 
   // 以下入口完全复用代码包中的页面样式与交互（全屏二级页）
+  if (entry === "archive") return <ArchiveView onClose={onClose} onUploaded={onArchived} />;
   if (entry === "med") return <MedsView onClose={onClose} />;
   if (entry === "data") return <DataEntryView onClose={onClose} />;
   if (entry === "plan") return <CarePlanView onClose={onClose} />;
