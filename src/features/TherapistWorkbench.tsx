@@ -1467,10 +1467,12 @@ function DischargeSheet({
   patient,
   onClose,
   onConfirm,
+  onContinueStay,
 }: {
   patient: Patient;
   onClose: () => void;
   onConfirm: (note: string) => void;
+  onContinueStay: (note: string) => void;
 }) {
   const [understanding, setUnderstanding] = useState<"优" | "良" | "差">("良");
   const [compliance, setCompliance] = useState<"高" | "中" | "低">("高");
