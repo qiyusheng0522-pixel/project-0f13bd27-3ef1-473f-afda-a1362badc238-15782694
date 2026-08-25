@@ -521,6 +521,7 @@ function StepCard({
   desc,
   icon: Icon,
   done,
+  locked,
   action,
   onClick,
 }: {
@@ -529,33 +530,54 @@ function StepCard({
   desc: string;
   icon: React.ElementType;
   done: boolean;
+  locked?: boolean;
   action: React.ReactNode;
   onClick?: () => void;
 }) {
+  const state = done ? "done" : locked ? "locked" : "todo";
   return (
     <div
       onClick={onClick}
       className={cn(
         "flex items-center gap-3 rounded-2xl border bg-card p-4",
-        done && "border-success/30 bg-success/5",
+        done && "border-success/40 bg-success/5",
       )}
     >
       <span
         className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-full font-display text-[18px] font-bold",
-          done ? "bg-success text-success-foreground" : "bg-primary/10 text-primary",
+          "relative grid size-11 shrink-0 place-items-center rounded-full font-display text-[18px] font-bold",
+          done ? "bg-success text-success-foreground" : locked ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary",
         )}
       >
         {done ? <Check className="size-6" /> : no}
+        {done && (
+          <span className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-card">
+            <CheckCircle2 className="size-4 text-success" />
+          </span>
+        )}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[18px] font-bold">{title}</p>
-        <p className="text-[15px] text-muted-foreground">{desc}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-[18px] font-bold">{title}</p>
+          <span
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[13px] font-bold",
+              state === "done" && "bg-success/15 text-success",
+              state === "todo" && "bg-warning/15 text-warning",
+              state === "locked" && "bg-muted text-muted-foreground",
+            )}
+          >
+            {state === "done" ? <CheckCircle2 className="size-3.5" /> : state === "locked" ? <Lock className="size-3.5" /> : <Clock className="size-3.5" />}
+            {state === "done" ? "已完成" : state === "locked" ? "待解锁" : "待完成"}
+          </span>
+        </div>
+        <p className={cn("text-[15px]", done ? "text-success/90" : "text-muted-foreground")}>{desc}</p>
       </div>
       <div className="shrink-0">{action}</div>
     </div>
   );
 }
+
 
 /* ============ 专属服务群入群引导 ============ */
 
