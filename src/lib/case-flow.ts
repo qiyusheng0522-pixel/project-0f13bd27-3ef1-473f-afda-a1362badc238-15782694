@@ -211,6 +211,11 @@ export function getDemoPatient(): Patient | undefined {
   return patients.find((p) => p.id === DEMO_PATIENT_ID);
 }
 
+/** 入院时间与手术时间同一天：不进入值班医生环节，直接推送手术团队 */
+export function isSameDaySurgery(p: Patient) {
+  return !!p.admissionDate && !!p.surgeryDate && p.admissionDate === p.surgeryDate;
+}
+
 function patchPatient(patch: Partial<Patient>) {
   const p = getDemoPatient();
   if (p) Object.assign(p, patch);
