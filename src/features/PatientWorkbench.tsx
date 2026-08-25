@@ -31,6 +31,9 @@ import {
   HeartHandshake,
   ImagePlus,
   Mic,
+  Lock,
+  CheckCircle2,
+
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { QuickEntryRail, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
