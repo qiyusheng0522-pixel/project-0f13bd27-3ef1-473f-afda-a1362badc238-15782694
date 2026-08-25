@@ -110,9 +110,11 @@ export function DoctorOnDutyWorkbench() {
           flowHint={
             !flow.created
               ? "点击「住院录入」新建演示患者 杨阳，开始全流程闭环"
-              : !flow.pushedToTeam
-                ? "术前量表已录入，请到「术前量表」确认推送手术团队"
-                : "已推送手术团队，等待手术确认"
+              : flow.sameDaySurgery
+                ? "该患者入院与手术同日，已跳过值班医生术前录入，直接推送手术团队"
+                : !flow.pushedToTeam
+                  ? "术前量表已录入，请到「术前量表」确认推送手术团队"
+                  : "已推送手术团队，等待手术确认"
           }
           onAdmit={() => setAdmitOpen(true)}
           onOpenScales={() => setTab("scales")}
@@ -122,7 +124,7 @@ export function DoctorOnDutyWorkbench() {
         <ScalesTab
           list={todaySurgery}
           pending={pendingData}
-
+          direct={directToTeam}
           pushed={pushed}
           onEdit={(p) => setEditor(p)}
           onPush={handlePush}
