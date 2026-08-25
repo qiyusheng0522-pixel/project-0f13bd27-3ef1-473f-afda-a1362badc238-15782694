@@ -553,33 +553,29 @@ function StepCard({
         )}
       >
         {done ? <Check className="size-6" /> : no}
-        {done && (
-          <span className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-card">
-            <CheckCircle2 className="size-4 text-success" />
-          </span>
-        )}
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-[18px] font-bold">{title}</p>
+          <p className="whitespace-nowrap text-[18px] font-bold">{title}</p>
           <span
             className={cn(
-              "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[13px] font-bold",
+              "inline-flex shrink-0 items-center justify-center rounded-full p-1.5",
               state === "done" && "bg-success/15 text-success",
               state === "todo" && "bg-warning/15 text-warning",
               state === "locked" && "bg-muted text-muted-foreground",
             )}
+            title={state === "done" ? "已完成" : state === "locked" ? "待解锁" : "待完成"}
           >
-            {state === "done" ? <CheckCircle2 className="size-3.5" /> : state === "locked" ? <Lock className="size-3.5" /> : <Clock className="size-3.5" />}
-            {state === "done" ? "已完成" : state === "locked" ? "待解锁" : "待完成"}
+            {state === "done" ? <CheckCircle2 className="size-5" /> : state === "locked" ? <Lock className="size-5" /> : <Clock className="size-5" />}
           </span>
         </div>
-        <p className={cn("text-[15px]", done ? "text-success/90" : "text-muted-foreground")}>{desc}</p>
+        <p className={cn("truncate whitespace-nowrap text-[15px]", done ? "text-success/90" : "text-muted-foreground")}>{desc}</p>
       </div>
       <div className="shrink-0">{action}</div>
     </div>
   );
 }
+
 
 
 /* ============ 专属服务群入群引导 ============ */
