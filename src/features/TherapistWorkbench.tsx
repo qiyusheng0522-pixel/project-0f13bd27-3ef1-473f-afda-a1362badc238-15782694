@@ -1500,8 +1500,27 @@ function DischargeSheet({
       <div className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-3">
         <div className="rounded-2xl border bg-warning/5 p-2.5 text-[11px] text-warning-foreground">
           <AlertTriangle className="mr-1 inline h-3 w-3" />
-          出院评估完成后，该患者仍在「术后康复」中保留 <b>3 天</b>，便于后续追踪。
+          由治疗师决定是否出院：出院后患者仍保留 <b>{READMIT_WINDOW_DAYS} 天</b>，期间可重新变更为入院状态（护士 / 治疗师端同步展示）。
         </div>
+
+        <div className="overflow-hidden rounded-2xl border border-info/40 bg-info/5">
+          <div className="border-b border-info/30 px-3 py-2 text-[11px] font-semibold text-info">
+            康复未达预期？可继续住院
+          </div>
+          <div className="space-y-2 p-3">
+            <div className="text-[10px] text-muted-foreground">
+              填写下方「出院备注说明」作为继续住院原因，患者保持在院状态，护士与治疗师继续每日记录。
+            </div>
+            <button
+              disabled={!canSave}
+              onClick={() => onContinueStay(note.trim())}
+              className="w-full rounded-full border border-info/50 bg-card py-2 text-[11px] font-medium text-info disabled:opacity-40"
+            >
+              康复未达预期 · 继续住院
+            </button>
+          </div>
+        </div>
+
         <div className="rounded-2xl border bg-card p-3 text-[11px]">
           <div className="font-semibold">
             {patient.bedNo && `${patient.bedNo}床 · `}{patient.name} · {patient.surgeryName ?? patient.diagnosis}
