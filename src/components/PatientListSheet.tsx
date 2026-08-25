@@ -16,6 +16,7 @@ export function PatientListSheet({
   onArchive,
   onChat,
   onReadmit,
+  readmitDaysLeft,
 }: {
   inpatientList: Patient[];
   outpatientList: Patient[];
@@ -24,6 +25,8 @@ export function PatientListSheet({
   onArchive: (p: Patient) => void;
   onChat: (p: Patient) => void;
   onReadmit?: (p: Patient) => void;
+  /** 出院后剩余可重新入院天数（0 表示超出 3 天窗口） */
+  readmitDaysLeft?: (p: Patient) => number;
 }) {
   const [category, setCategory] = useState<"active" | "history">("active");
   const [sub, setSub] = useState<"inpatient" | "outpatient">("inpatient");
