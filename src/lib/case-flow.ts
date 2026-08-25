@@ -176,6 +176,9 @@ const initial = (): CaseFlowState => ({
   messages: [],
   readmitCount: 0,
   dischargeNote: "",
+  sameDaySurgery: false,
+  dischargedAt: null,
+  continueStayNote: "",
 
   events: [],
 });
