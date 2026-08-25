@@ -13,7 +13,7 @@ import {
   Trash2,
   Download,
 } from "lucide-react";
-import { matchRule, surgeryScaleRules } from "@/lib/surgery-scale-map";
+import { matchRule } from "@/lib/surgery-scale-map";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -385,14 +385,12 @@ function AdminPage() {
                       </div>
                     </div>
                     {rule ? (
-                      <div className="mt-2 space-y-1.5">
-                        <ScaleRow label="术前" tone="sky" items={rule.scales.preOp} />
-                        <ScaleRow label="术中" tone="violet" items={rule.scales.intraOp} />
-                        <ScaleRow label="术后" tone="emerald" items={rule.scales.postOp} />
+                      <div className="mt-2">
+                        <ScaleRow label="量表" tone="sky" items={rule.scales} />
                       </div>
                     ) : (
                       <div className="mt-2 text-[11px] text-amber-700">
-                        规则库未匹配 · 请在【手术规则库】中补充
+                        规则库未匹配 · 请补充该手术的量表对应关系
                       </div>
                     )}
                   </li>
@@ -402,30 +400,6 @@ function AdminPage() {
           </section>
         </div>
 
-        {/* 规则库预览 */}
-        <section className="rounded-2xl border bg-white shadow-sm">
-          <div className="border-b px-5 py-3 text-sm font-bold">系统内置手术规则库</div>
-          <div className="grid gap-3 p-5 md:grid-cols-2">
-            {surgeryScaleRules.map((r) => (
-              <div key={r.surgery} className="rounded-xl border bg-slate-50/60 p-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold">{r.surgery}</div>
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                    {r.rehabTag}
-                  </span>
-                </div>
-                <div className="mt-1.5 text-[11px] text-muted-foreground">
-                  常见病症：{r.diagnoses.join("、")}
-                </div>
-                <div className="mt-2 space-y-1">
-                  <ScaleRow label="术前" tone="sky" items={r.scales.preOp} />
-                  <ScaleRow label="术中" tone="violet" items={r.scales.intraOp} />
-                  <ScaleRow label="术后" tone="emerald" items={r.scales.postOp} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
     </div>
   );
