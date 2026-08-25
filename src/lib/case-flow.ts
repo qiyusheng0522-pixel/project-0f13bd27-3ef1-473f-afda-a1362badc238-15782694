@@ -280,10 +280,15 @@ export function admitPatient(d: AdmitDraft) {
   if (idx >= 0) patients[idx] = record;
   else patients.unshift(record);
 
+  // 入院时间与手术时间同一天 → 不进入值班医生环节，直接推送手术团队
+  const sameDay = d.surgeryDate === todayStr();
+
   state = {
     ...initial(),
     created: true,
-    stage: "admitted",
+    stage: sameDay ? "pushed-team" : "admitted",
+    sameDaySurgery: sameDay,
+    pushedToTeam: sameDay,
     abnormal: abnormalFindings.map((f) => ({
       id: uid("ab"),
       source: "值班医生" as const,
@@ -294,6 +299,7 @@ export function admitPatient(d: AdmitDraft) {
     })),
   };
   log("值班医生", `住院录入 ${d.name}（${d.bedNo}床）· 术前量表 ${abnormalFindings.length} 项异常`);
+  if (sameDay) log("系统", `${d.name} 入院与手术同为 ${d.surgeryDate}，跳过值班医生术前录入，已直接推送手术团队`);
   notify();
 }
 
