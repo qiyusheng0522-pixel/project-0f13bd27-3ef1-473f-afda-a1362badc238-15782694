@@ -31,6 +31,9 @@ import {
   HeartHandshake,
   ImagePlus,
   Mic,
+  Lock,
+  CheckCircle2,
+
 } from "lucide-react";
 import { PhoneShell, TabBar } from "@/components/PhoneShell";
 import { QuickEntryRail, QuickEntrySheet, type QuickKey } from "@/components/QuickEntry";
@@ -521,6 +524,7 @@ function StepCard({
   desc,
   icon: Icon,
   done,
+  locked,
   action,
   onClick,
 }: {
@@ -529,33 +533,54 @@ function StepCard({
   desc: string;
   icon: React.ElementType;
   done: boolean;
+  locked?: boolean;
   action: React.ReactNode;
   onClick?: () => void;
 }) {
+  const state = done ? "done" : locked ? "locked" : "todo";
   return (
     <div
       onClick={onClick}
       className={cn(
         "flex items-center gap-3 rounded-2xl border bg-card p-4",
-        done && "border-success/30 bg-success/5",
+        done && "border-success/40 bg-success/5",
       )}
     >
       <span
         className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-full font-display text-[18px] font-bold",
-          done ? "bg-success text-success-foreground" : "bg-primary/10 text-primary",
+          "relative grid size-11 shrink-0 place-items-center rounded-full font-display text-[18px] font-bold",
+          done ? "bg-success text-success-foreground" : locked ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary",
         )}
       >
         {done ? <Check className="size-6" /> : no}
+        {done && (
+          <span className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-card">
+            <CheckCircle2 className="size-4 text-success" />
+          </span>
+        )}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[18px] font-bold">{title}</p>
-        <p className="text-[15px] text-muted-foreground">{desc}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-[18px] font-bold">{title}</p>
+          <span
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[13px] font-bold",
+              state === "done" && "bg-success/15 text-success",
+              state === "todo" && "bg-warning/15 text-warning",
+              state === "locked" && "bg-muted text-muted-foreground",
+            )}
+          >
+            {state === "done" ? <CheckCircle2 className="size-3.5" /> : state === "locked" ? <Lock className="size-3.5" /> : <Clock className="size-3.5" />}
+            {state === "done" ? "已完成" : state === "locked" ? "待解锁" : "待完成"}
+          </span>
+        </div>
+        <p className={cn("text-[15px]", done ? "text-success/90" : "text-muted-foreground")}>{desc}</p>
       </div>
       <div className="shrink-0">{action}</div>
     </div>
   );
 }
+
 
 /* ============ 专属服务群入群引导 ============ */
 
@@ -771,17 +796,32 @@ function GuestHomeTab({
 
 
         <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[17px] font-bold">建档进度</p>
+            <span className="whitespace-nowrap rounded-full bg-primary/10 px-2.5 py-1 text-[14px] font-bold text-primary">
+              已完成 {(photo ? 1 : 0) + (scaleDone ? 1 : 0)}/3 步
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-success transition-all"
+              style={{ width: `${(((photo ? 1 : 0) + (scaleDone ? 1 : 0)) / 3) * 100}%` }}
+            />
+          </div>
           <div className="space-y-3">
             <StepCard
               no="01"
               title="拍照上传"
-              desc="上传入院单/诊断证明，建立档案"
+              desc={photo ? "档案材料已上传，AI 已识别归档" : "上传入院单/诊断证明，建立档案"}
               icon={Camera}
               done={!!photo}
               action={
                 <button
                   onClick={onOpenArchive}
-                  className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96]"
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-4 py-2 text-[15px] font-bold active:scale-[0.96]",
+                    photo ? "bg-success/15 text-success" : "bg-primary text-primary-foreground",
+                  )}
                 >
                   <Camera className="size-4" />
                   {photo ? "继续上传" : "去拍照"}
@@ -791,13 +831,16 @@ function GuestHomeTab({
             <StepCard
               no="02"
               title="填写量表"
-              desc="完成专科评估，帮助医生了解病情"
+              desc={scaleDone ? "专科评估已提交，医生可查看结果" : "完成专科评估，帮助医生了解病情"}
               icon={ClipboardList}
               done={scaleDone}
               action={
                 <button
                   onClick={() => setScaleOpen(true)}
-                  className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96]"
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-4 py-2 text-[15px] font-bold active:scale-[0.96]",
+                    scaleDone ? "bg-success/15 text-success" : "bg-primary text-primary-foreground",
+                  )}
                 >
                   <ClipboardList className="size-4" />
                   {scaleDone ? "重新填写" : "去填写"}
@@ -807,9 +850,10 @@ function GuestHomeTab({
             <StepCard
               no="03"
               title="查看待办"
-              desc="建档完成后查看每日康复任务"
+              desc={photo && scaleDone ? "已解锁，去查看每日康复任务" : "完成前两步后自动解锁"}
               icon={CalendarCheck}
               done={false}
+              locked={!photo || !scaleDone}
               action={
                 <button
                   onClick={onDone}
@@ -823,6 +867,7 @@ function GuestHomeTab({
             />
           </div>
         </section>
+
 
         <section className="rounded-[26px] border-2 border-dashed bg-muted/30 px-6 py-8 text-center">
           <span className="mx-auto grid size-12 place-items-center rounded-full bg-card text-muted-foreground">
