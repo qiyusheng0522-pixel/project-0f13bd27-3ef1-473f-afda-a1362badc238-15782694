@@ -146,6 +146,12 @@ export interface CaseFlowState {
   messages: CaseMessage[];
   readmitCount: number;
   dischargeNote: string;
+  /** 入院与手术同一天：跳过值班医生术前录入，直接推送手术团队 */
+  sameDaySurgery: boolean;
+  /** 出院时间戳（3 天内支持重新变更为入院状态） */
+  dischargedAt: number | null;
+  /** 康复未达预期，继续住院的说明 */
+  continueStayNote: string;
   events: FlowEvent[];
 }
 
