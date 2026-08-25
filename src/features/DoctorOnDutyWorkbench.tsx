@@ -352,6 +352,7 @@ function HomeTab({
 function ScalesTab({
   list,
   pending,
+  direct,
   pushed,
   onEdit,
   onPush,
@@ -359,6 +360,7 @@ function ScalesTab({
 }: {
   list: typeof patients;
   pending: typeof patients;
+  direct: typeof patients;
   pushed: Set<string>;
   onEdit: (p: Patient) => void;
   onPush: (p: Patient) => void;
@@ -376,6 +378,34 @@ function ScalesTab({
         <Camera className="h-4 w-4" />
         住院录入 / 拍照识别
       </button>
+
+      {direct.length > 0 && (
+        <div className="overflow-hidden rounded-2xl border border-info/40 bg-info/5">
+          <div className="flex items-center justify-between border-b border-info/30 px-3 py-2">
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-info">
+              <Send className="h-3.5 w-3.5" />入院当日手术 · 直推手术团队 {direct.length} 例
+            </div>
+            <span className="text-[9px] text-muted-foreground">不进入值班医生环节</span>
+          </div>
+          <div className="divide-y divide-info/20">
+            {direct.map((p) => (
+              <div key={p.id} className="px-3 py-2.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
+                    {p.bedNo ?? "--"}床
+                  </span>
+                  <span className="text-[12px] font-bold">{p.name}</span>
+                  <span className="rounded-full bg-info/20 px-1.5 py-0.5 text-[9px] font-bold text-info">已直推团队</span>
+                </div>
+                <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                  入院 {p.admissionDate ?? "—"} = 手术 {p.surgeryDate ?? "—"} · {p.surgeryName ?? p.diagnosis}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
 
       {pending.length > 0 && (
         <div className="overflow-hidden rounded-2xl border border-warning/40 bg-warning/5">
