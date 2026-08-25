@@ -748,7 +748,13 @@ function GuestHomeTab({
         {photo && (
           <section className="rounded-3xl border bg-card p-4" style={{ boxShadow: "var(--shadow-card)" }}>
             <div className="flex items-center gap-3">
-              <img src={photo} alt="入院单照片" className="size-16 rounded-2xl object-cover" />
+              {localPhoto ? (
+                <img src={localPhoto} alt="入院单照片" className="size-16 rounded-2xl object-cover" />
+              ) : (
+                <div className="grid size-16 place-items-center rounded-2xl bg-success/10 text-success">
+                  <Camera className="size-7" />
+                </div>
+              )}
               <div className="min-w-0">
                 <p className="text-[18px] font-bold text-success">入院单已上传</p>
                 <p className="mt-0.5 text-[15px] text-muted-foreground">医护正在核对，建档完成后消息通知您</p>

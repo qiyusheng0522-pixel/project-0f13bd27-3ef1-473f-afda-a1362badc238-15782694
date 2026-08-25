@@ -1148,7 +1148,6 @@ export function QuickEntrySheet({
   onArchived?: () => void;
 }) {
   const meta = QUICK_ENTRIES.find((e) => e.key === entry)!;
-  const [photo, setPhoto] = useState<string | null>(null);
 
   const title =
     entry === "risk"
