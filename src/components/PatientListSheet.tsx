@@ -203,15 +203,22 @@ export function PatientListSheet({
                 <Edit3 className="h-3 w-3" />{notes[p.id] ? "改备注" : "加备注"}
               </button>
             </div>
-            {category === "history" && onReadmit && (
-              <button
-                onClick={() => onReadmit(p)}
-                className="flex w-full items-center justify-center gap-1 border-t py-2.5 text-[11px] font-medium text-primary-foreground"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                <RotateCcw className="h-3 w-3" />重新入院{p.bedNo ? `（沿用 ${p.bedNo} 床）` : ""}
-              </button>
-            )}
+            {category === "history" && onReadmit && (() => {
+              const left = readmitDaysLeft ? readmitDaysLeft(p) : 3;
+              return left > 0 ? (
+                <button
+                  onClick={() => onReadmit(p)}
+                  className="flex w-full items-center justify-center gap-1 border-t py-2.5 text-[11px] font-medium text-primary-foreground"
+                  style={{ background: "var(--gradient-primary)" }}
+                >
+                  <RotateCcw className="h-3 w-3" />重新入院{p.bedNo ? `（沿用 ${p.bedNo} 床）` : ""} · 剩 {left} 天
+                </button>
+              ) : (
+                <div className="border-t py-2.5 text-center text-[10px] text-muted-foreground">
+                  已超过 3 天窗口，需按门诊待入院流程重新办理
+                </div>
+              );
+            })()}
           </div>
         ))}
       </div>
