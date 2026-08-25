@@ -27,6 +27,7 @@ import {
   admitPatient,
   defaultAdmitDraft,
   pushPreOpToTeam,
+  isSameDaySurgery,
   useCaseFlow,
   type AdmitDraft,
 } from "@/lib/case-flow";
@@ -54,12 +55,17 @@ export function DoctorOnDutyWorkbench() {
 
   const myPatients = patients.filter((p) => p.responsibleDoctor === "朱医生");
 
-  const todaySurgery = patients.filter((p) => p.status === "admitted" && p.preOpFindings);
+  // 入院与手术同一天的患者：不进入值班医生环节，由系统直接推送手术团队
+  const directToTeam = patients.filter((p) => p.status === "admitted" && isSameDaySurgery(p));
+  const isDirect = (p: Patient) => directToTeam.some((d) => d.id === p.id);
+
+  const todaySurgery = patients.filter((p) => p.status === "admitted" && p.preOpFindings && !isDirect(p));
   // 当天未采集到术前数据的患者：保留至次日继续补充
   const pendingData = patients.filter(
     (p) =>
       p.status === "admitted" &&
       p.responsibleDoctor === "朱医生" &&
+      !isDirect(p) &&
       (!p.preOpFindings || p.preOpFindings.length === 0 || p.preOpFindings.some((f) => !f.value?.trim())),
   );
   const tasks = todayTasks["doctor-on-duty"];
@@ -104,9 +110,11 @@ export function DoctorOnDutyWorkbench() {
           flowHint={
             !flow.created
               ? "点击「住院录入」新建演示患者 杨阳，开始全流程闭环"
-              : !flow.pushedToTeam
-                ? "术前量表已录入，请到「术前量表」确认推送手术团队"
-                : "已推送手术团队，等待手术确认"
+              : flow.sameDaySurgery
+                ? "该患者入院与手术同日，已跳过值班医生术前录入，直接推送手术团队"
+                : !flow.pushedToTeam
+                  ? "术前量表已录入，请到「术前量表」确认推送手术团队"
+                  : "已推送手术团队，等待手术确认"
           }
           onAdmit={() => setAdmitOpen(true)}
           onOpenScales={() => setTab("scales")}
@@ -116,7 +124,7 @@ export function DoctorOnDutyWorkbench() {
         <ScalesTab
           list={todaySurgery}
           pending={pendingData}
-
+          direct={directToTeam}
           pushed={pushed}
           onEdit={(p) => setEditor(p)}
           onPush={handlePush}
@@ -344,6 +352,7 @@ function HomeTab({
 function ScalesTab({
   list,
   pending,
+  direct,
   pushed,
   onEdit,
   onPush,
@@ -351,6 +360,7 @@ function ScalesTab({
 }: {
   list: typeof patients;
   pending: typeof patients;
+  direct: typeof patients;
   pushed: Set<string>;
   onEdit: (p: Patient) => void;
   onPush: (p: Patient) => void;
@@ -369,13 +379,41 @@ function ScalesTab({
         住院录入 / 拍照识别
       </button>
 
+      {direct.length > 0 && (
+        <div className="overflow-hidden rounded-2xl border border-info/40 bg-info/5">
+          <div className="flex items-center justify-between border-b border-info/30 px-3 py-2">
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-info">
+              <Send className="h-3.5 w-3.5" />入院当日手术 · 直推手术团队 {direct.length} 例
+            </div>
+            <span className="text-[9px] text-muted-foreground">不进入值班医生环节</span>
+          </div>
+          <div className="divide-y divide-info/20">
+            {direct.map((p) => (
+              <div key={p.id} className="px-3 py-2.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary">
+                    {p.bedNo ?? "--"}床
+                  </span>
+                  <span className="text-[12px] font-bold">{p.name}</span>
+                  <span className="rounded-full bg-info/20 px-1.5 py-0.5 text-[9px] font-bold text-info">已直推团队</span>
+                </div>
+                <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                  入院 {p.admissionDate ?? "—"} = 手术 {p.surgeryDate ?? "—"} · {p.surgeryName ?? p.diagnosis}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
       {pending.length > 0 && (
         <div className="overflow-hidden rounded-2xl border border-warning/40 bg-warning/5">
           <div className="flex items-center justify-between border-b border-warning/30 px-3 py-2">
             <div className="flex items-center gap-1 text-[11px] font-semibold text-warning-foreground">
               <AlertTriangle className="h-3.5 w-3.5" />待补充术前评估 · {pending.length} 例
             </div>
-            <span className="text-[9px] text-muted-foreground">当天未采集 · 顺延次日</span>
+            <span className="text-[9px] text-muted-foreground">当天未采集 · 患者保留至次日继续补录</span>
           </div>
           <div className="divide-y divide-warning/20">
             {pending.map((p) => (

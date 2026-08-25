@@ -146,6 +146,12 @@ export interface CaseFlowState {
   messages: CaseMessage[];
   readmitCount: number;
   dischargeNote: string;
+  /** 入院与手术同一天：跳过值班医生术前录入，直接推送手术团队 */
+  sameDaySurgery: boolean;
+  /** 出院时间戳（3 天内支持重新变更为入院状态） */
+  dischargedAt: number | null;
+  /** 康复未达预期，继续住院的说明 */
+  continueStayNote: string;
   events: FlowEvent[];
 }
 
@@ -170,6 +176,9 @@ const initial = (): CaseFlowState => ({
   messages: [],
   readmitCount: 0,
   dischargeNote: "",
+  sameDaySurgery: false,
+  dischargedAt: null,
+  continueStayNote: "",
 
   events: [],
 });
@@ -200,6 +209,11 @@ export function getCaseFlow() {
 
 export function getDemoPatient(): Patient | undefined {
   return patients.find((p) => p.id === DEMO_PATIENT_ID);
+}
+
+/** 入院时间与手术时间同一天：不进入值班医生环节，直接推送手术团队 */
+export function isSameDaySurgery(p: Patient) {
+  return !!p.admissionDate && !!p.surgeryDate && p.admissionDate === p.surgeryDate;
 }
 
 function patchPatient(patch: Partial<Patient>) {
@@ -271,10 +285,15 @@ export function admitPatient(d: AdmitDraft) {
   if (idx >= 0) patients[idx] = record;
   else patients.unshift(record);
 
+  // 入院时间与手术时间同一天 → 不进入值班医生环节，直接推送手术团队
+  const sameDay = d.surgeryDate === todayStr();
+
   state = {
     ...initial(),
     created: true,
-    stage: "admitted",
+    stage: sameDay ? "pushed-team" : "admitted",
+    sameDaySurgery: sameDay,
+    pushedToTeam: sameDay,
     abnormal: abnormalFindings.map((f) => ({
       id: uid("ab"),
       source: "值班医生" as const,
@@ -285,6 +304,7 @@ export function admitPatient(d: AdmitDraft) {
     })),
   };
   log("值班医生", `住院录入 ${d.name}（${d.bedNo}床）· 术前量表 ${abnormalFindings.length} 项异常`);
+  if (sameDay) log("系统", `${d.name} 入院与手术同为 ${d.surgeryDate}，跳过值班医生术前录入，已直接推送手术团队`);
   notify();
 }
 
@@ -378,18 +398,50 @@ export function addDailyRehab(rec: Omit<DailyRehabRecord, "id">) {
 
 export function dischargePatient(note: string) {
   state.dischargeNote = note;
+  state.continueStayNote = "";
   state.stage = "discharged";
+  state.dischargedAt = Date.now();
   patchPatient({ status: "discharged", dischargeDate: todayStr() });
-  log("治疗师", "出院评估达标，确认出院，进入历史出院患者列表");
+  log("治疗师", "出院评估达标，治疗师确认出院，进入历史出院患者列表（3 天内可重新变更为入院）");
   notify();
 }
 
-/** 历史出院患者重新入院：沿用原床位，重新进入院内康复，治疗师/护士可继续每日录入 */
+/** 康复未达预期：治疗师决定继续住院，不出院 */
+export function continueStay(note: string) {
+  state.continueStayNote = note;
+  state.dischargeNote = "";
+  state.dischargedAt = null;
+  state.stage = state.planApproved ? "rehab" : "post-op";
+  patchPatient({ status: state.planApproved ? "rehab" : "post-op", dischargeDate: undefined });
+  pushMessage({
+    kind: "info",
+    title: "继续住院康复",
+    body: `治疗师评估康复未达预期，暂不出院，继续院内康复：${note}`,
+  });
+  log("治疗师", `康复未达预期，决定继续住院：${note}`);
+  notify();
+}
+
+export const READMIT_WINDOW_DAYS = 3;
+
+/** 出院后剩余的可重新入院天数（3 天窗口） */
+export function readmitDaysLeft() {
+  if (!state.dischargedAt) return READMIT_WINDOW_DAYS;
+  const passed = Math.floor((Date.now() - state.dischargedAt) / 86400000);
+  return Math.max(0, READMIT_WINDOW_DAYS - passed);
+}
+
+export function canReadmit() {
+  return state.stage === "discharged" && readmitDaysLeft() > 0;
+}
+
+/** 出院 3 天内的患者重新变更为入院：沿用原床位，护士与治疗师端同步展示 */
 export function readmitPatient() {
   const p = getDemoPatient();
   state.readmitCount += 1;
   state.stage = state.planApproved ? "rehab" : "post-op";
   state.dischargeNote = "";
+  state.dischargedAt = null;
   patchPatient({
     status: state.planApproved ? "rehab" : "post-op",
     dischargeDate: undefined,
@@ -401,7 +453,7 @@ export function readmitPatient() {
     title: "您已重新入院",
     body: `床位沿用 ${p?.bedNo ?? "--"} 床，治疗师与护士将继续每日康复记录与住院指标录入。`,
   });
-  log("治疗师", `${p?.name ?? DEMO_PATIENT_NAME} 重新入院（第 ${state.readmitCount} 次），沿用 ${p?.bedNo ?? "--"} 床，继续院内康复`);
+  log("治疗师", `${p?.name ?? DEMO_PATIENT_NAME} 出院 3 天内重新变更为入院（第 ${state.readmitCount} 次），沿用 ${p?.bedNo ?? "--"} 床，护士与治疗师端同步展示`);
   notify();
 }
 
