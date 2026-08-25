@@ -393,18 +393,50 @@ export function addDailyRehab(rec: Omit<DailyRehabRecord, "id">) {
 
 export function dischargePatient(note: string) {
   state.dischargeNote = note;
+  state.continueStayNote = "";
   state.stage = "discharged";
+  state.dischargedAt = Date.now();
   patchPatient({ status: "discharged", dischargeDate: todayStr() });
-  log("治疗师", "出院评估达标，确认出院，进入历史出院患者列表");
+  log("治疗师", "出院评估达标，治疗师确认出院，进入历史出院患者列表（3 天内可重新变更为入院）");
   notify();
 }
 
-/** 历史出院患者重新入院：沿用原床位，重新进入院内康复，治疗师/护士可继续每日录入 */
+/** 康复未达预期：治疗师决定继续住院，不出院 */
+export function continueStay(note: string) {
+  state.continueStayNote = note;
+  state.dischargeNote = "";
+  state.dischargedAt = null;
+  state.stage = state.planApproved ? "rehab" : "post-op";
+  patchPatient({ status: state.planApproved ? "rehab" : "post-op", dischargeDate: undefined });
+  pushMessage({
+    kind: "info",
+    title: "继续住院康复",
+    body: `治疗师评估康复未达预期，暂不出院，继续院内康复：${note}`,
+  });
+  log("治疗师", `康复未达预期，决定继续住院：${note}`);
+  notify();
+}
+
+export const READMIT_WINDOW_DAYS = 3;
+
+/** 出院后剩余的可重新入院天数（3 天窗口） */
+export function readmitDaysLeft() {
+  if (!state.dischargedAt) return READMIT_WINDOW_DAYS;
+  const passed = Math.floor((Date.now() - state.dischargedAt) / 86400000);
+  return Math.max(0, READMIT_WINDOW_DAYS - passed);
+}
+
+export function canReadmit() {
+  return state.stage === "discharged" && readmitDaysLeft() > 0;
+}
+
+/** 出院 3 天内的患者重新变更为入院：沿用原床位，护士与治疗师端同步展示 */
 export function readmitPatient() {
   const p = getDemoPatient();
   state.readmitCount += 1;
   state.stage = state.planApproved ? "rehab" : "post-op";
   state.dischargeNote = "";
+  state.dischargedAt = null;
   patchPatient({
     status: state.planApproved ? "rehab" : "post-op",
     dischargeDate: undefined,
@@ -416,7 +448,7 @@ export function readmitPatient() {
     title: "您已重新入院",
     body: `床位沿用 ${p?.bedNo ?? "--"} 床，治疗师与护士将继续每日康复记录与住院指标录入。`,
   });
-  log("治疗师", `${p?.name ?? DEMO_PATIENT_NAME} 重新入院（第 ${state.readmitCount} 次），沿用 ${p?.bedNo ?? "--"} 床，继续院内康复`);
+  log("治疗师", `${p?.name ?? DEMO_PATIENT_NAME} 出院 3 天内重新变更为入院（第 ${state.readmitCount} 次），沿用 ${p?.bedNo ?? "--"} 床，护士与治疗师端同步展示`);
   notify();
 }
 
