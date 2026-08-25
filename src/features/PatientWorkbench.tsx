@@ -796,17 +796,32 @@ function GuestHomeTab({
 
 
         <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[17px] font-bold">建档进度</p>
+            <span className="whitespace-nowrap rounded-full bg-primary/10 px-2.5 py-1 text-[14px] font-bold text-primary">
+              已完成 {(photo ? 1 : 0) + (scaleDone ? 1 : 0)}/3 步
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-success transition-all"
+              style={{ width: `${(((photo ? 1 : 0) + (scaleDone ? 1 : 0)) / 3) * 100}%` }}
+            />
+          </div>
           <div className="space-y-3">
             <StepCard
               no="01"
               title="拍照上传"
-              desc="上传入院单/诊断证明，建立档案"
+              desc={photo ? "档案材料已上传，AI 已识别归档" : "上传入院单/诊断证明，建立档案"}
               icon={Camera}
               done={!!photo}
               action={
                 <button
                   onClick={onOpenArchive}
-                  className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96]"
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-4 py-2 text-[15px] font-bold active:scale-[0.96]",
+                    photo ? "bg-success/15 text-success" : "bg-primary text-primary-foreground",
+                  )}
                 >
                   <Camera className="size-4" />
                   {photo ? "继续上传" : "去拍照"}
@@ -816,13 +831,16 @@ function GuestHomeTab({
             <StepCard
               no="02"
               title="填写量表"
-              desc="完成专科评估，帮助医生了解病情"
+              desc={scaleDone ? "专科评估已提交，医生可查看结果" : "完成专科评估，帮助医生了解病情"}
               icon={ClipboardList}
               done={scaleDone}
               action={
                 <button
                   onClick={() => setScaleOpen(true)}
-                  className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[15px] font-bold text-primary-foreground active:scale-[0.96]"
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-4 py-2 text-[15px] font-bold active:scale-[0.96]",
+                    scaleDone ? "bg-success/15 text-success" : "bg-primary text-primary-foreground",
+                  )}
                 >
                   <ClipboardList className="size-4" />
                   {scaleDone ? "重新填写" : "去填写"}
@@ -832,9 +850,10 @@ function GuestHomeTab({
             <StepCard
               no="03"
               title="查看待办"
-              desc="建档完成后查看每日康复任务"
+              desc={photo && scaleDone ? "已解锁，去查看每日康复任务" : "完成前两步后自动解锁"}
               icon={CalendarCheck}
               done={false}
+              locked={!photo || !scaleDone}
               action={
                 <button
                   onClick={onDone}
@@ -848,6 +867,7 @@ function GuestHomeTab({
             />
           </div>
         </section>
+
 
         <section className="rounded-[26px] border-2 border-dashed bg-muted/30 px-6 py-8 text-center">
           <span className="mx-auto grid size-12 place-items-center rounded-full bg-card text-muted-foreground">
